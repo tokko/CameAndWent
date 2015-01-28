@@ -19,6 +19,7 @@
         </activity>
 
         <receiver android:name=".GeofenceReceiver"
+            android:exported="false"
             android:enabled="true">
             <intent-filter>
                 <action android:name="com.tokko.cameandwent.GEOFENCE_ACTION" />

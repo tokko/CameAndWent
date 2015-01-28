@@ -12,6 +12,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -43,7 +44,8 @@ public class SettingsFragment extends PreferenceFragment implements GoogleApiCli
 
     @Override
     public void onStop() {
-        SharedPreferences sp = getActivity().getPreferences(Context.MODE_PRIVATE);
+        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         enabled = sp.getBoolean("enabled", false);
         String radiuS = sp.getString("radius", null);
         Location location = new Gson().fromJson(sp.getString("origin", null), Location.class);

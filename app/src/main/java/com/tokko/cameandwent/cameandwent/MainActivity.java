@@ -40,12 +40,14 @@ public class MainActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            getFragmentManager().beginTransaction().replace(android.R.id.content, preferenceFragment).commit();
+            getFragmentManager().beginTransaction().replace(android.R.id.content, preferenceFragment).addToBackStack("opening settings").commit();
             //getActionBar().setDisplayShowHomeEnabled(true);
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
         if(id == android.R.id.home){
             getFragmentManager().popBackStack();
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -55,8 +57,10 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         if(getFragmentManager().getBackStackEntryCount() == 0)
             super.onBackPressed();
-        else
+        else {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
             getFragmentManager().popBackStack();
+        }
     }
 
     /**
