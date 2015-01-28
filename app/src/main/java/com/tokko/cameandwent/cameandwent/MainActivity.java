@@ -13,16 +13,22 @@ import android.view.ViewGroup;
 
 
 public class MainActivity extends Activity {
-    private Fragment mainFragment;
+    private LogFragment logFragment;
     private PreferenceFragment preferenceFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         preferenceFragment = new SettingsFragment();
-        
+        logFragment = new LogFragment();
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getFragmentManager().beginTransaction().replace(android.R.id.content, logFragment).commit();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -58,7 +64,7 @@ public class MainActivity extends Activity {
         if(getFragmentManager().getBackStackEntryCount() == 0)
             super.onBackPressed();
         else {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(false);
             getFragmentManager().popBackStack();
         }
     }
