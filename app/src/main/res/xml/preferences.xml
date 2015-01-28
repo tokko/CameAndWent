@@ -1,0 +1,59 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="enabled"
+        android:title="Enabled"
+        android:defaultValue="true" />
+
+    <PreferenceCategory
+        android:dependency="enabled"
+        android:title="Location">
+
+        <com.tokko.cameandwent.cameandwent.LocationPreference
+            android:dependency="enabled"
+            android:title="Set location"
+            android:summary="Sets the current location as origin"
+            android:key="origin" />
+
+        <EditTextPreference
+            android:dependency="enabled"
+            android:title="Radius"
+            android:key="radius"
+            android:inputType="number" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:dependency="enabled"
+        android:defaultValue="true"
+        android:title="Reminder">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="Reminder"
+            android:summaryOff="Reminders are disabled"
+            android:summaryOn="Reminders are enabled"
+            android:key="reminders"/>
+
+        <com.tokko.cameandwent.cameandwent.TimePreference
+            android:key="reminder_time"
+            android:dependency="reminders"
+            android:title="Reminder time"/>
+
+        <ListPreference
+            android:defaultValue="0"
+            android:key="reminder_day"
+            android:entries="@array/weekdays"
+            android:entryValues="@array/weekday_numbers"
+            android:dependency="reminders"
+            android:title="Reminder day"/>
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="Vibrate"
+            android:key="vibrate"
+            android:dependency="reminders" />
+
+        </PreferenceCategory>
+
+</PreferenceScreen>
