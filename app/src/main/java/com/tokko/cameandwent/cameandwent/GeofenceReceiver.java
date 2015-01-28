@@ -19,6 +19,7 @@ public class GeofenceReceiver extends BroadcastReceiver {
         Log.d("recvr", "Intent fired");
         int transition = event.getGeofenceTransition();
         ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.DATE, System.currentTimeMillis());
         if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.d("recvr", "entered");
             Toast.makeText(context, "Entered", Toast.LENGTH_SHORT).show();
