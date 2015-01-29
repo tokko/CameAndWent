@@ -76,6 +76,7 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_CAME_OR_WENT:
                 long id = sdb.insert(TABLE_NAME, null, values);
+                getContext().getContentResolver().notifyChange(URI_GET_ALL, null);
                 return ContentUris.withAppendedId(uri, id);
             default:
                 throw new IllegalArgumentException("Unknown URI");
