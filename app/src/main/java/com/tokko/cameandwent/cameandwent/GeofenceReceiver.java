@@ -18,18 +18,15 @@ public class GeofenceReceiver extends BroadcastReceiver {
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
         Log.d("recvr", "Intent fired");
         int transition = event.getGeofenceTransition();
-        ContentValues cv = new ContentValues();
-        cv.put(CameAndWentProvider.DATE, System.currentTimeMillis());
+        ClockManager cm = new ClockManager(context);
         if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.d("recvr", "entered");
             Toast.makeText(context, "Entered", Toast.LENGTH_SHORT).show();
-            cv.put(CameAndWentProvider.ENTERED, 1);
+            cm.clockIn();
         }
         else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             Log.d("recvr", "exited");
-            cv.put(CameAndWentProvider.ENTERED, 0);
+            cm.clockOut();
         }
-            context.getContentResolver().insert(CameAndWentProvider.URI_CAME_OR_WENT, cv);
-
     }
 }

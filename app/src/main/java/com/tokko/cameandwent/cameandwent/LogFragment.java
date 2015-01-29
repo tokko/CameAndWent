@@ -8,10 +8,14 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,21 +23,32 @@ import java.util.Date;
 /**
  * Created by andre_000 on 2015-01-28.
  */
-public class LogFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class LogFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
     private LogCursorAdapter adapter;
+    private ClockManager cm;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new LogCursorAdapter(getActivity(), null);
+        cm = new ClockManager(getActivity());
+        setHasOptionsMenu(true);
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_main, null);
+        ((ToggleButton)v.findViewById(R.id.clock_button)).setOnClickListener(this);
+        return v;
     }
 
     @Override
     public void onStart() {
         super.onStart();
         setListAdapter(adapter);
-        setEmptyText("Log is fakking empty D:");
+        TextView tv = new TextView(getActivity());
+        tv.setText("Log is fakking empty D:");
+        getListView().setEmptyView(tv);
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -42,6 +57,21 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         CursorLoader cl = new CursorLoader(getActivity());
         cl.setUri(CameAndWentProvider.URI_GET_ALL);
         return cl;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.clear_log:
+                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.logfragment_menu, menu);
     }
 
     @Override
@@ -54,10 +84,23 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         adapter.swapCursor(null);
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.clock_button:
+                ToggleButton b = (ToggleButton) v;
+                if(b.isChecked())
+                    cm.clockIn();
+                else
+                    cm.clockOut();
+                break;
+        }
+    }
+
     private class LogCursorAdapter extends CursorAdapter{
 
         public LogCursorAdapter(Context context, Cursor c) {
-            super(context, c, false);
+            super(context, c, true);
         }
 
         @Override
@@ -67,8 +110,19 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            String data = sdf.format(new Date(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.DATE)))) + " " + (cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ENTERED))==0?"exited":"entered");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String event;
+            switch (cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ENTERED))){
+                 case 0:
+                    event = "exited";
+                    break;
+                case 1:
+                    event = "entered";
+                    break;
+                default:
+                    event = "now";
+             }
+            String data = sdf.format(new Date(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.DATE)))) + " " + event;
             ((TextView)view.findViewById(android.R.id.text1)).setText(data);
         }
     }
