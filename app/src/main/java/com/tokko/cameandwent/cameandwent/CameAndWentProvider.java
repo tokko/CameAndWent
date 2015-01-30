@@ -15,9 +15,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by andre_000 on 2015-01-28.
- */
 public class CameAndWentProvider extends ContentProvider {
 
     private static final String AUTHORITY = "com.tokko.cameandwent.cameandwent.CameAndWentProvider";
@@ -28,18 +25,22 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String TABLE_NAME = "cameandwent";
 
     public static final String ID = "_id";
-    public static final String DATE = "date";
-    public static final String ENTERED = "entered";
+    public static final String CAME = "came";
+    public static final String WENT = "went";
+    public static final String DURATION = "duration";
 
-    private static final String ACTION_CAME_OR_WENT = "ACTION_CAME_OR_WENT";
+    private static final String ACTION_CAME = "ACTION_CAME";
+    private static final String ACTION_WENT = "ACTION_WENT";
     private static final String ACTION_GET_ALL = "ACTION_GET_ALL";
     private static final String ACTION_DELETE_ALL = "ACTION_DELETE_ALL";
 
-    private static final int KEY_CAME_OR_WENT = 0;
-    private static final int KEY_GET_ALL = 1;
-    private static final int KEY_DELETE_ALL = 2;
+    private static final int KEY_CAME = 0;
+    private static final int KEY_WENT = 1;
+    private static final int KEY_GET_ALL = 2;
+    private static final int KEY_DELETE_ALL = 3;
 
-    public static final Uri URI_CAME_OR_WENT = Uri.parse(URI_TEMPLATE + ACTION_CAME_OR_WENT);
+    public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
+    public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
     public static final Uri URI_GET_ALL = Uri.parse(URI_TEMPLATE + ACTION_GET_ALL);
     public static final Uri URI_DELETE_ALL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_ALL);
 
@@ -47,7 +48,8 @@ public class CameAndWentProvider extends ContentProvider {
 
     static{
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(AUTHORITY, ACTION_CAME_OR_WENT, KEY_CAME_OR_WENT);
+        uriMatcher.addURI(AUTHORITY, ACTION_CAME, KEY_CAME);
+        uriMatcher.addURI(AUTHORITY, ACTION_WENT, KEY_WENT);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_ALL, KEY_GET_ALL);
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_ALL, KEY_DELETE_ALL);
     }
@@ -66,8 +68,8 @@ public class CameAndWentProvider extends ContentProvider {
         Cursor c;
         switch (uriMatcher.match(uri)){
             case KEY_GET_ALL:
-                c = sdb.query(TABLE_NAME, null, null, null, null, null, null);
-                c = transfromCursor(c);
+                //c = sdb.query(TABLE_NAME, null, null, null, null, null, null);
+                c = sdb.rawQuery("SELECT *, SUM("+WENT + "-" + CAME + ") AS " + DURATION + " FROM " + TABLE_NAME + " GROUP BY (" + CAME + " - " + CAME + "%(1000*60*60*24)", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_ALL);
                 return c;
             default:
@@ -75,73 +77,7 @@ public class CameAndWentProvider extends ContentProvider {
         }
     }
 
-    private Cursor transfromCursor(Cursor c) {
-        HashMap<Long, ArrayList<LogEntry>> map = new HashMap<>();
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
-            LogEntry logEntry = new LogEntry(c);
-            if(!map.containsKey(logEntry.getDay())) map.put(logEntry.getDay(), new ArrayList<LogEntry>());
-            map.get(logEntry.getDay()).add(logEntry);
-        }
 
-        ArrayList<DisplayLogEntry> displayLogEntries = new ArrayList<>();
-        for (long key : map.keySet()){
-            ArrayList<LogEntry> list = map.get(key);
-            Collections.sort(list);
-            if(list.size()%2!=0)
-                list.add(new LogEntry(-1, System.currentTimeMillis(), 3));
-        }
-        //TODO: finish this.
-
-        return null;
-    }
-
-    private class DisplayLogEntry implements Comparable<DisplayLogEntry>{
-
-
-
-        private long id;
-        private long duration;
-        private long day;
-
-        @Override
-        public int compareTo(DisplayLogEntry another) {
-            return (int) (day - another.day);
-        }
-    }
-
-    private class LogEntry implements Comparable<LogEntry>{
-        private int id;
-        private long date;
-        private int entered;
-
-        private LogEntry(int id, long date, int entered) {
-            this.id = id;
-            this.date = date;
-            this.entered = entered;
-        }
-
-        public LogEntry(Cursor c){
-            id = c.getInt(c.getColumnIndex(ID));
-            date = c.getLong(c.getColumnIndex(DATE));
-            entered = c.getInt(c.getColumnIndex(ENTERED));
-        }
-
-        @Override
-        public int compareTo(LogEntry another) {
-            return (int) (date - another.date);
-        }
-        public long getDay(){
-            return date - date%1000*60*60*24;
-        }
-        @Override
-        public boolean equals(Object o) {
-            if(o instanceof LogEntry){
-                LogEntry another = (LogEntry) o;
-                return getDay() == another.getDay();
-            }
-            return false;
-        }
-    }
     @Override
     public String getType(Uri uri) {
         return "";
@@ -151,7 +87,7 @@ public class CameAndWentProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         SQLiteDatabase sdb = db.getWritableDatabase();
         switch (uriMatcher.match(uri)){
-            case KEY_CAME_OR_WENT:
+            case KEY_CAME:
                 long id = sdb.insert(TABLE_NAME, null, values);
                 getContext().getContentResolver().notifyChange(URI_GET_ALL, null);
                 return ContentUris.withAppendedId(uri, id);
@@ -176,15 +112,24 @@ public class CameAndWentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase sdb = db.getWritableDatabase();
+        switch (uriMatcher.match(uri)){
+            case KEY_WENT:
+                int updated = sdb.update(TABLE_NAME, values, WENT + " = 0", null);
+                if(updated > 0)
+                    getContext().getContentResolver().notifyChange(URI_GET_ALL, null);
+                return updated;
+            default:
+                throw new IllegalArgumentException("Unknown URI");
+        }
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 2;
+        private static final int DATABASE_VERSION = 3;
         private static final String CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
-                DATE + " DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
-                ENTERED + " INTEGER NOT NULL DEFAULT 0);";
+                CAME + " INTEGER NOT NULL," +
+                WENT + " INTEGER NOT NULL DEFAULT 0);";
 
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);

@@ -111,19 +111,10 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String event;
-            switch (cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ENTERED))){
-                 case 0:
-                    event = "exited";
-                    break;
-                case 1:
-                    event = "entered";
-                    break;
-                default:
-                    event = "now";
-             }
-            String data = sdf.format(new Date(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.DATE)))) + " " + event;
-            ((TextView)view.findViewById(android.R.id.text1)).setText(data);
+            String came = sdf.format(new Date(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.CAME))));
+            String went = sdf.format(new Date(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WENT))));
+            String duration = new SimpleDateFormat("HH:mm:ss").format(new Date(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WENT))));
+            ((TextView)view.findViewById(android.R.id.text1)).setText("Came: " + came + "\nWent:" + went + "\nDuration: " + duration);
         }
     }
 }
