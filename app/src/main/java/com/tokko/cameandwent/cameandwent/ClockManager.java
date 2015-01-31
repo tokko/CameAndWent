@@ -11,15 +11,23 @@ public class ClockManager {
     }
 
     public void clockIn(){
-        ContentValues cv = new ContentValues();
-        cv.put(CameAndWentProvider.CAME, System.currentTimeMillis());
-        context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+        clockIn(System.currentTimeMillis());
     }
 
     public void clockOut(){
-        ContentValues cv = new ContentValues();
-        cv.put(CameAndWentProvider.WENT, System.currentTimeMillis());
-        context.getContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
+       clockOut(System.currentTimeMillis());
 
+    }
+
+    public void clockIn(long time) {
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.CAME, time);
+        context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+    }
+
+    public void clockOut(long time) {
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.WENT, time);
+        context.getContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
     }
 }

@@ -10,11 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
 public class CameAndWentProvider extends ContentProvider {
 
     private static final String AUTHORITY = "com.tokko.cameandwent.cameandwent.CameAndWentProvider";
@@ -59,7 +54,7 @@ public class CameAndWentProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         db = new DatabaseOpenHelper(getContext());
-        return db != null;
+        return true;
     }
 
     @Override
@@ -69,7 +64,7 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_GET_ALL:
                 //c = sdb.query(TABLE_NAME, null, null, null, null, null, null);
-                c = sdb.rawQuery("SELECT *, SUM("+WENT + "-" + CAME + ") AS " + DURATION + " FROM " + TABLE_NAME + " GROUP BY (" + CAME + " - " + CAME + "%(1000*60*60*24)", null);
+                c = sdb.rawQuery("SELECT *, SUM("+WENT + "-" + CAME + ") AS " + DURATION + " FROM " + TABLE_NAME + " GROUP BY (" + CAME + " - " + CAME + "%(1000*60*60*24)) ORDER BY " + CAME + " DESC", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_ALL);
                 return c;
             default:

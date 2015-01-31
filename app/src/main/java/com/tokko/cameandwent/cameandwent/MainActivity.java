@@ -2,17 +2,15 @@ package com.tokko.cameandwent.cameandwent;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.preference.PreferenceFragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.preference.PreferenceFragment;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ToggleButton;
 
 
 public class MainActivity extends Activity {
+    private static final String MAINACTIVITY_SETTINGS_KEY = "mainactivity";
+    private static final String HAS_SHOWN_SETTINGS = "hasshownsettings";
     private LogFragment logFragment;
     private PreferenceFragment preferenceFragment;
 
@@ -28,6 +26,10 @@ public class MainActivity extends Activity {
     protected void onStart() {
         super.onStart();
         getFragmentManager().beginTransaction().replace(android.R.id.content, logFragment).commit();
+        if(!getSharedPreferences(MAINACTIVITY_SETTINGS_KEY, MODE_PRIVATE).getBoolean(HAS_SHOWN_SETTINGS, false)) {
+            showSettings();
+            getSharedPreferences(MAINACTIVITY_SETTINGS_KEY, MODE_PRIVATE).edit().putBoolean(HAS_SHOWN_SETTINGS, true).commit();
+        }
     }
 
     @Override
@@ -35,6 +37,12 @@ public class MainActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    private void showSettings(){
+        //noinspection ConstantConditions
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getFragmentManager().beginTransaction().replace(android.R.id.content, preferenceFragment).addToBackStack("opening settings").commit();
     }
 
     @Override
@@ -46,12 +54,12 @@ public class MainActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            getFragmentManager().beginTransaction().replace(android.R.id.content, preferenceFragment).addToBackStack("opening settings").commit();
+            showSettings();
             //getActionBar().setDisplayShowHomeEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
         }
         if(id == android.R.id.home){
             getFragmentManager().popBackStack();
+            //noinspection ConstantConditions
             getActionBar().setDisplayHomeAsUpEnabled(false);
 
         }
@@ -64,6 +72,7 @@ public class MainActivity extends Activity {
         if(getFragmentManager().getBackStackEntryCount() == 0)
             super.onBackPressed();
         else {
+            //noinspection ConstantConditions
             getActionBar().setDisplayHomeAsUpEnabled(false);
             getFragmentManager().popBackStack();
         }
