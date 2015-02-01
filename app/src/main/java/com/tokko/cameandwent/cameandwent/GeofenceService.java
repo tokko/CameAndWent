@@ -42,7 +42,6 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        postNotification(0, intent.getAction());
         if(intent.getAction().equals(ACTIVATE_GEOFENCE)){
             registerGeofence();
         }
@@ -50,17 +49,19 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
             registerGeofence();
         }
         else if(intent.getAction().equals(ACTION)) {
+            if(!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("enabled", true)) return;
             GeofencingEvent event = GeofencingEvent.fromIntent(intent);
             Log.d("recvr", "Intent fired");
             int transition = event.getGeofenceTransition();
             ClockManager cm = new ClockManager(getApplicationContext());
-            postNotification(1, "GEOFENCE EVENT FUCK YEAH");
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Log.d("recvr", "entered");
+                postNotification(1, "Arrived at work");
                 Toast.makeText(getApplicationContext(), "Entered", Toast.LENGTH_SHORT).show();
                 cm.clockIn();
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                postNotification(1, "Left work");
                 Log.d("recvr", "exited");
                 cm.clockOut();
             }

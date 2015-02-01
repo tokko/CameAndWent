@@ -4,7 +4,15 @@ android {
     compileSdkVersion 21
     buildToolsVersion "20.0.0"
 
-    defaultConfig {
+    signingConfigs {
+        release {
+            storeFile file("C:\\AndroidStudioProjects\\CameAndWent\\keystore.jks")
+            storePassword "tit1rstsT/f"
+            keyAlias "release"
+            keyPassword "tit1rstsT/f"
+        }
+    }
+        defaultConfig {
         applicationId "com.tokko.cameandwent.cameandwent"
         minSdkVersion 18
         targetSdkVersion 21
@@ -13,8 +21,11 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            zipAlignEnabled true
         }
     }
 }

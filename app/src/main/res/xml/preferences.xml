@@ -26,9 +26,41 @@
 
     <PreferenceCategory
         android:dependency="enabled"
+        android:title="Audio"
+        android:key="audio"
+        android:defaultValue="true" >
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="Sound mode"
+            android:dependency="audio"
+            android:summaryOff="Sound mode will be unaltered"
+            android:summaryOn="Sound mode mode will be altered"
+            android:key="soundmode" />
+
+        <CheckBoxPreference
+            android:dependency="soundmode"
+            android:title="Silent"
+            android:defaultValue="true"
+            android:key="silent"
+            android:summaryOn="Device will be silent at work"
+            android:summaryOff="Device will not be silent at work"/>
+        <CheckBoxPreference
+            android:dependency="silent"
+            android:key="vibrate"
+            android:title="Vibrate"
+            android:summaryOn="Device will vibrate at work"
+            android:summaryOff="Device will not vibrate at work"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:dependency="enabled"
         android:defaultValue="true"
         android:enabled="false"
         android:title="Reminder">
+
 
         <CheckBoxPreference
             android:defaultValue="true"
