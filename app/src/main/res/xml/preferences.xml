@@ -19,6 +19,7 @@
         <EditTextPreference
             android:dependency="enabled"
             android:title="Radius"
+            android:defaultValue="100"
             android:key="radius"
             android:inputType="number" />
     </PreferenceCategory>
@@ -26,6 +27,7 @@
     <PreferenceCategory
         android:dependency="enabled"
         android:defaultValue="true"
+        android:enabled="false"
         android:title="Reminder">
 
         <CheckBoxPreference

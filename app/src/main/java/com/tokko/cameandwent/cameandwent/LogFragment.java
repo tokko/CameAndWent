@@ -47,9 +47,6 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     public void onStart() {
         super.onStart();
         setListAdapter(adapter);
-        TextView tv = new TextView(getActivity());
-        tv.setText("Log is fakking empty D:");
-        getListView().setEmptyView(tv);
         getLoaderManager().initLoader(0, null, this);
     }
 
