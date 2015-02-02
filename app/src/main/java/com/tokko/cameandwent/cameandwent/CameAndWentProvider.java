@@ -64,7 +64,7 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_GET_ALL:
                 //c = sdb.query(TABLE_NAME, null, null, null, null, null, null);
-                c = sdb.rawQuery("SELECT *, SUM("+WENT + "-" + CAME + ") AS " + DURATION + " FROM " + TABLE_NAME + " GROUP BY (" + CAME + " - " + CAME + "%(1000*60*60*24)) ORDER BY " + CAME + " DESC", null);
+                c = sdb.rawQuery("SELECT *, SUM("+WENT + "-" + CAME + ") AS " + DURATION + " FROM " + TABLE_NAME + " GROUP BY (" + CAME + " - " + CAME + "%(1000*60*60*24)) ORDER BY " + CAME + " ASC", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_ALL);
                 return c;
             default:
