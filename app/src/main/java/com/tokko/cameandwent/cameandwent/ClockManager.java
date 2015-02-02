@@ -1,9 +1,12 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
 public class ClockManager {
@@ -40,6 +43,7 @@ public class ClockManager {
             else if(silent)
                 am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
         }
+        postNotification(1, "Arrived at work");
     }
 
     public void clockOut(long time) {
@@ -49,5 +53,16 @@ public class ClockManager {
         if(sp.getBoolean("soundmode", false)){
             am.setRingerMode(sp.getInt(PREV_SOUNDMODE_KEY, AudioManager.RINGER_MODE_NORMAL));
         }
+        postNotification(1, "Left work");
+    }
+
+    private void postNotification(int id, String s) {
+        Notification.Builder nb = new Notification.Builder(context);
+        nb.setVibrate(new long[]{0, 1000});
+        nb.setContentTitle(s);
+        nb.setSmallIcon(R.drawable.ic_launcher);
+        nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(id, nb.build());
     }
 }

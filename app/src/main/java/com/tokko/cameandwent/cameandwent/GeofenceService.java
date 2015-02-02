@@ -56,12 +56,10 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
             ClockManager cm = new ClockManager(getApplicationContext());
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Log.d("recvr", "entered");
-                postNotification(1, "Arrived at work");
                 Toast.makeText(getApplicationContext(), "Entered", Toast.LENGTH_SHORT).show();
                 cm.clockIn();
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                postNotification(1, "Left work");
                 Log.d("recvr", "exited");
                 cm.clockOut();
             }
@@ -70,15 +68,7 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
             throw new IllegalStateException("Unknown action for service: " + intent.getAction());
     }
 
-    private void postNotification(int id, String s) {
-        Notification.Builder nb = new Notification.Builder(getApplicationContext());
-        nb.setVibrate(new long[]{1000});
-        nb.setContentTitle(s);
-        nb.setSmallIcon(R.drawable.ic_launcher);
-        nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(id, nb.build());
-    }
+
 
     public void registerGeofence() {
         PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
