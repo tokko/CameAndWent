@@ -53,7 +53,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader cl = new CursorLoader(getActivity());
-        cl.setUri(CameAndWentProvider.URI_GET_ALL);
+        cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
         return cl;
     }
 
@@ -77,7 +77,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         if(cursor.getCount() > 0) {
             int pos = cursor.getPosition();
             cursor.moveToLast();
-            tb.setChecked(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT)) == 0);
+          //  tb.setChecked(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT)) == 0);
             cursor.moveToPosition(pos);
         }
         adapter.swapCursor(cursor);
@@ -141,11 +141,11 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            long cameTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.CAME));
+            long cameTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE));
             String came = sdf.format(new Date(cameTime));
             long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
             String duration = formatInterval(durationTime);
-            if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT)) == 0)
+            if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
                 duration = "currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + came + "\nDuration: " + duration);
         }
