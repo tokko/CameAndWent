@@ -15,13 +15,16 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
 
-public class GeofenceService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class GeofenceService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
     public static final String ACTION = "com.tokko.cameandwent.GEOFENCE_ACTION";
     public static final String ACTIVATE_GEOFENCE = "com.tokko.cameandwent.ACTIVATE_GEOFENCE";
     public static final String DEACTIVATE_GEOFENCE = "com.tokko.cameandwent.DEACTIVATE_GEOFENCE";
@@ -100,8 +103,10 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
     @Override
     public void onConnected(Bundle bundle) {
         LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
-        if(enabled)
-            LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
+        if(enabled) {
+            PendingResult<Status> res = LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
+            res.setResultCallback(this);
+        }
      //   googleApiClient.disconnect();
     }
 
@@ -112,6 +117,19 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onResult(Status status) {
+        if(status.isSuccess())
+            Toast.makeText(getApplicationContext(), "Geofence added", Toast.LENGTH_SHORT).show();
+        if(!status.isSuccess())
+            Toast.makeText(getApplicationContext(), "Geofence add failed", Toast.LENGTH_SHORT).show();
+        if(status.isCanceled())
+            Toast.makeText(getApplicationContext(), "Geofence add canceled", Toast.LENGTH_SHORT).show();
+        if(status.isInterrupted())
+            Toast.makeText(getApplicationContext(), "Geofence add interrupted", Toast.LENGTH_SHORT).show();
 
     }
 }
