@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity$PlaceholderFragment">
 
-   <ListView
+   <ExpandableListView
        android:id="@android:id/list"
        android:layout_width="match_parent"
        android:stackFromBottom="true"

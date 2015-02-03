@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.CursorTreeAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
@@ -24,13 +26,15 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class LogFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener, View.OnLongClickListener, TimePickerDialog.OnTimeSetListener {
-    private LogCursorAdapter adapter;
+    private LogCursorTreeAdapter adapter;
     private ClockManager cm;
     private ToggleButton tb;
+    private ExpandableListView listView;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new LogCursorAdapter(getActivity(), null);
+        adapter = new LogCursorTreeAdapter(null, getActivity());
         cm = new ClockManager(getActivity());
         setHasOptionsMenu(true);
     }
@@ -44,9 +48,15 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        listView = (ExpandableListView) getListView();
+        listView.setAdapter(adapter);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
-        setListAdapter(adapter);
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -80,12 +90,12 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             tb.setChecked(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0);
             cursor.moveToPosition(pos);
         }
-        adapter.swapCursor(cursor);
+        adapter.setGroupCursor(cursor);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursor) {
-        adapter.swapCursor(null);
+        adapter.setGroupCursor(null);
     }
 
     @Override
@@ -139,7 +149,6 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             return ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.simple_list_item_1, null, false);
         }
 
-        @Override
         public void bindView(View view, Context context, Cursor cursor) {
             long cameTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE));
             String came = sdf.format(new Date(cameTime));
@@ -149,6 +158,57 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
                 duration = "currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + came + "\nDuration: " + duration);
         }
+        private String formatInterval(final long l)
+        {
+            final long hr = TimeUnit.MILLISECONDS.toHours(l);
+            final long min = TimeUnit.MILLISECONDS.toMinutes(l - TimeUnit.HOURS.toMillis(hr));
+            final long sec = TimeUnit.MILLISECONDS.toSeconds(l - TimeUnit.HOURS.toMillis(hr) - TimeUnit.MINUTES.toMillis(min));
+            return String.format("%02d:%02d:%02d", hr, min, sec);
+        }
+    }
+
+    private class LogCursorTreeAdapter extends CursorTreeAdapter{
+        private final SimpleDateFormat year = new SimpleDateFormat("yyyy");
+        private final SimpleDateFormat month= new SimpleDateFormat("MM");
+        private final SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+
+        public LogCursorTreeAdapter(Cursor cursor, Context context) {
+            super(cursor, context, true);
+        }
+
+        @Override
+        protected Cursor getChildrenCursor(Cursor groupCursor) {
+            return null;
+        }
+
+        @Override
+        protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
+            return ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.simple_expandable_list_item_2, null, false);
+        }
+
+        @Override
+        protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
+            long cameTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE));
+            String came = sdf.format(new Date(cameTime));
+            long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
+            String duration = formatInterval(durationTime);
+            if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
+                duration = "currently at work";
+            ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + came);
+            ((TextView)view.findViewById(android.R.id.text2)).setText("Duration: " + duration);
+        }
+
+        @Override
+        protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
+            return ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.expandable_list_content, null, false);
+
+        }
+
+        @Override
+        protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
+
+        }
+
         private String formatInterval(final long l)
         {
             final long hr = TimeUnit.MILLISECONDS.toHours(l);
