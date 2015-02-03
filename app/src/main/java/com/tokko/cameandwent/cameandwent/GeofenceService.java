@@ -107,7 +107,17 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
         LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
         if(enabled) {
             PendingResult<Status> res = LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
-            res.setResultCallback(this);
+            //res.setResultCallback(this);
+            Toast.makeText(getApplicationContext(), "waiting for geofence result", Toast.LENGTH_SHORT).show();
+            Status status = res.await();
+            if(status.isSuccess())
+                Toast.makeText(getApplicationContext(), "Geofence added", Toast.LENGTH_SHORT).show();
+            if(!status.isSuccess())
+                Toast.makeText(getApplicationContext(), "Geofence add failed", Toast.LENGTH_SHORT).show();
+            if(status.isCanceled())
+                Toast.makeText(getApplicationContext(), "Geofence add canceled", Toast.LENGTH_SHORT).show();
+            if(status.isInterrupted())
+                Toast.makeText(getApplicationContext(), "Geofence add interrupted", Toast.LENGTH_SHORT).show();
         }
      //   googleApiClient.disconnect();
     }
