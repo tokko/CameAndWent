@@ -99,6 +99,8 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
                     .build();
             googleApiClient.connect();
         }
+        else
+            Toast.makeText(getApplicationContext(), "Incomplete settings, geofence creation failed", Toast.LENGTH_SHORT).show();
     }
     @Override
     public void onConnected(Bundle bundle) {
