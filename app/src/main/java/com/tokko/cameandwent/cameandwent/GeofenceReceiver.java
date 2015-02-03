@@ -35,7 +35,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context = context;
-        pendingIntent = PendingIntent.getService(context, 0, new Intent(context, GeofenceReceiver.class).setAction(ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, GeofenceReceiver.class).setAction(ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
         if(intent.getAction().equals(ACTIVATE_GEOFENCE)){
             registerGeofence();
         }
