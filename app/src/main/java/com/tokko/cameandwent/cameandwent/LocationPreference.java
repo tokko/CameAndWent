@@ -41,7 +41,7 @@ public class LocationPreference extends Preference implements Preference.OnPrefe
                 mGoogleApiClient);
         if (mLastLocation != null) {
             Toast.makeText(getContext(), String.format("Longitude: %f\nLatitude %f", mLastLocation.getLongitude(), mLastLocation.getLatitude()), Toast.LENGTH_SHORT).show();;
-            persistString(mLastLocation.getLatitude() + " " + mLastLocation.getLongitude());
+            persistString(mLastLocation.getLatitude() + ";" + mLastLocation.getLongitude());
         }
 
 
