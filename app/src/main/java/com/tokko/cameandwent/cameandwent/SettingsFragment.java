@@ -15,7 +15,7 @@ public class SettingsFragment extends PreferenceFragment {
 
     @Override
     public void onStop() {
-        getActivity().startService(new Intent(getActivity(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
+        getActivity().sendBroadcast(new Intent(getActivity(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
         super.onStop();
     }
 }

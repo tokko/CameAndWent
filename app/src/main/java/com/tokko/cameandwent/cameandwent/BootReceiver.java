@@ -9,7 +9,7 @@ public class BootReceiver extends WakefulBroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        startWakefulService(context, new Intent(context, GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
+        context.sendBroadcast(new Intent(context, GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
         Toast.makeText(context, "CameAndWent service started", Toast.LENGTH_SHORT).show();
     }
 }
