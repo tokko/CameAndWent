@@ -19,7 +19,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.gson.Gson;
+
 
 public class GeofenceService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     public static final String ACTION = "com.tokko.cameandwent.GEOFENCE_ACTION";
@@ -75,11 +75,12 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         enabled = sp.getBoolean("enabled", false);
         String radiuS = sp.getString("radius", null);
-        Location location = new Gson().fromJson(sp.getString("origin", null), Location.class);
-        if (enabled && radiuS != null && location != null) {
+        //Location location = new Gson().fromJson(sp.getString("origin", null), Location.class);
+     	String[] location = sp.getString("origin", "").split(";");
+		if (enabled && radiuS != null && location.length == 2) {
             float radii = Float.parseFloat(radiuS);
             Geofence.Builder builder = new Geofence.Builder();
-            builder.setCircularRegion(location.getLatitude(), location.getLongitude(), radii);
+            builder.setCircularRegion(Float.parseFloat(location[0]), Float.parseFloat(location[1]), radii);
             builder.setRequestId("com.tokko.cameandwent");
             builder.setExpirationDuration(Geofence.NEVER_EXPIRE);
             builder.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);

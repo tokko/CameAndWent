@@ -10,7 +10,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.gson.Gson;
 
 public class LocationPreference extends Preference implements Preference.OnPreferenceClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -42,7 +41,7 @@ public class LocationPreference extends Preference implements Preference.OnPrefe
                 mGoogleApiClient);
         if (mLastLocation != null) {
             Toast.makeText(getContext(), String.format("Longitude: %f\nLatitude %f", mLastLocation.getLongitude(), mLastLocation.getLatitude()), Toast.LENGTH_SHORT).show();;
-            persistString(new Gson().toJson(mLastLocation));
+            persistString(mLastLocation.getLatitude() + " " + mLastLocation.getLongitude());
         }
 
 
