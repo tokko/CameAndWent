@@ -98,7 +98,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             com.google.android.gms.common.api.PendingResult<Status> res = LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
             //res.setResultCallback(this);
             Toast.makeText(context, "waiting for geofence result", Toast.LENGTH_SHORT).show();
-            Status status = res.await();
+         /*   Status status = res.await();
             if(status.isSuccess())
                 Toast.makeText(context, "Geofence added", Toast.LENGTH_SHORT).show();
             if(!status.isSuccess())
@@ -107,6 +107,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
                 Toast.makeText(context, "Geofence add canceled", Toast.LENGTH_SHORT).show();
             if(status.isInterrupted())
                 Toast.makeText(context, "Geofence add interrupted", Toast.LENGTH_SHORT).show();
+				*/
         }
      //   googleApiClient.disconnect();
     }
