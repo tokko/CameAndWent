@@ -102,11 +102,13 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
     }
     @Override
     public void onConnected(Bundle bundle) {
-        LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
+        
         if(enabled) {
             PendingResult<Status> res = LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
             res.setResultCallback(this);
         }
+		else
+			LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
      //   googleApiClient.disconnect();
     }
 
