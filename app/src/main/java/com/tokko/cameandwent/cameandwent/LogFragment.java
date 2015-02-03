@@ -77,7 +77,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         if(cursor.getCount() > 0) {
             int pos = cursor.getPosition();
             cursor.moveToLast();
-          //  tb.setChecked(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT)) == 0);
+            tb.setChecked(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0);
             cursor.moveToPosition(pos);
         }
         adapter.swapCursor(cursor);

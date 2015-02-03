@@ -67,7 +67,6 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         enabled = sp.getBoolean("enabled", false);
         String radiuS = sp.getString("radius", null);
-        //Location location = new Gson().fromJson(sp.getString("origin", null), Location.class);
      	String[] location = sp.getString("origin", "").split(";");
 		if (enabled && radiuS != null && location.length == 2) {
             float radii = Float.parseFloat(radiuS);
@@ -95,21 +94,9 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     public void onConnected(Bundle bundle) {
         LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
         if(enabled) {
-            com.google.android.gms.common.api.PendingResult<Status> res = LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
-            //res.setResultCallback(this);
-            Toast.makeText(context, "waiting for geofence result", Toast.LENGTH_SHORT).show();
-         /*   Status status = res.await();
-            if(status.isSuccess())
-                Toast.makeText(context, "Geofence added", Toast.LENGTH_SHORT).show();
-            if(!status.isSuccess())
-                Toast.makeText(context, "Geofence add failed", Toast.LENGTH_SHORT).show();
-            if(status.isCanceled())
-                Toast.makeText(context, "Geofence add canceled", Toast.LENGTH_SHORT).show();
-            if(status.isInterrupted())
-                Toast.makeText(context, "Geofence add interrupted", Toast.LENGTH_SHORT).show();
-				*/
+            LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
         }
-     //   googleApiClient.disconnect();
+        googleApiClient.disconnect();
     }
 
     @Override
