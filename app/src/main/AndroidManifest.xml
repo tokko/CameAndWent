@@ -30,14 +30,14 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".GeofenceService"
+        <receiver android:name=".GeofenceReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="com.tokko.cameandwent.GEOFENCE_ACTION" />
                 <action android:name="com.tokko.cameandwent.ACTIVATE_GEOFENCE" />
                 <action android:name="com.tokko.cameandwent.DEACTIVATE_GEOFENCE" />
             </intent-filter>
-        </service>
+        </receiver>
 
         <provider
             android:authorities="com.tokko.cameandwent.cameandwent.CameAndWentProvider"
