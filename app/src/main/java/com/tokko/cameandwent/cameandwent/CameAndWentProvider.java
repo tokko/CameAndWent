@@ -31,16 +31,19 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_WENT = "ACTION_WENT";
     private static final String ACTION_GET_LOG_ENTRIES = "ACTION_GET_LOG_ENTRIES";
     private static final String ACTION_DELETE_ALL = "ACTION_DELETE_ALL";
+    private static final String ACTION_GET_DETAILS = "ACTION_GET_DETAILS";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
     private static final int KEY_GET_LOG_ENTRIES = 2;
     private static final int KEY_DELETE_ALL = 3;
+    private static final int KEY_GET_DETAILS = 4;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
     public static final Uri URI_GET_LOG_ENTRIES = Uri.parse(URI_TEMPLATE + ACTION_GET_LOG_ENTRIES);
     public static final Uri URI_DELETE_ALL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_ALL);
+    public static final Uri URI_GET_DETAILS = Uri.parse(URI_TEMPLATE + ACTION_GET_DETAILS);
 
     private static UriMatcher uriMatcher;
 
@@ -50,6 +53,7 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_WENT, KEY_WENT);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_ALL, KEY_DELETE_ALL);
+        uriMatcher.addURI(AUTHORITY, ACTION_GET_DETAILS, KEY_GET_DETAILS);
     }
 
     private DatabaseOpenHelper db;
@@ -69,6 +73,10 @@ public class CameAndWentProvider extends ContentProvider {
                 c = sdb.query(VIEW_DURATION, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_LOG_ENTRIES);
                 return c;
+            case KEY_GET_DETAILS:
+                c = sdb.query(TABLE_LOG_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
+                return c;
             default:
                 throw new IllegalArgumentException("Unknown URI");
         }
@@ -86,7 +94,10 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_CAME:
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
-                getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                if(id > -1) {
+                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
+                }
                 return ContentUris.withAppendedId(uri, id);
             default:
                 throw new IllegalArgumentException("Unknown URI");
@@ -99,8 +110,10 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_DELETE_ALL:
                  int deleted = sdb.delete(TABLE_LOG_NAME, null, null);
-                if(deleted > 0)
+                if(deleted > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
+                }
                 return deleted;
             default:
                 throw new IllegalArgumentException("Unknown URI");
@@ -113,8 +126,10 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_WENT:
                 int updated = sdb.update(TABLE_LOG_NAME, values, WENT + " = 0", null);
-                if(updated > 0)
+                if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
+                }
                 return updated;
             default:
                 throw new IllegalArgumentException("Unknown URI");
