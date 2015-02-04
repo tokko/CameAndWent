@@ -86,12 +86,13 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         if(id == -1) {
             CursorLoader cl = new CursorLoader(getActivity());
             cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+            cl.setSortOrder(CameAndWentProvider.DATE + " ASC");
             return cl;
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
             cl.setUri(CameAndWentProvider.URI_GET_DETAILS);
-            cl.setSelection(String.format("(%s-%s%%(1000*60*60*24))=?", CameAndWentProvider.CAME, CameAndWentProvider.CAME));
+            cl.setSelection(String.format("%s=?", CameAndWentProvider.DATE));
             cl.setSelectionArgs(new String[]{String.valueOf(args.getLong(CameAndWentProvider.DATE))});
             cl.setSortOrder(CameAndWentProvider.CAME + " ASC");
             return cl;
@@ -186,7 +187,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             b.putLong(CameAndWentProvider.DATE, date);
            // loader.initLoader(groupId, b, callbacks);
           //  Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("(%s-%s%%(1000*60*60*24))=?", CameAndWentProvider.CAME, CameAndWentProvider.CAME), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
-            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, null);
             return c;
         }
 

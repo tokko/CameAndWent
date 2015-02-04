@@ -13,14 +13,16 @@ import android.preference.PreferenceManager;
 
 public class ClockManager {
     private Context context;
-    private SharedPreferences sp;
+    private SharedPreferences defaultPrefs;
     private static final String PREV_SOUNDMODE_KEY = "prevsoundmodekey";
     private  AudioManager am;
+    private SharedPreferences sp;
 
     public ClockManager(Context context) {
         this.context = context;
-        sp = PreferenceManager.getDefaultSharedPreferences(context);
+        defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        sp = context.getSharedPreferences("clock", Context.MODE_PRIVATE);
     }
 
     public void clockIn(){
@@ -36,26 +38,32 @@ public class ClockManager {
         ContentValues cv = new ContentValues();
         cv.put(CameAndWentProvider.CAME, time);
         context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
-        if(sp.getBoolean("soundmode", false)){
-            sp.edit().putInt(PREV_SOUNDMODE_KEY, am.getRingerMode()).apply();
-            boolean vibrate = sp.getBoolean("vibrate", false);
-            boolean silent = sp.getBoolean("silent", false);
-            if(vibrate)
-                am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-            else if(silent)
-                am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+        if(!this.defaultPrefs.getBoolean("clockedIn", false)) {
+            if (defaultPrefs.getBoolean("soundmode", false)) {
+                defaultPrefs.edit().putInt(PREV_SOUNDMODE_KEY, am.getRingerMode()).apply();
+                boolean vibrate = defaultPrefs.getBoolean("vibrate", false);
+                boolean silent = defaultPrefs.getBoolean("silent", false);
+                if (vibrate)
+                    am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+                else if (silent)
+                    am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+            }
+            this.sp.edit().putBoolean("clockedIn", true).apply();
+            postNotification(1, "Arrived at work");
         }
-        postNotification(1, "Arrived at work");
     }
 
     public void clockOut(long time) {
-        ContentValues cv = new ContentValues();
-        cv.put(CameAndWentProvider.WENT, time);
-        context.getContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
-        if(sp.getBoolean("soundmode", false)){
-            am.setRingerMode(sp.getInt(PREV_SOUNDMODE_KEY, AudioManager.RINGER_MODE_NORMAL));
+        if(this.sp.getBoolean("clockedIn", false)) {
+            ContentValues cv = new ContentValues();
+            cv.put(CameAndWentProvider.WENT, time);
+            context.getContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
+            if (defaultPrefs.getBoolean("soundmode", false)) {
+                am.setRingerMode(defaultPrefs.getInt(PREV_SOUNDMODE_KEY, AudioManager.RINGER_MODE_NORMAL));
+            }
+            this.sp.edit().putBoolean("clockedIn", false).commit();
+            postNotification(1, "Left work");
         }
-        postNotification(1, "Left work");
     }
 
     private void postNotification(int id, String s) {

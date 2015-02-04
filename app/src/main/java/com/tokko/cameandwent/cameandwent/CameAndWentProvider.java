@@ -93,6 +93,9 @@ public class CameAndWentProvider extends ContentProvider {
         SQLiteDatabase sdb = db.getWritableDatabase();
         switch (uriMatcher.match(uri)){
             case KEY_CAME:
+                long came = values.getAsLong(CAME);
+                long date = came - came%1000*60*60*24;
+                values.put(DATE, date);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 if(id > -1) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
@@ -137,15 +140,15 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 16;
-        private static final String CREATE = "CREATE TABLE " + TABLE_LOG_NAME + "(" +
+        private static final int DATABASE_VERSION = 19;
+        private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
+                DATE + " INTEGER NOT NULL DEFAULT 0, " +
                 CAME + " INTEGER NOT NULL," +
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
 
         private static final String DURATION_CALC = "(" + WENT + "-" + CAME + ") AS " + DURATION;
-        private static final String DATE_CALC = "("+CAME + "-(" + CAME + "%"+(1000*60*60*24)+")) AS " + DATE;
-        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE_CALC + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE + " ORDER BY " + DATE + " ASC";
+        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
 
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -159,9 +162,15 @@ public class CameAndWentProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOG_NAME);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
             onCreate(db);
+            for(int version = oldVersion; version <= newVersion; version++){
+                switch (version){
+                    case 16:
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + DATE + " INTEGER NOT NULL DEFAULT 0");
+                        break;
+                }
+            }
         }
     }
 }
