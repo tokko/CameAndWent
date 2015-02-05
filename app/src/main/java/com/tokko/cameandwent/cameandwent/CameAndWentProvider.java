@@ -10,6 +10,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
+import java.util.Calendar;
+
 public class CameAndWentProvider extends ContentProvider {
 
     private static final String AUTHORITY = "com.tokko.cameandwent.cameandwent.CameAndWentProvider";
@@ -32,18 +34,21 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_GET_LOG_ENTRIES = "ACTION_GET_LOG_ENTRIES";
     private static final String ACTION_DELETE_ALL = "ACTION_DELETE_ALL";
     private static final String ACTION_GET_DETAILS = "ACTION_GET_DETAILS";
+    private static final String ACTION_DELETE_DETAIL = "ACTION_DELETE_DETAIL";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
     private static final int KEY_GET_LOG_ENTRIES = 2;
     private static final int KEY_DELETE_ALL = 3;
     private static final int KEY_GET_DETAILS = 4;
+    private static final int KEY_DELETE_DETAIL = 4;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
     public static final Uri URI_GET_LOG_ENTRIES = Uri.parse(URI_TEMPLATE + ACTION_GET_LOG_ENTRIES);
     public static final Uri URI_DELETE_ALL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_ALL);
     public static final Uri URI_GET_DETAILS = Uri.parse(URI_TEMPLATE + ACTION_GET_DETAILS);
+    public static final Uri URI_DELETE_DETAIL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_DETAIL + "/#");
 
     private static UriMatcher uriMatcher;
 
@@ -54,6 +59,7 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_ALL, KEY_DELETE_ALL);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_DETAILS, KEY_GET_DETAILS);
+        uriMatcher.addURI(AUTHORITY, ACTION_DELETE_DETAIL, KEY_DELETE_DETAIL);
     }
 
     private DatabaseOpenHelper db;
@@ -94,8 +100,13 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_CAME:
                 long came = values.getAsLong(CAME);
-                long date = came - came%1000*60*60*24;
-                values.put(DATE, date);
+                Calendar c = Calendar.getInstance();
+                c.setTimeInMillis(came);
+                c.set(Calendar.MILLISECOND, 0);
+                c.set(Calendar.SECOND, 0);
+                c.set(Calendar.HOUR, 0);
+                c.set(Calendar.MINUTE, 0);
+                values.put(DATE, c.getTimeInMillis());
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 if(id > -1) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
@@ -110,10 +121,18 @@ public class CameAndWentProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase sdb = db.getWritableDatabase();
+        int deleted;
         switch (uriMatcher.match(uri)){
             case KEY_DELETE_ALL:
-                 int deleted = sdb.delete(TABLE_LOG_NAME, null, null);
+                deleted = sdb.delete(TABLE_LOG_NAME, null, null);
                 if(deleted > 0) {
+                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
+                }
+                return deleted;
+            case KEY_DELETE_DETAIL:
+                deleted = sdb.delete(TABLE_LOG_NAME, selection, selectionArgs);
+                if(deleted > 0){
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
                 }

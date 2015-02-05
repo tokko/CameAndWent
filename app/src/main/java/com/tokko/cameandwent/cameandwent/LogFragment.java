@@ -48,7 +48,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        adapter = new LogCursorTreeAdapter(getLoaderManager(), this, null, getActivity());
+        adapter = new LogCursorTreeAdapter(null, getActivity(), this);
         listView = (ExpandableListView) getListView();
         listView.setAdapter(adapter);
     }
@@ -135,6 +135,12 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
                 else
                     cm.clockOut();
                 break;
+            case R.id.logentry_deletebutton:
+                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_DETAIL, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
+                break;
+            case R.id.logentry_editButton:
+
+                break;
         }
     }
 
@@ -164,29 +170,22 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     }
 
     private class LogCursorTreeAdapter extends CursorTreeAdapter{
-        private final SimpleDateFormat year = new SimpleDateFormat("yyyy");
-        private final SimpleDateFormat month= new SimpleDateFormat("MM");
         private final SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
         private final SimpleDateFormat time = new SimpleDateFormat("HH:mm");
-        private LoaderManager loader;
-        private LoaderManager.LoaderCallbacks<Cursor> callbacks;
         private Context context;
+        private View.OnClickListener childClickListener;
 
-        public LogCursorTreeAdapter(LoaderManager loaderManager, LoaderManager.LoaderCallbacks<Cursor> callbacks, Cursor cursor, Context context) {
+        public LogCursorTreeAdapter(Cursor cursor, Context context, View.OnClickListener childClickListener) {
             super(cursor, context, true);
-            this.loader = loaderManager;
-            this.callbacks = callbacks;
             this.context = context;
+            this.childClickListener = childClickListener;
         }
 
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
-            int groupId = groupCursor.getPosition();
             Bundle b = new Bundle();
             long date = groupCursor.getLong(groupCursor.getColumnIndex(CameAndWentProvider.DATE));
             b.putLong(CameAndWentProvider.DATE, date);
-           // loader.initLoader(groupId, b, callbacks);
-          //  Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("(%s-%s%%(1000*60*60*24))=?", CameAndWentProvider.CAME, CameAndWentProvider.CAME), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
             Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, null);
             return c;
         }
@@ -199,18 +198,18 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         @Override
         protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
             long cameTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE));
-            String came = sdf.format(new Date(cameTime));
+            String date = sdf.format(new Date(cameTime));
             long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
             String duration = formatInterval(durationTime);
             if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
                 duration = "currently at work";
-            ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + came);
+            ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + date);
             ((TextView)view.findViewById(android.R.id.text2)).setText("Duration: " + duration);
         }
 
         @Override
         protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
-            return ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.simple_list_item_1, null, false);
+            return ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.logdetailsview, null, false);
 
         }
 
@@ -221,7 +220,16 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             String wentS = time.format(new Date(wentTime));
             if(wentTime <= 0)
                 wentS = "Currently at work";
-            ((TextView)view.findViewById(android.R.id.text1)).setText("Came: " + time.format(new Date(cameTime)) + "\nWent: " + wentS);
+            ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
+            ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
+
+            View v1 = view.findViewById(R.id.logentry_deletebutton);
+            v1.setOnClickListener(childClickListener);
+            v1.setTag(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.ID)));
+
+            View v2 = view.findViewById(R.id.logentry_editButton);
+            v2.setOnClickListener(childClickListener);
+            v2.setTag(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.ID)));
         }
 
         private String formatInterval(final long l)
