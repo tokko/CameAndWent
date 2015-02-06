@@ -35,6 +35,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_DELETE_ALL = "ACTION_DELETE_ALL";
     private static final String ACTION_GET_DETAILS = "ACTION_GET_DETAILS";
     private static final String ACTION_DELETE_DETAIL = "ACTION_DELETE_DETAIL";
+    private static final String ACTION_UPDATE_PARTICULAR_LOG_ENTRY = "ACTION_UPDATE_PARTICULAR_LOG_ENTRY";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -42,6 +43,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_DELETE_ALL = 3;
     private static final int KEY_GET_DETAILS = 4;
     private static final int KEY_DELETE_DETAIL = 4;
+    private static final int KEY_UPDATE_PARTICULAR_LOG_ENTRY = 5;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
@@ -49,6 +51,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_DELETE_ALL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_ALL);
     public static final Uri URI_GET_DETAILS = Uri.parse(URI_TEMPLATE + ACTION_GET_DETAILS);
     public static final Uri URI_DELETE_DETAIL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_DETAIL + "/#");
+    public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY + "/#");
 
     private static UriMatcher uriMatcher;
 
@@ -60,6 +63,7 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_ALL, KEY_DELETE_ALL);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_DETAILS, KEY_GET_DETAILS);
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_DETAIL, KEY_DELETE_DETAIL);
+        uriMatcher.addURI(AUTHORITY, ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
     }
 
     private DatabaseOpenHelper db;
@@ -145,9 +149,17 @@ public class CameAndWentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SQLiteDatabase sdb = db.getWritableDatabase();
+        int updated;
         switch (uriMatcher.match(uri)){
             case KEY_WENT:
-                int updated = sdb.update(TABLE_LOG_NAME, values, WENT + " = 0", null);
+                 updated = sdb.update(TABLE_LOG_NAME, values, WENT + " = 0", null);
+                if(updated > 0) {
+                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
+                }
+                return updated;
+            case KEY_UPDATE_PARTICULAR_LOG_ENTRY:
+                updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);

@@ -1,14 +1,15 @@
 package com.tokko.cameandwent.cameandwent;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import roboguice.activity.RoboFragmentActivity;
 
-public class MainActivity extends Activity {
+
+public class MainActivity extends RoboFragmentActivity implements LogFragment.LogFragmentHost{
     private static final String MAINACTIVITY_SETTINGS_KEY = "mainactivity";
     private static final String HAS_SHOWN_SETTINGS = "hasshownsettings";
     private LogFragment logFragment;
@@ -76,6 +77,12 @@ public class MainActivity extends Activity {
             getActionBar().setDisplayHomeAsUpEnabled(false);
             getFragmentManager().popBackStack();
         }
+    }
+
+    @Override
+    public void onEditLogentry(long id) {
+        LogEntryEditorFragment f = LogEntryEditorFragment.newInstance(id);
+        f.show(getSupportFragmentManager(), "editorlog");
     }
 
     /**

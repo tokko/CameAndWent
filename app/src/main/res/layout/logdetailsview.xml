@@ -31,7 +31,6 @@
             android:id="@+id/logentry_editButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:src="@android:drawable/ic_menu_edit"/>
         <ImageButton
             android:id="@+id/logentry_deletebutton"

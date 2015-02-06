@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.app.TimePickerDialog;
@@ -21,7 +22,6 @@ import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +30,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     private ClockManager cm;
     private ToggleButton tb;
     private ExpandableListView listView;
+    private LogFragmentHost host;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -140,9 +141,26 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
                 getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_DETAIL, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
                 break;
             case R.id.logentry_editButton:
-
+                long fakkingId = (long) v.getTag();
+                host.onEditLogentry(fakkingId);
                 break;
         }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            host = (LogFragmentHost) activity;
+        }
+        catch (ClassCastException e){
+            throw new IllegalStateException("Parent must implement LogFragmentHost interface");
+        }
+    }
+
+    public interface LogFragmentHost{
+
+        public void onEditLogentry(long id);
     }
 
     @Override
@@ -155,24 +173,16 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         if(!tb.isChecked()){
-            cm.clockIn(hourAndMinuteToMillis(hourOfDay, minute));
+            cm.clockIn(TimeConverter.hourAndMinuteToMillis(hourOfDay, minute));
             tb.setChecked(true);
         }
         else{
             tb.setChecked(false);
-            cm.clockOut(hourAndMinuteToMillis(hourOfDay, minute));
+            cm.clockOut(TimeConverter.hourAndMinuteToMillis(hourOfDay, minute));
         }
     }
 
-    private long hourAndMinuteToMillis(int hour, int minute){
-        Calendar c = Calendar.getInstance();
-  //      c.setTimeInMillis(System.currentTimeMillis());
-        c.set(Calendar.MILLISECOND, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.HOUR_OF_DAY, hour);
-        c.set(Calendar.MINUTE, minute);
-        return c.getTimeInMillis();
-    }
+
 
     private class LogCursorTreeAdapter extends CursorTreeAdapter{
         private final SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
@@ -234,7 +244,8 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
 
             View v2 = view.findViewById(R.id.logentry_editButton);
             v2.setOnClickListener(childClickListener);
-            v2.setTag(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.ID)));
+            long fakkingId = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.ID));
+            v2.setTag(fakkingId);
         }
 
         private String formatInterval(final long l)
