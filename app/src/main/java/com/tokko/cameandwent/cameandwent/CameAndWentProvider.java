@@ -104,7 +104,7 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setTimeInMillis(came);
                 c.set(Calendar.MILLISECOND, 0);
                 c.set(Calendar.SECOND, 0);
-                c.set(Calendar.HOUR, 0);
+                c.set(Calendar.HOUR_OF_DAY, 0);
                 c.set(Calendar.MINUTE, 0);
                 values.put(DATE, c.getTimeInMillis());
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);

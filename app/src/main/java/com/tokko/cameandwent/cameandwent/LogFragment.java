@@ -21,6 +21,7 @@ import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -164,9 +165,13 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     }
 
     private long hourAndMinuteToMillis(int hour, int minute){
-        long now = System.currentTimeMillis();
-        long currentDate = now - now%(1000*60*60*24);
-        return currentDate +  hour*60*60*1000 + minute*60*1000;
+        Calendar c = Calendar.getInstance();
+  //      c.setTimeInMillis(System.currentTimeMillis());
+        c.set(Calendar.MILLISECOND, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.HOUR_OF_DAY, hour);
+        c.set(Calendar.MINUTE, minute);
+        return c.getTimeInMillis();
     }
 
     private class LogCursorTreeAdapter extends CursorTreeAdapter{
