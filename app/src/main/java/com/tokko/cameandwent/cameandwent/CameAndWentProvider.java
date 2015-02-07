@@ -194,7 +194,6 @@ public class CameAndWentProvider extends ContentProvider {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
-            onCreate(db);
             for(int version = oldVersion; version <= newVersion; version++){
                 switch (version){
                     case 16:
@@ -202,6 +201,7 @@ public class CameAndWentProvider extends ContentProvider {
                         break;
                 }
             }
+            onCreate(db);
         }
     }
 }

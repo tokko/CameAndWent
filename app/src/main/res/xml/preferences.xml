@@ -25,6 +25,17 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="Breaks"
+        android:key="breaks"
+        android:dependency="enabled">
+
+        <com.tokko.cameandwent.cameandwent.TimePreference
+            android:key="average_break"
+            android:title="Average daily break"
+            android:dependency="breaks" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:dependency="enabled"
         android:title="Audio"
         android:key="audio"
