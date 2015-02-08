@@ -10,11 +10,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
-import java.util.Calendar;
-
 public class CameAndWentProvider extends ContentProvider {
 
-    private static final String AUTHORITY = "com.tokko.cameandwent.cameandwent.CameAndWentProvider";
+    static final String AUTHORITY = "com.tokko.cameandwent.cameandwent.CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
 
     private static final String DATABASE_NAME = "cameandwent";
@@ -25,6 +23,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String ID = "_id";
     public static final String CAME = "came";
     public static final String WENT = "went";
+    public static final String ISBREAK = "isbreak";
 
     public static final String DATE = "date";
     public static final String DURATION = "duration";
@@ -104,13 +103,7 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_CAME:
                 long came = values.getAsLong(CAME);
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(came);
-                c.set(Calendar.MILLISECOND, 0);
-                c.set(Calendar.SECOND, 0);
-                c.set(Calendar.HOUR_OF_DAY, 0);
-                c.set(Calendar.MINUTE, 0);
-                values.put(DATE, c.getTimeInMillis());
+                values.put(DATE, TimeConverter.extractDate(came));
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 if(id > -1) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
@@ -171,15 +164,18 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 19;
+        private static final int DATABASE_VERSION = 21;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
                 CAME + " INTEGER NOT NULL," +
+                ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
 
-        private static final String DURATION_CALC = "(" + WENT + "-" + CAME + ") AS " + DURATION;
-        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
+        private static final String DURATION_CALC = "SUM(" + WENT + "-" + CAME + ") AS " + DURATION;
+       // private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
+
+
 
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -188,9 +184,19 @@ public class CameAndWentProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREATE);
-            db.execSQL(CREATE_DURATION_VIEW);
+            createDurationView(db);
         }
 
+        private void createDurationView(SQLiteDatabase db) {
+            String viewCreateStatement = "CREATE VIEW " + VIEW_DURATION + "  AS SELECT durations."+ID+", durations."+DATE+", (durations."+DURATION+"-breaks."+DURATION+
+                    ") AS " + DURATION + " FROM ("+getDurationSelectStatement(false)+") AS durations join ("+getDurationSelectStatement(true)+") AS breaks ON durations."+ID+"=breaks."+ID+";";
+            db.execSQL(viewCreateStatement);
+        }
+
+        private String getDurationSelectStatement(boolean isBreak){
+            String s = String.format("SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " WHERE " + ISBREAK + "=%s GROUP BY " + DATE, String.valueOf(isBreak ? 1 : 0));
+            return s;
+        }
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
@@ -198,6 +204,9 @@ public class CameAndWentProvider extends ContentProvider {
                 switch (version){
                     case 16:
                         db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + DATE + " INTEGER NOT NULL DEFAULT 0");
+                        break;
+                    case 19:
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + ISBREAK + " INTEGER NOT NULL DEFAULT 0");
                         break;
                 }
             }
