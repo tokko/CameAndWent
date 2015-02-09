@@ -164,7 +164,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 21;
+        private static final int DATABASE_VERSION = 25;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
@@ -188,8 +188,8 @@ public class CameAndWentProvider extends ContentProvider {
         }
 
         private void createDurationView(SQLiteDatabase db) {
-            String viewCreateStatement = "CREATE VIEW " + VIEW_DURATION + "  AS SELECT durations."+ID+", durations."+DATE+", (durations."+DURATION+"-breaks."+DURATION+
-                    ") AS " + DURATION + " FROM ("+getDurationSelectStatement(false)+") AS durations join ("+getDurationSelectStatement(true)+") AS breaks ON durations."+ID+"=breaks."+ID+";";
+            String viewCreateStatement = "CREATE VIEW " + VIEW_DURATION + "  AS SELECT durations."+ID+", durations."+DATE+", (durations." + DURATION + "-breaks." + DURATION + ") AS "
+                    + DURATION + " FROM ("+getDurationSelectStatement(false)+") AS durations join("+getDurationSelectStatement(true)+") AS breaks ON durations."+DATE+"=breaks."+DATE+";";
             db.execSQL(viewCreateStatement);
         }
 

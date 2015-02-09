@@ -64,7 +64,8 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     }
 
     public void testGetEntries(){
-        fail();
+        Cursor c = getMockContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        assertEquals(WEEKS_BACK * 7 * TIMES_PER_DAY + WEEKS_BACK * 7, c.getCount());
     }
 
     public void testGetDetails(){
