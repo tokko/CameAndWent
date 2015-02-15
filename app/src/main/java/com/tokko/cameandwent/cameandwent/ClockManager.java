@@ -35,10 +35,10 @@ public class ClockManager {
     }
 
     public void clockIn(long time) {
-        ContentValues cv = new ContentValues();
-        cv.put(CameAndWentProvider.CAME, time);
-        context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
         if(!this.defaultPrefs.getBoolean("clockedIn", false)) {
+            ContentValues cv = new ContentValues();
+            cv.put(CameAndWentProvider.CAME, time);
+            context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
             if (defaultPrefs.getBoolean("soundmode", false)) {
                 defaultPrefs.edit().putInt(PREV_SOUNDMODE_KEY, am.getRingerMode()).apply();
                 boolean vibrate = defaultPrefs.getBoolean("vibrate", false);
