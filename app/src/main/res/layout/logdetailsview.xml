@@ -10,14 +10,20 @@
         android:layout_height="wrap_content">
         <TextView
             android:id="@+id/log_details_came"
-            style="@android:style/TextAppearance.DeviceDefault.Medium"
+            style="@android:style/TextAppearance.DeviceDefault.Small"
             android:layout_width="wrap_content"
             android:text="placeholder"
             android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/log_details_went"
-            style="@android:style/TextAppearance.DeviceDefault.Medium"
+            style="@android:style/TextAppearance.DeviceDefault.Small"
+            android:layout_width="wrap_content"
+            android:text="placeholder"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/log_details_isbreak"
+            style="@android:style/TextAppearance.DeviceDefault.Small"
             android:layout_width="wrap_content"
             android:text="placeholder"
             android:layout_height="wrap_content" />

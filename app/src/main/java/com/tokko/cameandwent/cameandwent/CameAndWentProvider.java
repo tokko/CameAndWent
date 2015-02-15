@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.Bundle;
 
 public class CameAndWentProvider extends ContentProvider {
 
@@ -92,6 +93,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
 
+
     @Override
     public String getType(Uri uri) {
         return "";
@@ -139,6 +141,40 @@ public class CameAndWentProvider extends ContentProvider {
         }
     }
 
+    public static final String RECREATE_TRIGGER_METHOD = "recreate_trigger_method";
+    public static final String DROP_TRIGGER_METHOD = "drop_trigger_method";
+    public static final String RECREATE_TRIGGER_EXTRA_TIME = "recreate_trigger_extra_time";
+    public static final String RECREATE_TRIGGER_EXTRA_DURATION = "recreate_trigger_EXTRA_DURATION";
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+        if(method.equals(RECREATE_TRIGGER_METHOD)){
+            long time = extras.getLong(RECREATE_TRIGGER_EXTRA_TIME);
+            long duration = extras.getLong(RECREATE_TRIGGER_EXTRA_DURATION);
+            recreateTrigger(db.getWritableDatabase(), time, duration);
+            return null;
+        }
+        else if(method.equals(DROP_TRIGGER_METHOD)){
+            dropTrigger(db.getWritableDatabase());
+        }
+        return super.call(method, arg, extras);
+    }
+
+    public static final String BREAK_TRIGGER = "break_trigger";
+
+    private void recreateTrigger(SQLiteDatabase db, long time, long duration){
+        dropTrigger(db);
+        db.execSQL("CREATE TRIGGER IF NOT EXISTS " + BREAK_TRIGGER
+                + " AFTER INSERT ON " + TABLE_LOG_NAME +
+                //" WHEN NOT EXISTS (SELECT * FROM " + TABLE_LOG_NAME + " WHERE " + DATE + "=new." + DATE +")" +
+                " FOR EACH ROW BEGIN " +
+               // "INSERT INTO " + TABLE_LOG_NAME + " ("+CAME+", " + WENT +", " +ISBREAK + ") VALUES (new."+ DATE + "+" + time +", new."+DATE+"+"+time + "+"+duration + ");" +
+                "INSERT INTO " + TABLE_LOG_NAME + " ("+CAME+", " + WENT +", " +ISBREAK + ", " + DATE + ") VALUES (new." + DATE + "+"+time+", new." + DATE + "+"+(time+duration)+", 1, new." + DATE + ");" +
+                " END;");
+    }
+
+    private void dropTrigger(SQLiteDatabase db){
+        db.execSQL("DROP TRIGGER IF EXISTS " + BREAK_TRIGGER);
+    }
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SQLiteDatabase sdb = db.getWritableDatabase();
@@ -163,8 +199,9 @@ public class CameAndWentProvider extends ContentProvider {
         }
     }
 
+
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 25;
+        private static final int DATABASE_VERSION = 29;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
@@ -172,8 +209,8 @@ public class CameAndWentProvider extends ContentProvider {
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
 
-        private static final String DURATION_CALC = "SUM(" + WENT + "-" + CAME + ") AS " + DURATION;
-       // private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
+        private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN (-" + WENT + "-" + CAME +  ") END) AS " + DURATION;
+        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
 
 
 
@@ -187,10 +224,19 @@ public class CameAndWentProvider extends ContentProvider {
             createDurationView(db);
         }
 
+
+
         private void createDurationView(SQLiteDatabase db) {
-            String viewCreateStatement = "CREATE VIEW " + VIEW_DURATION + "  AS SELECT durations."+ID+", durations."+DATE+", (durations." + DURATION + "-breaks." + DURATION + ") AS "
-                    + DURATION + " FROM ("+getDurationSelectStatement(false)+") AS durations join("+getDurationSelectStatement(true)+") AS breaks ON durations."+DATE+"=breaks."+DATE+";";
-            db.execSQL(viewCreateStatement);
+            /*
+            String viewCreateStatement = "CREATE VIEW " + VIEW_DURATION + " AS" +
+                    " SELECT durations."+ID+", durations."+DATE+", (durations." + DURATION + "-breaks." + DURATION + ") AS " + DURATION + " FROM " +
+                    "("+getDurationSelectStatement(false)+") AS durations " +
+                    "join " +
+                    "("+getDurationSelectStatement(true)+") AS breaks " +
+                    "ON durations."+DATE+"=breaks."+DATE+";";
+                    */
+            db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+            db.execSQL(CREATE_DURATION_VIEW);
         }
 
         private String getDurationSelectStatement(boolean isBreak){
@@ -199,7 +245,8 @@ public class CameAndWentProvider extends ContentProvider {
         }
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+            dropTrigger(db);
+            db.execSQL("DROP TRIGGER IF EXISTS " + BREAK_TRIGGER);
             for(int version = oldVersion; version <= newVersion; version++){
                 switch (version){
                     case 16:

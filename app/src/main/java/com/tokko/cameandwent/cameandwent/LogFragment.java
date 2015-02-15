@@ -201,7 +201,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             Bundle b = new Bundle();
             long date = groupCursor.getLong(groupCursor.getColumnIndex(CameAndWentProvider.DATE));
             b.putLong(CameAndWentProvider.DATE, date);
-            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, null);
+            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
             return c;
         }
 
@@ -237,6 +237,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
                 wentS = "Currently at work";
             ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
+            ((TextView)view.findViewById(R.id.log_details_isbreak)).setText(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1 ? "Break" : "Work");
 
             View v1 = view.findViewById(R.id.logentry_deletebutton);
             v1.setOnClickListener(childClickListener);

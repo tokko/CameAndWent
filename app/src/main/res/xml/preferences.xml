@@ -29,10 +29,21 @@
         android:key="breaks"
         android:dependency="enabled">
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
-            android:key="average_break"
-            android:title="Average daily break"
+        <SwitchPreference
+            android:key="breaks_enabled"
+            android:title="Automatic lunch"
+            android:defaultValue="false"
             android:dependency="breaks" />
+
+        <com.tokko.cameandwent.cameandwent.TimePreference
+            android:key="average_break_start"
+            android:title="Average lunch start"
+            android:dependency="breaks_enabled" />
+
+        <com.tokko.cameandwent.cameandwent.TimePreference
+            android:key="average_break_duration"
+            android:title="Average lunch duration"
+            android:dependency="breaks_enabled" />
     </PreferenceCategory>
 
     <PreferenceCategory

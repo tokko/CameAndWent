@@ -28,8 +28,17 @@ public class TimeConverter {
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(time);
         c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
         c.set(Calendar.HOUR_OF_DAY, 0);
         return c.getTimeInMillis();
+    }
+
+    public static long timeToLong(String time){
+        String[] split = time.split(":");
+        long hour = Long.valueOf(split[0])*60*60*1000;
+        long minute  = Long.valueOf(split[1])*60*1000;
+        return hour + minute;
+
     }
 }
