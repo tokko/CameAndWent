@@ -165,9 +165,8 @@ public class CameAndWentProvider extends ContentProvider {
         dropTrigger(db);
         db.execSQL("CREATE TRIGGER IF NOT EXISTS " + BREAK_TRIGGER
                 + " AFTER INSERT ON " + TABLE_LOG_NAME +
-                //" WHEN NOT EXISTS (SELECT * FROM " + TABLE_LOG_NAME + " WHERE " + DATE + "=new." + DATE +")" +
-                " FOR EACH ROW BEGIN " +
-               // "INSERT INTO " + TABLE_LOG_NAME + " ("+CAME+", " + WENT +", " +ISBREAK + ") VALUES (new."+ DATE + "+" + time +", new."+DATE+"+"+time + "+"+duration + ");" +
+                " FOR EACH ROW WHEN 0=(SELECT COUNT(*) FROM " + TABLE_LOG_NAME + " AS a WHERE a." + DATE + "=new." + DATE +")" +
+                " BEGIN " +
                 "INSERT INTO " + TABLE_LOG_NAME + " ("+CAME+", " + WENT +", " +ISBREAK + ", " + DATE + ") VALUES (new." + DATE + "+"+time+", new." + DATE + "+"+(time+duration)+", 1, new." + DATE + ");" +
                 " END;");
     }
@@ -246,7 +245,6 @@ public class CameAndWentProvider extends ContentProvider {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             dropTrigger(db);
-            db.execSQL("DROP TRIGGER IF EXISTS " + BREAK_TRIGGER);
             for(int version = oldVersion; version <= newVersion; version++){
                 switch (version){
                     case 16:

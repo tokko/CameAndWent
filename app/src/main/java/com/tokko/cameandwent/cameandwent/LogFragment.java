@@ -216,8 +216,8 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             String date = sdf.format(new Date(cameTime));
             long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
             String duration = formatInterval(durationTime);
-            if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
-                duration = "currently at work";
+        //    if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
+          //      duration = "currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + date);
             ((TextView)view.findViewById(android.R.id.text2)).setText("Duration: " + duration);
         }
@@ -249,12 +249,17 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             v2.setTag(fakkingId);
         }
 
-        private String formatInterval(final long l)
+        private String formatInterval(long l)
         {
+            String prefix = "";
+            if(l < 0){
+                l *= -1;
+                prefix = "-";
+            }
             final long hr = TimeUnit.MILLISECONDS.toHours(l);
             final long min = TimeUnit.MILLISECONDS.toMinutes(l - TimeUnit.HOURS.toMillis(hr));
             final long sec = TimeUnit.MILLISECONDS.toSeconds(l - TimeUnit.HOURS.toMillis(hr) - TimeUnit.MINUTES.toMillis(min));
-            return String.format("%02d:%02d:%02d", hr, min, sec);
+            return String.format(prefix+"%02d:%02d:%02d", hr, min, sec);
         }
     }
 }

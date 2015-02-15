@@ -27,6 +27,8 @@ public class SettingsFragment extends PreferenceFragment {
             b.putLong(CameAndWentProvider.RECREATE_TRIGGER_EXTRA_DURATION, duration);
             getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.RECREATE_TRIGGER_METHOD, null, b);
         }
+        else
+            getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.DROP_TRIGGER_METHOD, null, null);
         super.onStop();
     }
 

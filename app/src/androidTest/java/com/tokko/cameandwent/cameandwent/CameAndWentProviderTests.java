@@ -186,5 +186,12 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
         assertTrue(c.getInt(c.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1);
         assertEquals(dTime, c.getLong(c.getColumnIndex(CameAndWentProvider.CAME)));
         assertEquals(dTime+duration, c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)));
+
+        getMockContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+        c.close();
+        c = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(System.currentTimeMillis()))},  CameAndWentProvider.CAME + " DESC");
+        assertNotNull(c);
+        assertEquals(3, c.getCount());
+        c.close();
     }
 }
