@@ -110,7 +110,9 @@ public class CameAndWentProvider extends ContentProvider {
                 values.put(DATE, date);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-                if(sp.getBoolean("breaks_enabled", false) && query(URI_GET_DETAILS, null, String.format("%S=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount() == 1){
+                int numberOfEventsToday = query(URI_GET_DETAILS, null, String.format("%S=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();
+                boolean breaksEnabled = sp.getBoolean("breaks_enabled", false);
+                if(breaksEnabled && numberOfEventsToday == 1){
                     values.clear();
                     values.put(CAME, TimeConverter.hourAndMinuteToMillis(came, sp.getString("average_break_start", "0:0")));
                     values.put(WENT, values.getAsLong(CAME) + TimeConverter.timeIntervalAsLong(sp.getString("average_break_duration", "0:0")));
@@ -178,7 +180,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 30;
+        private static final int DATABASE_VERSION = 31;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
@@ -222,6 +224,7 @@ public class CameAndWentProvider extends ContentProvider {
         }
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
             for(int version = oldVersion; version <= newVersion; version++){
                 switch (version){
                     case 16:

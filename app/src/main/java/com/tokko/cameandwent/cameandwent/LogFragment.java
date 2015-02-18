@@ -67,7 +67,14 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         }
     }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        Cursor c = getActivity().getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=0", CameAndWentProvider.ISBREAK), null, CameAndWentProvider.CAME + " ASC");
+        if(c.moveToLast())
+            tb.setChecked(c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)) == 0);
+        c.close();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -105,7 +112,6 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if(loader.getId() == -1) {
-            tb.setChecked(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("clockedIn", false));
             adapter.setGroupCursor(cursor);
         }
         else{
