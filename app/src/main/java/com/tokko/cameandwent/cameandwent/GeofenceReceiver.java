@@ -50,7 +50,6 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             ClockManager cm = new ClockManager(context);
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Log.d("recvr", "entered");
-                Toast.makeText(context, "Entered", Toast.LENGTH_SHORT).show();
                 cm.clockIn();
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
@@ -63,7 +62,6 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     }
 
     public void registerGeofence() {
-        PreferenceManager.setDefaultValues(context, R.xml.preferences, false);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         enabled = sp.getBoolean("enabled", false);
         String radiuS = sp.getString("radius", null);

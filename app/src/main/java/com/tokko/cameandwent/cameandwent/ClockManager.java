@@ -12,6 +12,8 @@ import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
 public class ClockManager {
+    public static final String CLOCK_PREFS = "clock";
+    public static final String PREF_CLOCKED_IN = "clockedIn";
     private Context context;
     private SharedPreferences defaultPrefs;
     private static final String PREV_SOUNDMODE_KEY = "prevsoundmodekey";
@@ -22,7 +24,7 @@ public class ClockManager {
         this.context = context;
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        sp = context.getSharedPreferences("clock", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(CLOCK_PREFS, Context.MODE_PRIVATE);
     }
 
     public void clockIn(){
@@ -35,7 +37,8 @@ public class ClockManager {
     }
 
     public void clockIn(long time) {
-        if(!this.defaultPrefs.getBoolean("clockedIn", false)) {
+        if(!this.sp.getBoolean(PREF_CLOCKED_IN, false)) {
+            this.sp.edit().putBoolean(PREF_CLOCKED_IN, true).commit();
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.CAME, time);
             context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
@@ -48,20 +51,19 @@ public class ClockManager {
                 else if (silent)
                     am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
             }
-            this.sp.edit().putBoolean("clockedIn", true).apply();
             postNotification(1, "Arrived at work");
         }
     }
 
     public void clockOut(long time) {
-        if(this.sp.getBoolean("clockedIn", false)) {
+        if(this.sp.getBoolean(PREF_CLOCKED_IN, false)) {
+            this.sp.edit().putBoolean(PREF_CLOCKED_IN, false).commit();
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.WENT, time);
             context.getContentResolver().update(CameAndWentProvider.URI_WENT, cv, CameAndWentProvider.WENT + " = 0 " , null);
             if (defaultPrefs.getBoolean("soundmode", false)) {
                 am.setRingerMode(defaultPrefs.getInt(PREV_SOUNDMODE_KEY, AudioManager.RINGER_MODE_NORMAL));
             }
-            this.sp.edit().putBoolean("clockedIn", false).commit();
             postNotification(1, "Left work");
         }
     }

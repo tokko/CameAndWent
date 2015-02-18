@@ -9,7 +9,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -70,10 +69,12 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public void onResume() {
         super.onResume();
+        /*
         Cursor c = getActivity().getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=0", CameAndWentProvider.ISBREAK), null, CameAndWentProvider.CAME + " ASC");
         if(c.moveToLast())
             tb.setChecked(c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)) == 0);
         c.close();
+        */
     }
 
     @Override
@@ -111,6 +112,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        tb.setChecked(getActivity().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false));
         if(loader.getId() == -1) {
             adapter.setGroupCursor(cursor);
         }
@@ -218,8 +220,9 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             String date = sdf.format(new Date(cameTime));
             long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
             String duration = formatInterval(durationTime);
-        //    if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
-          //      duration = "currently at work";
+            //if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
+            if(getActivity().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false))
+                duration = "currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + date);
             ((TextView)view.findViewById(android.R.id.text2)).setText("Duration: " + duration);
         }
@@ -236,11 +239,14 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             long wentTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT));
             String wentS = time.format(new Date(wentTime));
             boolean isbreak = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1;
-            if(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("clockedIn", false))
+            String duration = formatInterval(wentTime-cameTime);
+            if(wentTime-cameTime < 0) {
                 wentS = "Currently at work";
+                duration = "Currently unavailable";
+            }
             ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
-            ((TextView)view.findViewById(R.id.log_details_isbreak)).setText((isbreak ? "Break" : "Work") +": " + formatInterval(wentTime-cameTime));
+            ((TextView)view.findViewById(R.id.log_details_isbreak)).setText((isbreak ? "Break" : "Work") +": " + duration);
 
             View v1 = view.findViewById(R.id.logentry_deletebutton);
             v1.setOnClickListener(childClickListener);
