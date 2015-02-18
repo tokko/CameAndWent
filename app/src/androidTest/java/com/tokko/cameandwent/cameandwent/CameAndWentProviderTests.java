@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.test.ProviderTestCase2;
+import android.test.RenamingDelegatingContext;
 import android.test.mock.MockContext;
 
 import java.util.ArrayList;
@@ -28,86 +30,92 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
         super(CameAndWentProvider.class, CameAndWentProvider.AUTHORITY);
     }
 
+    private class CustomContext extends RenamingDelegatingContext {
+        private Context context;
+
+        public CustomContext(Context context) {
+            super(context, "PREFIX.");
+            this.context = context;
+        }
+
+        @Override
+        public String getPackageName() {
+            return "bengt";
+        }
+
+        @Override
+        public SharedPreferences getSharedPreferences(String name, int mode) {
+            return new SharedPreferences() {
+                @Override
+                public Map<String, ?> getAll() {
+                    return null;
+                }
+
+                @Override
+                public String getString(String key, String defValue) {
+                    if (key.equals("average_break_start"))
+                        return "12:00";
+                    else if (key.equals("average_break_duration"))
+                        return "00:30";
+                    return defValue;
+                }
+
+                @Override
+                public Set<String> getStringSet(String key, Set<String> defValues) {
+                    return null;
+                }
+
+                @Override
+                public int getInt(String key, int defValue) {
+                    return 0;
+                }
+
+                @Override
+                public long getLong(String key, long defValue) {
+                    return 0;
+                }
+
+                @Override
+                public float getFloat(String key, float defValue) {
+                    return 0;
+                }
+
+                @Override
+                public boolean getBoolean(String key, boolean defValue) {
+                    if (key.equals("breaks_enabled")) {
+                        return true;
+                    }
+                    return defValue;
+                }
+
+                @Override
+                public boolean contains(String key) {
+                    return false;
+                }
+
+                @Override
+                public Editor edit() {
+                    return null;
+                }
+
+                @Override
+                public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
+
+                }
+
+                @Override
+                public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
+
+                }
+
+            };
+        }
+    }
+
     @Override
     protected void setUp() throws Exception {
-//        super.setUp();
-        Context mock = new MockContext(){
-            @Override
-            public String getPackageName() {
-                return "bengt";
-            }
-
-            @Override
-            public SharedPreferences getSharedPreferences(String name, int mode) {
-                return new SharedPreferences() {
-                    @Override
-                    public Map<String, ?> getAll() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getString(String key, String defValue) {
-                      if(key.equals("average_break_start"))
-                          return "12:00";
-                        else if (key.equals("average_break_duration"))
-                          return "00:30";
-                        return defValue;
-                    }
-
-                    @Override
-                    public Set<String> getStringSet(String key, Set<String> defValues) {
-                        return null;
-                    }
-
-                    @Override
-                    public int getInt(String key, int defValue) {
-                        return 0;
-                    }
-
-                    @Override
-                    public long getLong(String key, long defValue) {
-                        return 0;
-                    }
-
-                    @Override
-                    public float getFloat(String key, float defValue) {
-                        return 0;
-                    }
-
-                    @Override
-                    public boolean getBoolean(String key, boolean defValue) {
-                        if(key.equals("breaks_enabled")){
-                            return true;
-                        }
-                        return defValue;
-                    }
-
-                    @Override
-                    public boolean contains(String key) {
-                        return false;
-                    }
-
-                    @Override
-                    public Editor edit() {
-                        return null;
-                    }
-
-                    @Override
-                    public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
-
-                    }
-
-                    @Override
-                    public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
-
-                    }
-                };
-            }
-        };
-        CameAndWentProvider mProvider = CameAndWentProvider.class.newInstance();
-        assertNotNull(mProvider);
-        mProvider.attachInfo(mock, null);
-        mock.addProvider(CameAndWentProvider.AUTHORITY, mProvider);
+        super.setUp();
+       // CustomContext mockContext = new CustomContext(this);
         getMockContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
         Calendar c = Calendar.getInstance();
         c.set(Calendar.WEEK_OF_YEAR, c.get(Calendar.WEEK_OF_YEAR) - WEEKS_BACK);
@@ -236,18 +244,11 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
         afterUpdate.close();
     }
 
-    private void createTrigger(long time, long duration){
-        Bundle b = new Bundle();
-        b.putLong(CameAndWentProvider.RECREATE_TRIGGER_EXTRA_TIME, time);
-        b.putLong(CameAndWentProvider.RECREATE_TRIGGER_EXTRA_DURATION, duration);
-       // getMockContentResolver().call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.RECREATE_TRIGGER_METHOD, null, b);
-    }
     public void testAutomaticBreaks(){
         getMockContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
         long time = 1000*60*60*12;
         long dTime = TimeConverter.extractDate(System.currentTimeMillis())+1000*60*60*12;
         long duration = 1000*60*30;
-        createTrigger(time, duration);
        // getMockContentResolver().call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.DROP_TRIGGER_METHOD, null, null);
 
         ContentValues cv = new ContentValues();

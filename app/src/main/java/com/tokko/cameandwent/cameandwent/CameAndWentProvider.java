@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 public class CameAndWentProvider extends ContentProvider {
@@ -113,8 +112,10 @@ public class CameAndWentProvider extends ContentProvider {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
                 if(sp.getBoolean("breaks_enabled", false) && query(URI_GET_DETAILS, null, String.format("%S=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount() == 1){
                     values.clear();
-                    values.put(CAME, TimeConverter.hourAndMinuteToMillis(sp.getString("average_break_start", "0:0")));
-                    values.put(WENT, values.getAsLong(CAME) + TimeConverter.timeToLong(sp.getString("average_break_start", "0:0")));
+                    values.put(CAME, TimeConverter.hourAndMinuteToMillis(came, sp.getString("average_break_start", "0:0")));
+                    values.put(WENT, values.getAsLong(CAME) + TimeConverter.timeIntervalAsLong(sp.getString("average_break_duration", "0:0")));
+                    values.put(DATE, date);
+                    values.put(ISBREAK, 1);
                     sdb.insert(TABLE_LOG_NAME, null, values);
                 }
                 if(id > -1) {
@@ -151,46 +152,13 @@ public class CameAndWentProvider extends ContentProvider {
         }
     }
 
-    public static final String RECREATE_TRIGGER_METHOD = "recreate_trigger_method";
-    public static final String DROP_TRIGGER_METHOD = "drop_trigger_method";
-    public static final String RECREATE_TRIGGER_EXTRA_TIME = "recreate_trigger_extra_time";
-    public static final String RECREATE_TRIGGER_EXTRA_DURATION = "recreate_trigger_EXTRA_DURATION";
-    @Override
-    public Bundle call(String method, String arg, Bundle extras) {
-        if(method.equals(RECREATE_TRIGGER_METHOD)){
-            long time = extras.getLong(RECREATE_TRIGGER_EXTRA_TIME);
-            long duration = extras.getLong(RECREATE_TRIGGER_EXTRA_DURATION);
-            recreateTrigger(db.getWritableDatabase(), time, duration);
-            return null;
-        }
-        else if(method.equals(DROP_TRIGGER_METHOD)){
-            dropTrigger(db.getWritableDatabase());
-        }
-        return super.call(method, arg, extras);
-    }
-
-    public static final String BREAK_TRIGGER = "break_trigger";
-
-    private void recreateTrigger(SQLiteDatabase db, long time, long duration){
-        dropTrigger(db);
-        db.execSQL("CREATE TRIGGER IF NOT EXISTS " + BREAK_TRIGGER
-                + " AFTER INSERT ON " + TABLE_LOG_NAME +
-                " FOR EACH ROW WHEN 0=(SELECT COUNT(*) FROM " + TABLE_LOG_NAME + " AS a WHERE a." + DATE + "=new." + DATE +")" +
-                " BEGIN " +
-                "INSERT INTO " + TABLE_LOG_NAME + " ("+CAME+", " + WENT +", " +ISBREAK + ", " + DATE + ") VALUES (new." + DATE + "+"+time+", new." + DATE + "+"+(time+duration)+", 1, new." + DATE + ");" +
-                " END;");
-    }
-
-    private void dropTrigger(SQLiteDatabase db){
-        db.execSQL("DROP TRIGGER IF EXISTS " + BREAK_TRIGGER);
-    }
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SQLiteDatabase sdb = db.getWritableDatabase();
         int updated;
         switch (uriMatcher.match(uri)){
             case KEY_WENT:
-                 updated = sdb.update(TABLE_LOG_NAME, values, WENT + " = 0", null);
+                 updated = sdb.update(TABLE_LOG_NAME, values, WENT + " = 0 " + selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
@@ -210,7 +178,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 29;
+        private static final int DATABASE_VERSION = 30;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
@@ -218,7 +186,7 @@ public class CameAndWentProvider extends ContentProvider {
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
 
-        private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN (-" + WENT + "-" + CAME +  ") END) AS " + DURATION;
+        private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
         private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
 
 
@@ -254,7 +222,6 @@ public class CameAndWentProvider extends ContentProvider {
         }
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            dropTrigger(db);
             for(int version = oldVersion; version <= newVersion; version++){
                 switch (version){
                     case 16:

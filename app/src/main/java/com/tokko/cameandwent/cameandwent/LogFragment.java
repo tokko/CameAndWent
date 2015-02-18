@@ -233,11 +233,12 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             long cameTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.CAME));
             long wentTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT));
             String wentS = time.format(new Date(wentTime));
+            boolean isbreak = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1;
             if(wentTime <= 0)
                 wentS = "Currently at work";
             ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
-            ((TextView)view.findViewById(R.id.log_details_isbreak)).setText(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1 ? "Break" : "Work");
+            ((TextView)view.findViewById(R.id.log_details_isbreak)).setText((isbreak ? "Break" : "Work") +": " + formatInterval(wentTime-cameTime));
 
             View v1 = view.findViewById(R.id.logentry_deletebutton);
             v1.setOnClickListener(childClickListener);
@@ -258,8 +259,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             }
             final long hr = TimeUnit.MILLISECONDS.toHours(l);
             final long min = TimeUnit.MILLISECONDS.toMinutes(l - TimeUnit.HOURS.toMillis(hr));
-            final long sec = TimeUnit.MILLISECONDS.toSeconds(l - TimeUnit.HOURS.toMillis(hr) - TimeUnit.MINUTES.toMillis(min));
-            return String.format(prefix+"%02d:%02d:%02d", hr, min, sec);
+            return String.format(prefix+"%02d:%02d", hr, min);
         }
     }
 }
