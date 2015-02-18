@@ -57,7 +57,7 @@ public class ClockManager {
         if(this.sp.getBoolean("clockedIn", false)) {
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.WENT, time);
-            context.getContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
+            context.getContentResolver().update(CameAndWentProvider.URI_WENT, cv, CameAndWentProvider.WENT + " = 0 " , null);
             if (defaultPrefs.getBoolean("soundmode", false)) {
                 am.setRingerMode(defaultPrefs.getInt(PREV_SOUNDMODE_KEY, AudioManager.RINGER_MODE_NORMAL));
             }

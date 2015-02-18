@@ -158,7 +158,7 @@ public class CameAndWentProvider extends ContentProvider {
         int updated;
         switch (uriMatcher.match(uri)){
             case KEY_WENT:
-                 updated = sdb.update(TABLE_LOG_NAME, values, WENT + " = 0 " + selection, selectionArgs);
+                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);

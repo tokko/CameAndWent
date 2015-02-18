@@ -9,6 +9,7 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -104,12 +105,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if(loader.getId() == -1) {
-            if (cursor.getCount() > 0) {
-                int pos = cursor.getPosition();
-                cursor.moveToLast();
-                tb.setChecked(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0);
-                cursor.moveToPosition(pos);
-            }
+            tb.setChecked(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("clockedIn", false));
             adapter.setGroupCursor(cursor);
         }
         else{
@@ -234,7 +230,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             long wentTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT));
             String wentS = time.format(new Date(wentTime));
             boolean isbreak = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1;
-            if(wentTime <= 0)
+            if(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("clockedIn", false))
                 wentS = "Currently at work";
             ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
