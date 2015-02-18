@@ -3,6 +3,11 @@ package com.tokko.cameandwent.cameandwent;
 import java.util.Calendar;
 public class TimeConverter {
 
+    public static long hourAndMinuteToMillis(String time){
+        String[] splits = time.split(":");
+        return hourAndMinuteToMillis(Integer.valueOf(splits[0]), Integer.valueOf(splits[1]));
+    }
+
     public static long hourAndMinuteToMillis(int hour, int minute){
         Calendar c = Calendar.getInstance();
         c.set(Calendar.MILLISECOND, 0);

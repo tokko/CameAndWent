@@ -18,6 +18,7 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onStop() {
         getActivity().sendBroadcast(new Intent(getActivity(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
+      /*
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         if(sp.getBoolean("breaks_enabled", false)) {
             long start = TimeConverter.timeToLong(sp.getString("average_break_start", "0:0"));
@@ -29,6 +30,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
         else
             getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.DROP_TRIGGER_METHOD, null, null);
+        */
         super.onStop();
     }
 

@@ -4,12 +4,14 @@ import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 public class CameAndWentProvider extends ContentProvider {
 
@@ -105,8 +107,16 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_CAME:
                 long came = values.getAsLong(CAME);
-                values.put(DATE, TimeConverter.extractDate(came));
+                long date = TimeConverter.extractDate(came);
+                values.put(DATE, date);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+                if(sp.getBoolean("breaks_enabled", false) && query(URI_GET_DETAILS, null, String.format("%S=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount() == 1){
+                    values.clear();
+                    values.put(CAME, TimeConverter.hourAndMinuteToMillis(sp.getString("average_break_start", "0:0")));
+                    values.put(WENT, values.getAsLong(CAME) + TimeConverter.timeToLong(sp.getString("average_break_start", "0:0")));
+                    sdb.insert(TABLE_LOG_NAME, null, values);
+                }
                 if(id > -1) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
