@@ -69,11 +69,16 @@ public class ClockManager {
     }
 
     private void postNotification(int id, String s) {
+        if(!defaultPrefs.getBoolean("notifications_enabled", false)) return;
         Notification.Builder nb = new Notification.Builder(context);
-        nb.setVibrate(new long[]{0, 1000});
+        if(defaultPrefs.getBoolean("notifications_vibrate", false))
+            nb.setVibrate(new long[]{0, 1000});
+        else
+            nb.setVibrate(new long[]{0});
         nb.setContentTitle(s);
         nb.setSmallIcon(R.drawable.ic_launcher);
-        nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        if(defaultPrefs.getBoolean("notifications_sound", false))
+            nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT));
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(id, nb.build());

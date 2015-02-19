@@ -3,26 +3,8 @@ package com.tokko.cameandwent.cameandwent;
 import java.util.Calendar;
 public class TimeConverter {
 
-    public static long hourAndMinuteToMillis(long date, String time){
-        String[] splits = time.split(":");
-        return hourAndMinuteToMillis(date, Integer.valueOf(splits[0]), Integer.valueOf(splits[1]));
-    }
-
-    public static long hourAndMinuteToMillis(int hour, int minute) {
-        return hourAndMinuteToMillis(System.currentTimeMillis(), hour, minute);
-    }
-
-    public static long timeIntervalAsLong(String time){
-        String[] split = time.split(":");
-        return timeIntervalAsLong(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
-    }
-
-    public static long timeIntervalAsLong(int hour, int minute){
-        return hour*60*60*1000 + minute*60*1000;
-    }
-    public static long hourAndMinuteToMillis(long date, int hour, int minute){
+    public static long hourAndMinuteToMillis(int hour, int minute){
         Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(date);
         c.set(Calendar.MILLISECOND, 0);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.HOUR_OF_DAY, hour);
@@ -52,4 +34,8 @@ public class TimeConverter {
         return c.getTimeInMillis();
     }
 
+
+    public static long weeksToMillis(int weeks){
+        return 7*24*60*60*1000;
+    }
 }

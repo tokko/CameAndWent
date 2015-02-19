@@ -14,7 +14,7 @@ import android.preference.PreferenceManager;
 
 public class CameAndWentProvider extends ContentProvider {
 
-    static final String AUTHORITY = "com.tokko.cameandwent.cameandwent.CameAndWentProvider";
+    private static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
 
     private static final String DATABASE_NAME = "cameandwent";
@@ -92,7 +92,6 @@ public class CameAndWentProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI");
         }
     }
-
 
 
     @Override
@@ -178,7 +177,6 @@ public class CameAndWentProvider extends ContentProvider {
         }
     }
 
-
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
         private static final int DATABASE_VERSION = 31;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
@@ -190,8 +188,6 @@ public class CameAndWentProvider extends ContentProvider {
 
         private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
         private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
-
-
 
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
