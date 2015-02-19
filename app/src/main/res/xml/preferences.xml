@@ -1,7 +1,7 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference
+    <CheckBoxPreference
         android:key="enabled"
         android:title="Enabled"
         android:defaultValue="true" />
@@ -41,7 +41,7 @@
         android:key="audio"
         android:defaultValue="true" >
         
-        <SwitchPreference
+        <CheckBoxPreference
             android:defaultValue="true"
             android:title="Sound mode"
             android:dependency="audio"
@@ -49,14 +49,14 @@
             android:summaryOn="Sound mode mode will be altered"
             android:key="soundmode" />
 
-        <SwitchPreference
+        <CheckBoxPreference
             android:dependency="soundmode"
             android:title="Silent"
             android:defaultValue="true"
             android:key="silent"
             android:summaryOn="Device will be silent at work"
             android:summaryOff="Device will not be silent at work"/>
-        <SwitchPreference
+        <CheckBoxPreference
             android:dependency="silent"
             android:key="vibrate"
             android:title="Vibrate"
@@ -67,13 +67,36 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="notifications"
+        android:dependency="enabled"
+        android:title="Notifications" >
+
+        <CheckBoxPreference
+            android:key="notifications_enabled"
+            android:title="Notify"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="notifications_enabled"
+            android:key="notifications_sound"
+            android:title="Play sound"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="notifications_enabled"
+            android:key="notifications_vibrate"
+            android:title="Vibrate"
+            android:defaultValue="true" />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:dependency="enabled"
         android:defaultValue="true"
         android:enabled="false"
         android:title="Reminder">
 
 
-        <SwitchPreference
+        <CheckBoxPreference
             android:defaultValue="true"
             android:title="Reminder"
             android:summaryOff="Reminders are disabled"
@@ -93,7 +116,7 @@
             android:dependency="reminders"
             android:title="Reminder day"/>
 
-        <SwitchPreference
+        <CheckBoxPreference
             android:defaultValue="true"
             android:title="Vibrate"
             android:key="vibrate"
