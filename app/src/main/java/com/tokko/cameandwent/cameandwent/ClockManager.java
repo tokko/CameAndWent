@@ -37,6 +37,7 @@ public class ClockManager {
     }
 
     public void clockIn(long time) {
+        if(!defaultPrefs.getBoolean("enabled", false)) return;
         if(!this.sp.getBoolean(PREF_CLOCKED_IN, false)) {
             this.sp.edit().putBoolean(PREF_CLOCKED_IN, true).commit();
             ContentValues cv = new ContentValues();

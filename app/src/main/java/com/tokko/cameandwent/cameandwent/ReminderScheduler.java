@@ -11,7 +11,9 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class ReminderScheduler extends BroadcastReceiver{
     public static final String ACTION_WEEKLY_REMINDER = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_REMINDER";
@@ -23,23 +25,24 @@ public class ReminderScheduler extends BroadcastReceiver{
         this.context = context;
     }
 
-    public void scheduleWeeklyReminder(SharedPreferences sp){
+    public void scheduleWeeklyReminder(SharedPreferences defaultPrefs){
+        if(!defaultPrefs.getBoolean("enabled", false)) return;
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_WEEKLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        if(sp.getBoolean("weekly_reminders", false)) {
-            if(!sp.getString("weekly_reminder_time", "").contains(":")) return;
-            Calendar c = setTimeAndMinute(sp.getString("weekly_reminder_time", "0:0"));
-            int weekday = Integer.valueOf(sp.getString("weekly_reminder_day", "0"));
+        if(defaultPrefs.getBoolean("weekly_reminders", false)) {
+            if(!defaultPrefs.getString("weekly_reminder_time", "").contains(":")) return;
+            Calendar c = setTimeAndMinute(defaultPrefs.getString("weekly_reminder_time", "0:0"));
+            int weekday = Integer.valueOf(defaultPrefs.getString("weekly_reminder_day", "0"));
             c.set(Calendar.DAY_OF_WEEK, weekday);
             Calendar now = Calendar.getInstance();
             while (c.before(now)) c.add(Calendar.WEEK_OF_YEAR, 1);
             long time = c.getTimeInMillis();
+            String timeS = new SimpleDateFormat("yyy-MM-dd HH:mm").format(new Date(c.getTimeInMillis()));
             am.set(AlarmManager.RTC, time, pi);
         }
         else{
             am.cancel(pi);
         }
-        onReceive(context, new Intent().setAction(ACTION_WEEKLY_REMINDER));
     }
 
     public void scheduleWeeklyReminder(){

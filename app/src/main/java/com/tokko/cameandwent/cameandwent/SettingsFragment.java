@@ -3,6 +3,7 @@ package com.tokko.cameandwent.cameandwent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 
 public class SettingsFragment extends PreferenceFragment {
     public SettingsFragment() {
