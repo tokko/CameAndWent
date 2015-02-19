@@ -13,12 +13,12 @@ android {
         }
     }
         defaultConfig {
-        applicationId "com.tokko.cameandwent.cameandwent"
-        minSdkVersion 18
-        targetSdkVersion 21
-        versionCode 4
-        versionName "0.4"
-    }
+            applicationId "com.tokko.cameandwent.cameandwent"
+            minSdkVersion 18
+            targetSdkVersion 21
+            versionCode 4
+            versionName "0.4"
+        }
     buildTypes {
         release {
             signingConfig signingConfigs.release

@@ -14,7 +14,7 @@ import java.util.Calendar;
 
 public class CameAndWentProvider extends ContentProvider {
 
-    private static final String AUTHORITY = "com.tokko.cameandwent.cameandwent.CameAndWentProvider";
+    private static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
 
     private static final String DATABASE_NAME = "cameandwent";

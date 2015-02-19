@@ -40,7 +40,7 @@
         </receiver>
 
         <provider
-            android:authorities="com.tokko.cameandwent.cameandwent.CameAndWentProvider"
+            android:authorities="${applicationId}.CameAndWentProvider"
             android:name=".CameAndWentProvider"
             android:exported="false" />
 
