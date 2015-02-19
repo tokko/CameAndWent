@@ -43,6 +43,9 @@ public class LocationPreference extends Preference implements Preference.OnPrefe
             Toast.makeText(getContext(), String.format("Longitude: %f\nLatitude %f", mLastLocation.getLongitude(), mLastLocation.getLatitude()), Toast.LENGTH_SHORT).show();;
             persistString(mLastLocation.getLatitude() + ";" + mLastLocation.getLongitude());
         }
+        else
+            Toast.makeText(getContext(), "Location is null", Toast.LENGTH_SHORT).show();
+
 
 
     }

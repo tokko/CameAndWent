@@ -1,16 +1,13 @@
 package com.tokko.cameandwent.cameandwent;
 
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
 import android.test.ProviderTestCase2;
 import android.test.RenamingDelegatingContext;
-import android.test.mock.MockContext;
 
 import java.util.ArrayList;
 import java.util.Calendar;
