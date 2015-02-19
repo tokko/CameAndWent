@@ -92,36 +92,41 @@
     <PreferenceCategory
         android:dependency="enabled"
         android:defaultValue="true"
-        android:enabled="false"
-        android:title="Reminder">
-
+        android:key="weekly_reminders_container"
+        android:title="Reminders">
 
         <CheckBoxPreference
+            android:dependency="weekly_reminders_container"
             android:defaultValue="true"
-            android:title="Reminder"
-            android:summaryOff="Reminders are disabled"
-            android:summaryOn="Reminders are enabled"
-            android:key="reminders"/>
+            android:title="Weekly Reminder"
+            android:summaryOff="Weekly reminders are disabled"
+            android:summaryOn="Weekly reminders are enabled"
+            android:key="weekly_reminders"/>
 
         <com.tokko.cameandwent.cameandwent.TimePreference
-            android:key="reminder_time"
-            android:dependency="reminders"
+            android:key="weekly_reminder_time"
+            android:dependency="weekly_reminders"
             android:title="Reminder time"/>
 
         <ListPreference
             android:defaultValue="0"
-            android:key="reminder_day"
+            android:key="weekly_reminder_day"
             android:entries="@array/weekdays"
             android:entryValues="@array/weekday_numbers"
-            android:dependency="reminders"
+            android:dependency="weekly_reminders"
             android:title="Reminder day"/>
 
         <CheckBoxPreference
             android:defaultValue="true"
-            android:title="Vibrate"
-            android:key="vibrate"
-            android:dependency="reminders" />
+            android:title="Sound"
+            android:key="weekly_reminder_sound"
+            android:dependency="weekly_reminders" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="Vibrate"
+            android:key="weekly_reminder_vibrate"
+            android:dependency="weekly_reminders" />
         </PreferenceCategory>
 
 </PreferenceScreen>

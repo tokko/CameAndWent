@@ -57,12 +57,16 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
         if (id == R.id.action_settings) {
             showSettings();
             //getActionBar().setDisplayShowHomeEnabled(true);
+            return true;
         }
         if(id == android.R.id.home){
             getFragmentManager().popBackStack();
             //noinspection ConstantConditions
             getActionBar().setDisplayHomeAsUpEnabled(false);
-
+            return true;
+        }
+        if(id == R.id.show_summary){
+            SummaryFragment.newInstance().show(getSupportFragmentManager(), "summary");
         }
 
         return super.onOptionsItemSelected(item);

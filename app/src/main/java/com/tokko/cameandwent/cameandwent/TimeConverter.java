@@ -23,4 +23,8 @@ public class TimeConverter {
         c.setTimeInMillis(millis);
         return c.get(Calendar.MINUTE);
     }
+
+    public static long weeksToMillis(int weeks){
+        return 7*24*60*60*1000;
+    }
 }
