@@ -239,7 +239,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
             String duration = formatInterval(durationTime);
             //if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
-            if(getActivity().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false))
+            if(durationTime < 0 && getActivity().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false))
                 duration = "currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + date);
             ((TextView)view.findViewById(android.R.id.text2)).setText("Duration: " + duration);
