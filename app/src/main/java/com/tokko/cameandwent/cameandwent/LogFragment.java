@@ -204,8 +204,6 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         }
     }
 
-
-
     private class LogCursorTreeAdapter extends CursorTreeAdapter{
         private final SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
         private final SimpleDateFormat time = new SimpleDateFormat("HH:mm");
@@ -223,8 +221,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             Bundle b = new Bundle();
             long date = groupCursor.getLong(groupCursor.getColumnIndex(CameAndWentProvider.DATE));
             b.putLong(CameAndWentProvider.DATE, date);
-            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
-            return c;
+            return context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
         }
 
         @Override
@@ -238,7 +235,6 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
             String date = sdf.format(new Date(cameTime));
             long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
             String duration = formatInterval(durationTime);
-            //if(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION)) <= 0)
             if(durationTime < 0 && getActivity().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false))
                 duration = "currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + date);
