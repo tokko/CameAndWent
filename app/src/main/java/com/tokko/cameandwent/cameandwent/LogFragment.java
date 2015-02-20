@@ -1,11 +1,13 @@
 package com.tokko.cameandwent.cameandwent;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -81,7 +83,23 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.clear_log:
-                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+                AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
+                adb.setTitle("Clear log");
+                adb.setMessage("Are you sure??");
+                adb.setPositiveButton("I am sure!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+                        dialog.dismiss();
+                    }
+                });
+                adb.setNegativeButton("No :(", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                adb.show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
