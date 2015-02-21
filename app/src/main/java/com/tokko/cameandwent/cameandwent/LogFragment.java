@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -71,6 +72,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public void onResume() {
         super.onResume();
+        tb.setEnabled(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("enabled", false));
         /*
         Cursor c = getActivity().getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=0", CameAndWentProvider.ISBREAK), null, CameAndWentProvider.CAME + " ASC");
         if(c.moveToLast())
