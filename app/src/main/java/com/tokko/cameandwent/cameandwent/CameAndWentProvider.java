@@ -16,7 +16,7 @@ import android.preference.PreferenceManager;
 import java.util.Calendar;
 
 public class CameAndWentProvider extends ContentProvider {
-    private static final int WEEKS_BACK = 1;
+    private static final int WEEKS_BACK = 8;
     private static final int TIME_INTERVAL_HOURS = 4;
     private static final int TIMES_PER_DAY = 2;
 
@@ -94,9 +94,11 @@ public class CameAndWentProvider extends ContentProvider {
     private void seed(){
         delete(URI_DELETE_ALL, null, null);
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.WEEK_OF_YEAR, c.get(Calendar.WEEK_OF_YEAR) - WEEKS_BACK);
+        c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK);
         c.set(Calendar.MINUTE, 0);
-        for (int i = 0; i < WEEKS_BACK*7; i++){
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        for (int i = 0; i <= WEEKS_BACK*7; i++){
             c.set(Calendar.HOUR_OF_DAY, 8);
             for(int j = 0; j < TIMES_PER_DAY; j++) {
                 ContentValues cv = new ContentValues();
@@ -119,7 +121,7 @@ public class CameAndWentProvider extends ContentProvider {
             cv.put(CameAndWentProvider.WENT, c.getTimeInMillis());
             update(CameAndWentProvider.URI_WENT, cv, String.format("%s=?", ID), new String[]{String.valueOf(id)});
 
-            c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 1);
+            c.add(Calendar.DAY_OF_YEAR, 1);
         }
     }
 
