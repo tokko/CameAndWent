@@ -85,9 +85,8 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
                     .build();
             googleApiClient.connect();
         }
-        else
-            Toast.makeText(context, "Incomplete settings, geofence creation failed", Toast.LENGTH_SHORT).show();
     }
+
     @Override
     public void onConnected(Bundle bundle) {
         LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
