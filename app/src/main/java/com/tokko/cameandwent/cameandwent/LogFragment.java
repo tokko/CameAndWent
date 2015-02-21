@@ -73,12 +73,6 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
     public void onResume() {
         super.onResume();
         tb.setEnabled(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("enabled", false));
-        /*
-        Cursor c = getActivity().getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=0", CameAndWentProvider.ISBREAK), null, CameAndWentProvider.CAME + " ASC");
-        if(c.moveToLast())
-            tb.setChecked(c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)) == 0);
-        c.close();
-        */
     }
 
     @Override
