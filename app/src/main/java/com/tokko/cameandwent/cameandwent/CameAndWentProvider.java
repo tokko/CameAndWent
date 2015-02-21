@@ -10,11 +10,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-public class CameAndWentProvider extends ContentProvider {
+import java.util.Calendar;
 
-    private static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".CameAndWentProvider";
+public class CameAndWentProvider extends ContentProvider {
+    private static final int WEEKS_BACK = 1;
+    private static final int TIME_INTERVAL_HOURS = 4;
+    private static final int TIMES_PER_DAY = 2;
+
+
+    static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
 
     private static final String DATABASE_NAME = "cameandwent";
@@ -73,6 +80,47 @@ public class CameAndWentProvider extends ContentProvider {
     public boolean onCreate() {
         db = new DatabaseOpenHelper(getContext());
         return true;
+    }
+
+    public static final String SEED_METHOD = "seed";
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+        if(method.equals(SEED_METHOD)){
+            seed();
+        }
+        return super.call(method, arg, extras);
+    }
+
+    private void seed(){
+        delete(URI_DELETE_ALL, null, null);
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.WEEK_OF_YEAR, c.get(Calendar.WEEK_OF_YEAR) - WEEKS_BACK);
+        c.set(Calendar.MINUTE, 0);
+        for (int i = 0; i < WEEKS_BACK*7; i++){
+            c.set(Calendar.HOUR_OF_DAY, 8);
+            for(int j = 0; j < TIMES_PER_DAY; j++) {
+                ContentValues cv = new ContentValues();
+                if(j == 1)
+                    c.add(Calendar.HOUR_OF_DAY, TIME_INTERVAL_HOURS);
+                cv.put(CameAndWentProvider.CAME, c.getTimeInMillis());
+                long id = ContentUris.parseId(insert(CameAndWentProvider.URI_CAME, cv));
+                c.add(Calendar.HOUR_OF_DAY, TIME_INTERVAL_HOURS);
+                cv.clear();
+                cv.put(CameAndWentProvider.WENT, c.getTimeInMillis());
+                update(CameAndWentProvider.URI_WENT, cv, String.format("%s=?", ID), new String[]{String.valueOf(id)});
+            }
+            //break 1h 12-13
+            ContentValues cv = new ContentValues();
+            c.set(Calendar.HOUR_OF_DAY, 12);
+            cv.put(CameAndWentProvider.CAME, c.getTimeInMillis());
+            cv.put(CameAndWentProvider.ISBREAK, 1);
+            long id = ContentUris.parseId(insert(CameAndWentProvider.URI_CAME, cv));
+            cv.clear();
+            cv.put(CameAndWentProvider.WENT, c.getTimeInMillis());
+            update(CameAndWentProvider.URI_WENT, cv, String.format("%s=?", ID), new String[]{String.valueOf(id)});
+
+            c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 1);
+        }
     }
 
     @Override

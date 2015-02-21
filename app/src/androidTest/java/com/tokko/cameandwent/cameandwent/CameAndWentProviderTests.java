@@ -15,10 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvider>{
-    private static final int WEEKS_BACK = 1;
-    private static final int TIME_INTERVAL_HOURS = 4;
-    private static final int TIMES_PER_DAY = 2;
-
     private int numDetailEntries = 0;
     private int numBreaks = 0;
     private int numNoBreaks = 0;
@@ -112,41 +108,6 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-       // CustomContext mockContext = new CustomContext(this);
-        getMockContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.WEEK_OF_YEAR, c.get(Calendar.WEEK_OF_YEAR) - WEEKS_BACK);
-        c.set(Calendar.MINUTE, 0);
-        for (int i = 0; i < WEEKS_BACK*7; i++){
-            c.set(Calendar.HOUR_OF_DAY, 8);
-            for(int j = 0; j < TIMES_PER_DAY; j++) {
-                ContentValues cv = new ContentValues();
-                if(j == 1)
-                    increaseCalendarByHour(c, TIME_INTERVAL_HOURS);
-                cv.put(CameAndWentProvider.CAME, c.getTimeInMillis());
-                getMockContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
-                numDetailEntries++;
-                numNoBreaks++;
-                increaseCalendarByHour(c, TIME_INTERVAL_HOURS);
-                cv.clear();
-                cv.put(CameAndWentProvider.WENT, c.getTimeInMillis());
-                getMockContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
-            }
-            //break 1h 12-13
-            ContentValues cv = new ContentValues();
-            c.set(Calendar.HOUR_OF_DAY, 12);
-            cv.put(CameAndWentProvider.CAME, c.getTimeInMillis());
-            cv.put(CameAndWentProvider.ISBREAK, 1);
-            getMockContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
-            numDetailEntries++;
-            numBreaks++;
-            cv.clear();
-            increaseCalendarByHour(c, 1);
-            cv.put(CameAndWentProvider.WENT, c.getTimeInMillis());
-            getMockContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
-
-            c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) - 1);
-        }
     }
 
 
@@ -184,7 +145,7 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
         ArrayList<Long> dates = new ArrayList<>();
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
             dates.add(c.getLong(c.getColumnIndex(CameAndWentProvider.DATE)));
-        assertEquals(WEEKS_BACK * 7, c.getCount());
+      //  assertEquals(WEEKS_BACK * 7, c.getCount());
         c.close();
     }
 
