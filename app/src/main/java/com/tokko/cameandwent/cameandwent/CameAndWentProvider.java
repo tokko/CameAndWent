@@ -1,9 +1,11 @@
 package com.tokko.cameandwent.cameandwent;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -13,10 +15,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class CameAndWentProvider extends ContentProvider {
-    private static final int WEEKS_BACK = 8;
+    private static final int WEEKS_BACK = 5;
     private static final int TIME_INTERVAL_HOURS = 4;
     private static final int TIMES_PER_DAY = 2;
 
@@ -92,36 +95,38 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private void seed(){
-        delete(URI_DELETE_ALL, null, null);
         Calendar c = Calendar.getInstance();
         c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>(WEEKS_BACK*7+1);
+        ops.add(ContentProviderOperation.newDelete(URI_DELETE_ALL).build());
         for (int i = 0; i <= WEEKS_BACK*7; i++){
+            ContentProviderOperation.Builder builder;
             c.set(Calendar.HOUR_OF_DAY, 8);
             for(int j = 0; j < TIMES_PER_DAY; j++) {
-                ContentValues cv = new ContentValues();
+                builder = ContentProviderOperation.newInsert(URI_CAME);
                 if(j == 1)
                     c.add(Calendar.HOUR_OF_DAY, TIME_INTERVAL_HOURS);
-                cv.put(CameAndWentProvider.CAME, c.getTimeInMillis());
-                long id = ContentUris.parseId(insert(CameAndWentProvider.URI_CAME, cv));
+                builder.withValue(CameAndWentProvider.CAME, c.getTimeInMillis());
                 c.add(Calendar.HOUR_OF_DAY, TIME_INTERVAL_HOURS);
-                cv.clear();
-                cv.put(CameAndWentProvider.WENT, c.getTimeInMillis());
-                update(CameAndWentProvider.URI_WENT, cv, String.format("%s=?", ID), new String[]{String.valueOf(id)});
+                builder.withValue(CameAndWentProvider.WENT, c.getTimeInMillis());
+                ops.add(builder.build());
             }
             //break 1h 12-13
-            ContentValues cv = new ContentValues();
+            builder = ContentProviderOperation.newInsert(URI_CAME);
             c.set(Calendar.HOUR_OF_DAY, 12);
-            cv.put(CameAndWentProvider.CAME, c.getTimeInMillis());
-            cv.put(CameAndWentProvider.ISBREAK, 1);
-            long id = ContentUris.parseId(insert(CameAndWentProvider.URI_CAME, cv));
-            cv.clear();
-            cv.put(CameAndWentProvider.WENT, c.getTimeInMillis());
-            update(CameAndWentProvider.URI_WENT, cv, String.format("%s=?", ID), new String[]{String.valueOf(id)});
-
+            builder.withValue(CameAndWentProvider.CAME, c.getTimeInMillis());
+            builder.withValue(CameAndWentProvider.ISBREAK, 1);
+            builder.withValue(CameAndWentProvider.WENT, c.getTimeInMillis());
+            ops.add(builder.build());
             c.add(Calendar.DAY_OF_YEAR, 1);
+        }
+        try {
+            applyBatch(ops);
+        } catch (OperationApplicationException e) {
+            e.printStackTrace();
         }
     }
 
