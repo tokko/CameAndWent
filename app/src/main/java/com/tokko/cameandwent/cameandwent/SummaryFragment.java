@@ -23,11 +23,20 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     private static final String EXTRA_MONTHLY = "extra_monthly";
     private SummaryCursorAdapter adapter;
     private ListView listView;
+    private boolean monthly;
 
 
     public static SummaryFragment newInstance() {
         SummaryFragment fragment = new SummaryFragment();
         Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static SummaryFragment newMonthlyInstance(){
+        SummaryFragment fragment = new SummaryFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(EXTRA_MONTHLY, true);
         fragment.setArguments(args);
         return fragment;
     }
@@ -38,6 +47,18 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new SummaryCursorAdapter(getActivity());
+        if(savedInstanceState != null){
+            monthly = savedInstanceState.getBoolean(EXTRA_MONTHLY, false);
+        }
+        else if(getArguments() != null){
+            monthly = getArguments().getBoolean(EXTRA_MONTHLY, false);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(EXTRA_MONTHLY, monthly);
     }
 
     @Override
