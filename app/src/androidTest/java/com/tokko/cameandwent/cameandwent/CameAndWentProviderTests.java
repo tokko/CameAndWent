@@ -18,6 +18,7 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     private int numDetailEntries = 0;
     private int numBreaks = 0;
     private int numNoBreaks = 0;
+    private CameAndWentProvider provider;
 
     public CameAndWentProviderTests() {
         super(CameAndWentProvider.class, CameAndWentProvider.AUTHORITY);
@@ -108,6 +109,8 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+      // provider = new CameAndWentProvider(new CustomContext(getContext()));
+        provider.call(CameAndWentProvider.SEED_METHOD, null, null);
     }
 
 
@@ -121,12 +124,12 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     }
 
     public void testCame(){
-        Cursor pre = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        Cursor pre = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
         ContentValues cv = new ContentValues();
         cv.put(CameAndWentProvider.CAME, System.currentTimeMillis());
-        Uri  postInsertUri = getMockContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+        Uri  postInsertUri = provider.insert(CameAndWentProvider.URI_CAME, cv);
         assertTrue(-1 != ContentUris.parseId(postInsertUri));
-        Cursor post = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        Cursor post = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
         assertEquals(pre.getCount()+1, post.getCount());
         pre.close();
         post.close();
@@ -136,12 +139,12 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
         testCame();
         ContentValues cv = new ContentValues();
         cv.put(CameAndWentProvider.WENT, System.currentTimeMillis());
-        int updated = getMockContentResolver().update(CameAndWentProvider.URI_WENT, cv, null, null);
+        int updated = provider.update(CameAndWentProvider.URI_WENT, cv, null, null);
         assertEquals(1, updated);
     }
 
     public void testGetEntries(){
-        Cursor c = getMockContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        Cursor c = provider.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         ArrayList<Long> dates = new ArrayList<>();
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
             dates.add(c.getLong(c.getColumnIndex(CameAndWentProvider.DATE)));
@@ -150,7 +153,7 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     }
 
     public void testGetDetails(){
-        Cursor c = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        Cursor c = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
         assertNotNull(c);
         assertEquals(numDetailEntries, c.getCount());
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
@@ -162,8 +165,8 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
             assertEquals(date, TimeConverter.extractDate(went));
         }
         c.close();
-        Cursor noBreak = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
-        Cursor isBreak = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(1)}, null);
+        Cursor noBreak = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
+        Cursor isBreak = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(1)}, null);
         assertEquals(numNoBreaks, noBreak.getCount());
         assertEquals(numBreaks, isBreak.getCount());
         noBreak.close();
@@ -171,12 +174,12 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     }
 
     public void testDeleteDetail(){
-        int deleted = getMockContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+        int deleted = provider.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
         assertEquals(numDetailEntries, deleted);
     }
 
     public void testUpdateEntry(){
-        Cursor toEdit = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        Cursor toEdit = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
         assertNotNull(toEdit);
         assertTrue(toEdit.moveToLast());
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
@@ -187,10 +190,10 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
         ContentValues cv = new ContentValues();
         cv.put(CameAndWentProvider.WENT, newWent);
 
-        int updated = getMockContentResolver().update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+        int updated = provider.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
         assertEquals(1, updated);
 
-        Cursor afterUpdate = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        Cursor afterUpdate = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
         assertNotNull(afterUpdate);
         assertEquals(1, afterUpdate.getCount());
         assertTrue(afterUpdate.moveToFirst());
@@ -203,20 +206,20 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
     }
 
     public void testAutomaticBreaks(){
-        getMockContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+        provider.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
         long time = 1000*60*60*12;
         long dTime = TimeConverter.extractDate(System.currentTimeMillis())+1000*60*60*12;
         long duration = 1000*60*30;
-       // getMockContentResolver().call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.DROP_TRIGGER_METHOD, null, null);
+       // provider.call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.DROP_TRIGGER_METHOD, null, null);
 
         ContentValues cv = new ContentValues();
         long came = System.currentTimeMillis();
         cv.put(CameAndWentProvider.CAME, came);
-        getMockContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+        provider.insert(CameAndWentProvider.URI_CAME, cv);
 
-        Cursor c = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(System.currentTimeMillis()))},  CameAndWentProvider.CAME + " DESC");
+        Cursor c = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(System.currentTimeMillis()))},  CameAndWentProvider.CAME + " DESC");
 
-      //  Cursor c = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, CameAndWentProvider.CAME + " ASC");
+      //  Cursor c = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, CameAndWentProvider.CAME + " ASC");
         assertNotNull(c);
         assertEquals(2, c.getCount());
         assertTrue(c.moveToFirst());
@@ -228,11 +231,34 @@ public class CameAndWentProviderTests extends ProviderTestCase2<CameAndWentProvi
         assertEquals(dTime, c.getLong(c.getColumnIndex(CameAndWentProvider.CAME)));
         assertEquals(dTime+duration, c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)));
 
-        getMockContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+        provider.insert(CameAndWentProvider.URI_CAME, cv);
         c.close();
-        c = getMockContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(System.currentTimeMillis()))},  CameAndWentProvider.CAME + " DESC");
+        c = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(System.currentTimeMillis()))},  CameAndWentProvider.CAME + " DESC");
         assertNotNull(c);
         assertEquals(3, c.getCount());
         c.close();
+    }
+
+    public void testCreateMonthlySummaryView(){
+        Cursor c = provider.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, null);
+        assertTrue(c.getCount() > 0);
+        String[] names = c.getColumnNames();
+        assertEquals(3, names.length);
+        assertTrue(contains(names, CameAndWentProvider.ID, CameAndWentProvider.WEEK_OF_YEAR, CameAndWentProvider.DURATION));
+        c.close();
+    }
+
+    @SafeVarargs
+    private final <T> boolean contains(T[] arr, T... elems){
+        for(T t : elems)
+            if(contains(arr, t)) return true;
+        return false;
+    }
+
+    private <T> boolean contains(T[] arr, T elem){
+        for(T t : arr)
+            if(t.equals(elem))
+                return true;
+        return false;
     }
 }
