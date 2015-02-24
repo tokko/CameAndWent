@@ -31,11 +31,13 @@ public class CameAndWentProvider extends ContentProvider {
 
     private static final String TABLE_LOG_NAME = "cameandwent";
     private static final String VIEW_DURATION = "durations";
+    private static final String VIEW_MONTHLY_SUMMARY = "monthlysummar";
 
     public static final String ID = "_id";
     public static final String CAME = "came";
     public static final String WENT = "went";
     public static final String ISBREAK = "isbreak";
+    public static final String WEEK_OF_YEAR = "weekofyear";
 
     public static final String DATE = "date";
     public static final String DURATION = "duration";
@@ -47,6 +49,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_GET_DETAILS = "ACTION_GET_DETAILS";
     private static final String ACTION_DELETE_DETAIL = "ACTION_DELETE_DETAIL";
     private static final String ACTION_UPDATE_PARTICULAR_LOG_ENTRY = "ACTION_UPDATE_PARTICULAR_LOG_ENTRY";
+    private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -55,14 +58,16 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_GET_DETAILS = 4;
     private static final int KEY_DELETE_DETAIL = 4;
     private static final int KEY_UPDATE_PARTICULAR_LOG_ENTRY = 5;
+    private static final int KEY_GET_MONTHLY_SUMMARY = 6;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
     public static final Uri URI_GET_LOG_ENTRIES = Uri.parse(URI_TEMPLATE + ACTION_GET_LOG_ENTRIES);
     public static final Uri URI_DELETE_ALL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_ALL);
     public static final Uri URI_GET_DETAILS = Uri.parse(URI_TEMPLATE + ACTION_GET_DETAILS);
-    public static final Uri URI_DELETE_DETAIL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_DETAIL + "/#");
-    public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY + "/#");
+    public static final Uri URI_DELETE_DETAIL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_DETAIL);
+    public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY);
+    public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
 
     private static UriMatcher uriMatcher;
 
@@ -75,10 +80,10 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_GET_DETAILS, KEY_GET_DETAILS);
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_DETAIL, KEY_DELETE_DETAIL);
         uriMatcher.addURI(AUTHORITY, ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
+        uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHLY_SUMMARY, KEY_GET_MONTHLY_SUMMARY);
     }
 
     private DatabaseOpenHelper db;
-
     @Override
     public boolean onCreate() {
         db = new DatabaseOpenHelper(getContext());
@@ -141,6 +146,10 @@ public class CameAndWentProvider extends ContentProvider {
                 return c;
             case KEY_GET_DETAILS:
                 c = sdb.query(TABLE_LOG_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
+                return c;
+            case KEY_GET_MONTHLY_SUMMARY:
+                c = sdb.query(VIEW_MONTHLY_SUMMARY, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             default:
@@ -233,17 +242,20 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 31;
+        private static final int DATABASE_VERSION = 33;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
+                WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 CAME + " INTEGER NOT NULL," +
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
 
         private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
-        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
+        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + WEEK_OF_YEAR + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
 
+        private static final String CREATE_MONTH_SUMMARY_VIEW = "CREATE VIEW " + VIEW_MONTHLY_SUMMARY + " AS SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
+                " FROM " + VIEW_DURATION + " GROUP BY " + WEEK_OF_YEAR;
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -257,22 +269,12 @@ public class CameAndWentProvider extends ContentProvider {
 
 
         private void createDurationView(SQLiteDatabase db) {
-            /*
-            String viewCreateStatement = "CREATE VIEW " + VIEW_DURATION + " AS" +
-                    " SELECT durations."+ID+", durations."+DATE+", (durations." + DURATION + "-breaks." + DURATION + ") AS " + DURATION + " FROM " +
-                    "("+getDurationSelectStatement(false)+") AS durations " +
-                    "join " +
-                    "("+getDurationSelectStatement(true)+") AS breaks " +
-                    "ON durations."+DATE+"=breaks."+DATE+";";
-                    */
+            db.execSQL("DROP VIEW IF EXISTS " + VIEW_MONTHLY_SUMMARY);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
             db.execSQL(CREATE_DURATION_VIEW);
+            db.execSQL(CREATE_MONTH_SUMMARY_VIEW);
         }
 
-        private String getDurationSelectStatement(boolean isBreak){
-            String s = String.format("SELECT " + ID + ", " + DATE + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " WHERE " + ISBREAK + "=%s GROUP BY " + DATE, String.valueOf(isBreak ? 1 : 0));
-            return s;
-        }
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
@@ -283,6 +285,16 @@ public class CameAndWentProvider extends ContentProvider {
                         break;
                     case 19:
                         db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + ISBREAK + " INTEGER NOT NULL DEFAULT 0");
+                        break;
+                    case 32:
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
+                        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+                            ContentValues cv = new ContentValues();
+                            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getLong(c.getColumnIndex(CAME))));
+                            db.update(TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
+                        }
+                        c.close();
                         break;
                 }
             }

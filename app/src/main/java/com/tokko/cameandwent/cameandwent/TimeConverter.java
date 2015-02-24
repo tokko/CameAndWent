@@ -59,4 +59,9 @@ public class TimeConverter {
     }
 
 
+    public static int extractWeek(long time) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(time);
+        return c.get(Calendar.WEEK_OF_YEAR);
+    }
 }
