@@ -103,6 +103,7 @@
     <PreferenceCategory
         android:dependency="enabled"
         android:defaultValue="true"
+        android:enabled="false"
         android:key="weekly_reminders_container"
         android:title="Reminders">
 
