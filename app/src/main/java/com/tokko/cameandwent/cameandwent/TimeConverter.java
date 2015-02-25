@@ -3,11 +3,11 @@ package com.tokko.cameandwent.cameandwent;
 import java.util.Calendar;
 public class TimeConverter {
 
-    public static long hourAndMinuteToMillis(long came, String time) {
+    public static long hourAndMinuteToMillis(long date, String time) {
         String[] split = time.split(":");
         int hour = Integer.valueOf(split[0]);
         int minute = Integer.valueOf(split[1]);
-        return hourAndMinuteToMillis(came, hour, minute);
+        return hourAndMinuteToMillis(date, hour, minute);
     }
 
     public static long hourAndMinuteToMillis(int hour, int minute) {
@@ -45,11 +45,9 @@ public class TimeConverter {
         return c.getTimeInMillis();
     }
 
-
-    public static long weeksToMillis(int weeks){
-        return 7*24*60*60*1000;
+    public static long weeksToMillis(long weeks){
+        return weeks*7*24*60*60*1000;
     }
-
 
     public static long timeIntervalAsLong(String time) {
         String[] split = time.split(":");
