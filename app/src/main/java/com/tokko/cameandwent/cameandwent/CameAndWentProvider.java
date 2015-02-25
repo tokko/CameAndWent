@@ -1,11 +1,9 @@
 package com.tokko.cameandwent.cameandwent;
 
 import android.content.ContentProvider;
-import android.content.ContentProviderOperation;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -19,10 +17,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class CameAndWentProvider extends ContentProvider {
-    private static final int WEEKS_BACK = 5;
-    private static final int TIME_INTERVAL_HOURS = 4;
-    private static final int TIMES_PER_DAY = 2;
-
+    static final int WEEKS_BACK = 5;
 
     static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
@@ -102,37 +97,49 @@ public class CameAndWentProvider extends ContentProvider {
     private void seed(){
         Calendar c = Calendar.getInstance();
         c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK);
-        c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MINUTE, 0);
         c.set(Calendar.MILLISECOND, 0);
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>(WEEKS_BACK*7+1);
-        ops.add(ContentProviderOperation.newDelete(URI_DELETE_ALL).build());
-        for (int i = 0; i <= WEEKS_BACK*7; i++){
-            ContentProviderOperation.Builder builder;
+        ArrayList<ContentValues> cvs = new ArrayList<>();
+        for (int i = 1; i <= WEEKS_BACK*7; i++){
+            ContentValues cv = new ContentValues();
+
+            cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
             c.set(Calendar.HOUR_OF_DAY, 8);
-            for(int j = 0; j < TIMES_PER_DAY; j++) {
-                builder = ContentProviderOperation.newInsert(URI_CAME);
-                if(j == 1)
-                    c.add(Calendar.HOUR_OF_DAY, TIME_INTERVAL_HOURS);
-                builder.withValue(CameAndWentProvider.CAME, c.getTimeInMillis());
-                c.add(Calendar.HOUR_OF_DAY, TIME_INTERVAL_HOURS);
-                builder.withValue(CameAndWentProvider.WENT, c.getTimeInMillis());
-                ops.add(builder.build());
-            }
-            //break 1h 12-13
-            builder = ContentProviderOperation.newInsert(URI_CAME);
+            cv.put(CAME, c.getTimeInMillis());
+            c.add(Calendar.HOUR_OF_DAY, 4);
+            cv.put(WENT, c.getTimeInMillis());
+
+            cvs.add(cv);
+            cv = new ContentValues();
+
+            cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
             c.set(Calendar.HOUR_OF_DAY, 12);
-            builder.withValue(CameAndWentProvider.CAME, c.getTimeInMillis());
-            builder.withValue(CameAndWentProvider.ISBREAK, 1);
-            builder.withValue(CameAndWentProvider.WENT, c.getTimeInMillis());
-            ops.add(builder.build());
+            cv.put(CAME, c.getTimeInMillis());
+            c.add(Calendar.HOUR_OF_DAY, 4);
+            cv.put(WENT, c.getTimeInMillis());
+
+            cvs.add(cv);
+            cv = new ContentValues();
+
+            cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
+            c.set(Calendar.HOUR_OF_DAY, 12);
+            cv.put(CAME, c.getTimeInMillis());
+            c.add(Calendar.HOUR_OF_DAY, 1);
+            cv.put(WENT, c.getTimeInMillis());
+            cv.put(ISBREAK, 1);
+
+            cvs.add(cv);
+
             c.add(Calendar.DAY_OF_YEAR, 1);
         }
-        try {
-            applyBatch(ops);
-        } catch (OperationApplicationException e) {
-            e.printStackTrace();
-        }
+        SQLiteDatabase sdb = db.getWritableDatabase();
+        sdb.beginTransaction();
+        sdb.delete(TABLE_LOG_NAME, null, null);
+        for (ContentValues value : cvs)
+            sdb.insert(TABLE_LOG_NAME, null, value);
+        sdb.setTransactionSuccessful();
+        sdb.endTransaction();
     }
 
     @Override
