@@ -155,7 +155,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         public void bindView(View view, Context context, Cursor cursor) {
             int week = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
             int duration = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.DURATION));
-            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%i: %ih", week, duration));
+            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d: %dh", week, duration));
         }
     }
 }

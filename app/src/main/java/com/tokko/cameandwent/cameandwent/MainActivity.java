@@ -67,8 +67,12 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
         }
         if(id == R.id.show_summary){
             SummaryFragment.newInstance().show(getSupportFragmentManager(), "summary");
+            return true;
         }
-
+        if(id == R.id.show_monthly_summary){
+            SummaryFragment.newMonthlyInstance().show(getSupportFragmentManager(), "monthly_summary");
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

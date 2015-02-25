@@ -45,7 +45,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
     }
 
     @Test
-    public void testMonthlySummaryViewCreated(){
+       public void testMonthlySummaryView_Created(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, null);
         assertTrue(c.getCount() > 0);
         String[] names = c.getColumnNames();
@@ -53,7 +53,15 @@ public class CameAndWentProviderRoboTests extends TestCase{
         assertTrue(contains(names, CameAndWentProvider.ID, CameAndWentProvider.WEEK_OF_YEAR, CameAndWentProvider.DURATION));
         c.close();
     }
-
+    @Test
+    public void testMonthlySummaryView_CorrectData(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, null);
+        assertEquals(CameAndWentProvider.WEEKS_BACK, c.getCount());
+        long duration = 7*60*60*1000;
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+            assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
+        }
+    }
     @SafeVarargs
     private final <T> boolean contains(T[] arr, T... elems){
         for(T t : elems)
