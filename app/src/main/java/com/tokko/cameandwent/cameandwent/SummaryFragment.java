@@ -123,10 +123,10 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         public void bindView(View view, Context context, Cursor cursor) {
             String date = sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE))));
             double duration = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION))/(1000D*60D*60D);
-            String durationS = new DecimalFormat("#.00").format(duration);
+            String durationS = new DecimalFormat("#.00").format(duration) + "h";
             if(duration < 0)
                 durationS = "Currently at work";
-            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS + "h");
+            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS);
         }
     }
 }
