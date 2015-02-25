@@ -1,6 +1,7 @@
 package com.tokko.cameandwent.cameandwent;
 
 import android.content.ContentResolver;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 
 import junit.framework.TestCase;
@@ -12,6 +13,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContentResolver;
+import org.robolectric.shadows.ShadowPreferenceManager;
 
 @Config(emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
@@ -28,6 +30,13 @@ public class CameAndWentProviderRoboTests extends TestCase{
         mShadowContentResolver = Robolectric.shadowOf(mContentResolver);
         mProvider.onCreate();
         ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, mProvider);
+        SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
+        sharedPreferences.edit()
+                .putBoolean("breaks_enabled", true)
+                .putString("average_break_start", "12:00")
+                .putString("average_break_duration", "00:30")
+                .apply();
+        mShadowContentResolver.call(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, CameAndWentProvider.SEED_METHOD, null, null);
     }
 
     @Test
