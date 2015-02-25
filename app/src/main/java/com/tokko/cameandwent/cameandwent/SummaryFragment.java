@@ -23,6 +23,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     private static final String EXTRA_MONTHLY = "extra_monthly";
     private SummaryCursorAdapter adapter;
     private ListView listView;
+    private boolean monthly;
 
 
     public static SummaryFragment newInstance() {
@@ -32,12 +33,31 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         return fragment;
     }
 
+    public static SummaryFragment newMonthlyInstance(){
+        SummaryFragment fragment = new SummaryFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(EXTRA_MONTHLY, true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public SummaryFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new SummaryCursorAdapter(getActivity());
+        if(savedInstanceState != null){
+            monthly = savedInstanceState.getBoolean(EXTRA_MONTHLY, false);
+        }
+        else if(getArguments() != null){
+            monthly = getArguments().getBoolean(EXTRA_MONTHLY, false);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(EXTRA_MONTHLY, monthly);
     }
 
     @Override
@@ -50,8 +70,15 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if(!monthly) {
+            getDialog().setTitle("Weekly summary");
+            adapter = new SummaryCursorAdapter(getActivity());
+        }
+        else {
+            getDialog().setTitle("Monthly summary");
+            adapter = new MonthlySummaryAdapter(getActivity());
+        }
         listView.setAdapter(adapter);
-        getDialog().setTitle("Weekly summary");
 
     }
 
@@ -69,11 +96,20 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        CursorLoader cl = new CursorLoader(getActivity());
-        cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
-        cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
-        cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
-        return cl;
+        if(!monthly) {
+            CursorLoader cl = new CursorLoader(getActivity());
+            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+            cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
+            cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
+            return cl;
+        }
+        else{
+            CursorLoader cl = new CursorLoader(getActivity());
+            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+            cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
+            cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
+            return cl;
+        }
     }
 
     @Override
@@ -101,8 +137,25 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
             String date = sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE))));
-            String duration = new DecimalFormat("#.00").format(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION))/(1000D*60D*60D));
-            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + duration + "h");
+            double duration = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION))/(1000D*60D*60D);
+            String durationS = new DecimalFormat("#.00").format(duration) + "h";
+            if(duration < 0)
+                durationS = "Currently at work";
+            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS);
+        }
+    }
+
+    private class MonthlySummaryAdapter extends SummaryCursorAdapter{
+
+        public MonthlySummaryAdapter(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            int week = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
+            int duration = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.DURATION));
+            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%i: %ih", week, duration));
         }
     }
 }

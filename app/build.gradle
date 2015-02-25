@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    buildToolsVersion "20.0.0"
 
     signingConfigs {
         release {
@@ -16,9 +16,8 @@ android {
         applicationId "com.tokko.cameandwent.cameandwent"
         minSdkVersion 18
         targetSdkVersion 21
-        versionCode 7
-        versionName "0.7"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 8
+        versionName "0.8"
     }
     buildTypes {
         release {
@@ -34,50 +33,10 @@ android {
             minifyEnabled false
         }
     }
-    packagingOptions {
-        //exclude 'META-INF/LICENSE'
-      //  exclude 'LICENSE'
-        exclude 'LICENSE.txt'
-       // exclude 'META-INF/LICENSE.txt'
-       // exclude 'META-INF/NOTICE.txt'
-       // exclude 'META-INF/NOTICE'
-    }
 }
-//apply plugin: 'android-unit-test'
 
 dependencies {
-    repositories {
-        mavenCentral()
-    }
-
-    // Espresso
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.0')
-    androidTestCompile('com.android.support.test:testing-support-lib:0.1')
-// Robolectric
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.hamcrest:hamcrest-core:1.1'
-    testCompile 'org.hamcrest:hamcrest-library:1.1'
-    testCompile 'org.hamcrest:hamcrest-integration:1.1'
-
-    // TODO: requires special build of robolectric right now. working on this...
-    testCompile('org.robolectric:robolectric:2.4') {
-        exclude module: 'classworlds'
-        exclude module: 'commons-logging'
-        exclude module: 'httpclient'
-        exclude module: 'maven-artifact'
-        exclude module: 'maven-artifact-manager'
-        exclude module: 'maven-error-diagnostics'
-        exclude module: 'maven-model'
-        exclude module: 'maven-project'
-        exclude module: 'maven-settings'
-        exclude module: 'plexus-container-default'
-        exclude module: 'plexus-interpolation'
-        exclude module: 'plexus-utils'
-        exclude module: 'wagon-file'
-        exclude module: 'wagon-http-lightweight'
-        exclude module: 'wagon-provider-api'
-    }
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.android.gms:play-services:6.5.87'
     compile 'org.roboguice:roboguice:3.0.1'

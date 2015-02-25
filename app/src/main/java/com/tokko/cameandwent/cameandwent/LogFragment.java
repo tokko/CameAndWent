@@ -183,7 +183,7 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
 
     @Override
     public boolean onLongClick(View v) {
-        TimePickerDialog tbd = new TimePickerDialog(getActivity(), this, 0, 0, true);
+        TimePickerDialog tbd = new TimePickerDialog(getActivity(), this, TimeConverter.getHour(), TimeConverter.getMinute(), true);
         tbd.show();
         return true;
     }
