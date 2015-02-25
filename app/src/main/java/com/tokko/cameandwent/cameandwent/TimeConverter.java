@@ -23,6 +23,21 @@ public class TimeConverter {
         return c.getTimeInMillis();
     }
 
+    public static int getHour(){
+        return getFieldFromTime(Calendar.HOUR_OF_DAY, System.currentTimeMillis());
+    }
+
+    private static int getFieldFromTime(int field, long l) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(l);
+        return c.get(field);
+    }
+
+    public static int getMinute(){
+        return getFieldFromTime(Calendar.MINUTE, System.currentTimeMillis());
+    }
+
+
     public static int millisToHours(long millis){
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(millis);
