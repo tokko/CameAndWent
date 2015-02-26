@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowPreferenceManager;
 
-import java.util.ArrayList;
+import java.util.Calendar;
 
 @Config(emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
@@ -45,7 +45,23 @@ public class CameAndWentProviderRoboTests extends TestCase{
     }
 
     @Test
-       public void testMonthlySummaryView_Created(){
+    public void testWeeks(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        Calendar cal = Calendar.getInstance();
+        int[] weeks = new int[52];
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+            long date = c.getLong(c.getColumnIndex(CameAndWentProvider.DATE));
+            int week = c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
+            weeks[week]++;
+            cal.setTimeInMillis(date);
+            assertEquals(week, cal.get(Calendar.WEEK_OF_YEAR));
+        }
+        for (int week : weeks)
+            assertFalse(weeks[week] > 1);
+        c.close();
+    }
+   @Test
+   public void testMonthlySummaryView_Created(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, null);
         assertTrue(c.getCount() > 0);
         String[] names = c.getColumnNames();
@@ -57,9 +73,9 @@ public class CameAndWentProviderRoboTests extends TestCase{
     public void testMonthlySummaryView_CorrectData(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, null);
         assertEquals(CameAndWentProvider.WEEKS_BACK, c.getCount());
-        long duration = 7*60*60*1000;
+        long duration = TimeConverter.hoursAsLong(40);
         int[] weeks = new int[52];
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+        for (c.moveToFirst(); !c.isLast(); c.moveToNext()){
             weeks[c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR))]++;
             assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
         }
@@ -109,10 +125,9 @@ public class CameAndWentProviderRoboTests extends TestCase{
     @Test
     public void testGetEntries(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
-        ArrayList<Long> dates = new ArrayList<>();
+        long duration = TimeConverter.hoursAsLong(8);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
-            dates.add(c.getLong(c.getColumnIndex(CameAndWentProvider.DATE)));
-        //  assertEquals(WEEKS_BACK * 7, c.getCount());
+             assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
         c.close();
     }
 
@@ -137,6 +152,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
         noBreak.close();
         isBreak.close();
     }
+
+
 
     @Test
     public void testDeleteDetail(){

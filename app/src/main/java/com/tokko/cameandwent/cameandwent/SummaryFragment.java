@@ -105,9 +105,9 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
-            cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
-            cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
+            cl.setUri(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY);
+           // cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
+           // cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
             return cl;
         }
     }
@@ -155,7 +155,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         public void bindView(View view, Context context, Cursor cursor) {
             int week = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
             double duration = TimeConverter.longAsHour(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.DURATION)));
-            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d: %02fh", week, duration));
+            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d: %sh", week, new DecimalFormat("##.0").format(duration)));
         }
     }
 }

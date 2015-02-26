@@ -83,6 +83,9 @@ public class TimeConverter {
         return time/(60D*60D*1000D);
     }
 
+    public static int getCurrentWeek(){
+        return extractWeek(System.currentTimeMillis());
+    }
     public static int extractWeek(long time) {
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(time);

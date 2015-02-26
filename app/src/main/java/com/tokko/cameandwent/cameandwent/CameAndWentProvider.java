@@ -98,45 +98,23 @@ public class CameAndWentProvider extends ContentProvider {
     private void seed(){
         Calendar now = Calendar.getInstance();
         Calendar c = Calendar.getInstance();
-        c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK);
+        c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK + 1);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.MILLISECOND, 0);
+        c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         ArrayList<ContentValues> cvs = new ArrayList<>();
-        while(c.get(Calendar.DAY_OF_YEAR) <= now.get(Calendar.DAY_OF_YEAR)){
-            ContentValues cv = new ContentValues();
-
-            cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
-            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
-            c.set(Calendar.HOUR_OF_DAY, 8);
-            cv.put(CAME, c.getTimeInMillis());
-            c.add(Calendar.HOUR_OF_DAY, 4);
-            cv.put(WENT, c.getTimeInMillis());
-
+        for(; c.get(Calendar.DAY_OF_YEAR) <= now.get(Calendar.DAY_OF_YEAR); c.add(Calendar.DAY_OF_YEAR, 1)){
+            if(c.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || c.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) continue;
+            ContentValues cv = buildSeedValues(c, 8, 12);
             cvs.add(cv);
-            cv = new ContentValues();
 
-            cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
-            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
-            c.set(Calendar.HOUR_OF_DAY, 12);
-            cv.put(CAME, c.getTimeInMillis());
-            c.add(Calendar.HOUR_OF_DAY, 4);
-            cv.put(WENT, c.getTimeInMillis());
-
+            cv = buildSeedValues(c, 12, 17);
             cvs.add(cv);
-            cv = new ContentValues();
 
-            cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
-            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
-            c.set(Calendar.HOUR_OF_DAY, 12);
-            cv.put(CAME, c.getTimeInMillis());
-            c.add(Calendar.HOUR_OF_DAY, 1);
-            cv.put(WENT, c.getTimeInMillis());
+            cv = buildSeedValues(c, 12, 13);
             cv.put(ISBREAK, 1);
-
             cvs.add(cv);
-
-            c.add(Calendar.DAY_OF_YEAR, 1);
         }
         SEED_ENTRIES = cvs.size();
         SQLiteDatabase sdb = db.getWritableDatabase();
@@ -146,6 +124,17 @@ public class CameAndWentProvider extends ContentProvider {
             sdb.insert(TABLE_LOG_NAME, null, value);
         sdb.setTransactionSuccessful();
         sdb.endTransaction();
+    }
+
+    private ContentValues buildSeedValues(Calendar c, int firstHour, int secondHour) {
+        ContentValues cv = new ContentValues();
+        cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
+        cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
+        c.set(Calendar.HOUR_OF_DAY, firstHour);
+        cv.put(CAME, c.getTimeInMillis());
+        c.set(Calendar.HOUR_OF_DAY, secondHour);
+        cv.put(WENT, c.getTimeInMillis());
+        return cv;
     }
 
     @Override
@@ -163,7 +152,7 @@ public class CameAndWentProvider extends ContentProvider {
                 return c;
             case KEY_GET_MONTHLY_SUMMARY:
                 c = sdb.rawQuery("SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
-                        " FROM " + VIEW_DURATION + " GROUP BY " + WEEK_OF_YEAR, null);
+                        " FROM " + VIEW_DURATION + " GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", null);
                 //c = sdb.query(VIEW_MONTHLY_SUMMARY, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
