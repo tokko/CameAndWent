@@ -94,14 +94,16 @@ public class CameAndWentProvider extends ContentProvider {
         return super.call(method, arg, extras);
     }
 
+    public static int SEED_ENTRIES = 0;
     private void seed(){
+        Calendar now = Calendar.getInstance();
         Calendar c = Calendar.getInstance();
         c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.MILLISECOND, 0);
         ArrayList<ContentValues> cvs = new ArrayList<>();
-        for (int i = 1; i <= WEEKS_BACK*7; i++){
+        while(c.get(Calendar.DAY_OF_YEAR) <= now.get(Calendar.DAY_OF_YEAR)){
             ContentValues cv = new ContentValues();
 
             cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
@@ -136,6 +138,7 @@ public class CameAndWentProvider extends ContentProvider {
 
             c.add(Calendar.DAY_OF_YEAR, 1);
         }
+        SEED_ENTRIES = cvs.size();
         SQLiteDatabase sdb = db.getWritableDatabase();
         sdb.beginTransaction();
         sdb.delete(TABLE_LOG_NAME, null, null);
@@ -159,7 +162,9 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             case KEY_GET_MONTHLY_SUMMARY:
-                c = sdb.query(VIEW_MONTHLY_SUMMARY, projection, selection, selectionArgs, null, null, sortOrder);
+                c = sdb.rawQuery("SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
+                        " FROM " + VIEW_DURATION + " GROUP BY " + WEEK_OF_YEAR, null);
+                //c = sdb.query(VIEW_MONTHLY_SUMMARY, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             default:

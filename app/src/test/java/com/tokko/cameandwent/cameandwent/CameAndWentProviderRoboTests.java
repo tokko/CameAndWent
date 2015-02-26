@@ -90,7 +90,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         long id = ContentUris.parseId(postInsertUri);
         assertTrue(-1 != id);
         Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
-        assertEquals(pre+2, post.getCount()); //new entry + break
+        assertEquals(pre+1, post.getCount()); //new entry + break
         post.close();
     }
 
@@ -120,7 +120,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
     public void testGetDetails(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
         assertNotNull(c);
-        assertEquals(CameAndWentProvider.WEEKS_BACK*7*3, c.getCount());
+        assertEquals(CameAndWentProvider.SEED_ENTRIES, c.getCount());
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             long came = c.getLong(c.getColumnIndex(CameAndWentProvider.CAME));
             long went = c.getLong(c.getColumnIndex(CameAndWentProvider.WENT));
@@ -132,8 +132,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
         c.close();
         Cursor noBreak = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
         Cursor isBreak = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(1)}, null);
-        assertEquals(CameAndWentProvider.WEEKS_BACK*7*2, noBreak.getCount());
-        assertEquals(CameAndWentProvider.WEEKS_BACK*7, isBreak.getCount());
+        assertEquals(CameAndWentProvider.SEED_ENTRIES*2/3, noBreak.getCount());
+        assertEquals(noBreak.getColumnCount(), noBreak.getCount()/3, isBreak.getCount());
         noBreak.close();
         isBreak.close();
     }
@@ -141,9 +141,9 @@ public class CameAndWentProviderRoboTests extends TestCase{
     @Test
     public void testDeleteDetail(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
-        assertEquals(CameAndWentProvider.WEEKS_BACK*7*3, c.getCount());
+        assertEquals(CameAndWentProvider.SEED_ENTRIES, c.getCount());
         int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
-        assertEquals(CameAndWentProvider.WEEKS_BACK*7*3, deleted);
+        assertEquals(CameAndWentProvider.SEED_ENTRIES, deleted);
     }
 
     @Test
