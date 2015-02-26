@@ -15,10 +15,10 @@ public class TimeConverter {
     }
     public static long hourAndMinuteToMillis(long time, int hour, int minute){
         DateTime dt = new DateTime(time);
-        dt.withMillisOfSecond(0);
-        dt.withSecondOfMinute(0);
-        dt.withHourOfDay(hour);
-        dt.withMinuteOfHour(minute);
+        dt = dt.withMillisOfSecond(0);
+        dt = dt.withSecondOfMinute(0);
+        dt = dt.withHourOfDay(hour);
+        dt = dt.withMinuteOfHour(minute);
         return dt.getMillis();
       }
 
@@ -41,7 +41,7 @@ public class TimeConverter {
 
     public static long extractDate(long time){
         DateTime dt = new DateTime(time);
-        dt.withTime(0, 0, 0, 0);
+        dt = dt.withTime(0, 0, 0, 0);
         return dt.getMillis();
     }
 

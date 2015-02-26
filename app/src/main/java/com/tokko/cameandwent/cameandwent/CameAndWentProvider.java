@@ -13,8 +13,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.DurationFieldType;
+
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class CameAndWentProvider extends ContentProvider {
     static final int WEEKS_BACK = 5;
@@ -96,23 +99,33 @@ public class CameAndWentProvider extends ContentProvider {
 
     public static int SEED_ENTRIES = 0;
     private void seed(){
-        Calendar now = Calendar.getInstance();
+       // Calendar now = Calendar.getInstance();
+        DateTime dtNow = new DateTime();
+
+        DateTime dt = new DateTime();
+        dt = dt.withTime(0, 0, 0, 0);
+        dt = dt.withFieldAdded(DurationFieldType.weeks(), -WEEKS_BACK+1);
+        dt = dt.withDayOfWeek(DateTimeConstants.MONDAY);
+        int currrentDayOfYear = dtNow.getDayOfYear();
+        int dayOfYear = dt.getDayOfYear();
+        /*
         Calendar c = Calendar.getInstance();
         c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK + 1);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.MILLISECOND, 0);
         c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        */
         ArrayList<ContentValues> cvs = new ArrayList<>();
-        for(; c.get(Calendar.DAY_OF_YEAR) <= now.get(Calendar.DAY_OF_YEAR); c.add(Calendar.DAY_OF_YEAR, 1)){
-            if(c.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || c.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) continue;
-            ContentValues cv = buildSeedValues(c, 8, 12);
+        for(; dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
+            if(dt.getDayOfWeek() == DateTimeConstants.SATURDAY || dt.getDayOfWeek() == DateTimeConstants.SUNDAY) continue;
+            ContentValues cv = buildSeedValues(dt, 8, 12);
             cvs.add(cv);
 
-            cv = buildSeedValues(c, 12, 17);
+            cv = buildSeedValues(dt, 12, 17);
             cvs.add(cv);
 
-            cv = buildSeedValues(c, 12, 13);
+            cv = buildSeedValues(dt, 12, 13);
             cv.put(ISBREAK, 1);
             cvs.add(cv);
         }
@@ -126,14 +139,14 @@ public class CameAndWentProvider extends ContentProvider {
         sdb.endTransaction();
     }
 
-    private ContentValues buildSeedValues(Calendar c, int firstHour, int secondHour) {
+    private ContentValues buildSeedValues(DateTime dt, int firstHour, int secondHour) {
         ContentValues cv = new ContentValues();
-        cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
-        cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
-        c.set(Calendar.HOUR_OF_DAY, firstHour);
-        cv.put(CAME, c.getTimeInMillis());
-        c.set(Calendar.HOUR_OF_DAY, secondHour);
-        cv.put(WENT, c.getTimeInMillis());
+        cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
+        cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(dt.getMillis()));
+        dt = dt.withHourOfDay(firstHour);
+        cv.put(CAME, dt.getMillis());
+        dt = dt.withHourOfDay(secondHour);
+        cv.put(WENT, dt.getMillis());
         return cv;
     }
 
@@ -152,7 +165,7 @@ public class CameAndWentProvider extends ContentProvider {
                 return c;
             case KEY_GET_MONTHLY_SUMMARY:
                 c = sdb.rawQuery("SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
-                        " FROM " + VIEW_DURATION + " GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", null);
+                        " FROM " + VIEW_DURATION + " WHERE " + DATE + ">=? GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", selectionArgs);
                 //c = sdb.query(VIEW_MONTHLY_SUMMARY, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;

@@ -56,7 +56,7 @@ public class TimeConverterTest extends TestCase {
     public void testExtractDate() throws Exception {
         DateTime dt = new DateTime();
         long time = dt.getMillis();
-        dt.withTime(0, 0, 0, 0);
+        dt = dt.withTime(0, 0, 0, 0);
         assertEquals(dt.getMillis(), TimeConverter.extractDate(time));
     }
 

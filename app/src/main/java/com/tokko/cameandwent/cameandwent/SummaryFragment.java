@@ -14,8 +14,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDateTime;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -111,11 +109,10 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             CursorLoader cl = new CursorLoader(getActivity());
             cl.setUri(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY);
             DateTime dt = new DateTime();
-            dt.withTime(0, 0, 0, 0);
-
-            int week = dt.getWeekOfWeekyear();
+            dt = dt.withTime(0, 0, 0, 0);
+            dt = dt.withDayOfMonth(1);
             cl.setSelection(String.format("%s>=?", CameAndWentProvider.WEEK_OF_YEAR));
-            cl.setSelectionArgs(new String[]{String.valueOf(week)});
+            cl.setSelectionArgs(new String[]{String.valueOf(TimeConverter.extractDate(dt.getMillis()))});
             return cl;
         }
     }
