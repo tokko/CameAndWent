@@ -13,9 +13,12 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDateTime;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import roboguice.fragment.RoboDialogFragment;
@@ -107,14 +110,12 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         else{
             CursorLoader cl = new CursorLoader(getActivity());
             cl.setUri(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY);
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.MILLISECOND, 0);
-            c.set(Calendar.SECOND, 0);
-            c.set(Calendar.HOUR_OF_DAY, 0);
-            c.set(Calendar.DAY_OF_MONTH, 1);
-            c.set(Calendar.WEEK_OF_MONTH, 1);
+            DateTime dt = new DateTime();
+            dt.withTime(0, 0, 0, 0);
+
+            int week = dt.getWeekOfWeekyear();
             cl.setSelection(String.format("%s>=?", CameAndWentProvider.WEEK_OF_YEAR));
-            cl.setSelectionArgs(new String[]{String.valueOf(c.get(Calendar.WEEK_OF_YEAR))});
+            cl.setSelectionArgs(new String[]{String.valueOf(week)});
             return cl;
         }
     }
