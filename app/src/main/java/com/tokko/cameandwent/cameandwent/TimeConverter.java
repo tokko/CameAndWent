@@ -38,13 +38,13 @@ public class TimeConverter {
     }
 
 
-    public static int millisToHours(long millis){
+    public static int currentTimeInMillisToCurrentHours(long millis){
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(millis);
         return c.get(Calendar.HOUR_OF_DAY);
     }
 
-    public static int millisToMinutes(long millis){
+    public static int currentTimeInMillisToCurrentMinutes(long millis){
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(millis);
         return c.get(Calendar.MINUTE);
@@ -68,9 +68,20 @@ public class TimeConverter {
         String[] split = time.split(":");
         int hour = Integer.valueOf(split[0]);
         int minute = Integer.valueOf(split[1]);
-        return hour*60*60*1000 + minute*60*1000;
+        return hoursAsLong(hour) + minutesAsLong(minute);
     }
 
+    public static long hoursAsLong(int hour){
+        return hour*60*60*1000;
+    }
+
+    public static long minutesAsLong(int minute){
+        return minute*60*1000;
+    }
+
+    public static double longAsHour(long time){
+        return time/(60D*60D*1000D);
+    }
 
     public static int extractWeek(long time) {
         Calendar c = Calendar.getInstance();

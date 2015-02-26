@@ -105,6 +105,7 @@ public class CameAndWentProvider extends ContentProvider {
             ContentValues cv = new ContentValues();
 
             cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
+            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
             c.set(Calendar.HOUR_OF_DAY, 8);
             cv.put(CAME, c.getTimeInMillis());
             c.add(Calendar.HOUR_OF_DAY, 4);
@@ -114,6 +115,7 @@ public class CameAndWentProvider extends ContentProvider {
             cv = new ContentValues();
 
             cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
+            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
             c.set(Calendar.HOUR_OF_DAY, 12);
             cv.put(CAME, c.getTimeInMillis());
             c.add(Calendar.HOUR_OF_DAY, 4);
@@ -123,6 +125,7 @@ public class CameAndWentProvider extends ContentProvider {
             cv = new ContentValues();
 
             cv.put(DATE, TimeConverter.extractDate(c.getTimeInMillis()));
+            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getTimeInMillis()));
             c.set(Calendar.HOUR_OF_DAY, 12);
             cv.put(CAME, c.getTimeInMillis());
             c.add(Calendar.HOUR_OF_DAY, 1);
@@ -177,7 +180,9 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_CAME:
                 long came = values.getAsLong(CAME);
                 long date = TimeConverter.extractDate(came);
+                int week = TimeConverter.extractWeek(came);
                 values.put(DATE, date);
+                values.put(WEEK_OF_YEAR, week);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
                 int numberOfEventsToday = query(URI_GET_DETAILS, null, String.format("%S=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();

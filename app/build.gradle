@@ -35,12 +35,7 @@ android {
         }
     }
     packagingOptions {
-        //exclude 'META-INF/LICENSE'
-      //  exclude 'LICENSE'
         exclude 'LICENSE.txt'
-       // exclude 'META-INF/LICENSE.txt'
-       // exclude 'META-INF/NOTICE.txt'
-       // exclude 'META-INF/NOTICE'
     }
 }
 //apply plugin: 'android-unit-test'

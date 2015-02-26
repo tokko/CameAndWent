@@ -52,13 +52,13 @@ public class TimeConverterTest extends TestCase {
     public void testMillisToHours() throws Exception {
         Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
-        assertEquals(hour, TimeConverter.millisToHours(c.getTimeInMillis()));
+        assertEquals(hour, TimeConverter.currentTimeInMillisToCurrentHours(c.getTimeInMillis()));
     }
 
     public void testMillisToMinutes() throws Exception {
         Calendar c = Calendar.getInstance();
         int minute = c.get(Calendar.MINUTE);
-        assertEquals(minute, TimeConverter.millisToMinutes(c.getTimeInMillis()));
+        assertEquals(minute, TimeConverter.currentTimeInMillisToCurrentMinutes(c.getTimeInMillis()));
     }
 
     public void testExtractDate() throws Exception {

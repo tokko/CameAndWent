@@ -58,9 +58,13 @@ public class CameAndWentProviderRoboTests extends TestCase{
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, null);
         assertEquals(CameAndWentProvider.WEEKS_BACK, c.getCount());
         long duration = 7*60*60*1000;
+        int[] weeks = new int[52];
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+            weeks[c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR))]++;
             assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
         }
+        for (int week : weeks)
+            assertFalse(weeks[week] > 1);
     }
     @SafeVarargs
     private final <T> boolean contains(T[] arr, T... elems){
