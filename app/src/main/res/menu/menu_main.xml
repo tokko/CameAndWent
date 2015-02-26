@@ -6,4 +6,6 @@
     <item android:id="@+id/show_summary"
         android:title="Summary"
         android:showAsAction="ifRoom" />
+    <item android:id="@+id/show_monthly_summary"
+        android:title="Monthly Summary"/>
 </menu>

@@ -13,6 +13,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.joda.time.DateTime;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,7 +48,6 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new SummaryCursorAdapter(getActivity());
         if(savedInstanceState != null){
             monthly = savedInstanceState.getBoolean(EXTRA_MONTHLY, false);
         }
@@ -71,8 +72,15 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if(!monthly) {
+            getDialog().setTitle("Weekly summary");
+            adapter = new SummaryCursorAdapter(getActivity());
+        }
+        else {
+            getDialog().setTitle("Monthly summary");
+            adapter = new MonthlySummaryAdapter(getActivity());
+        }
         listView.setAdapter(adapter);
-        getDialog().setTitle("Weekly summary");
 
     }
 
@@ -90,11 +98,23 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        CursorLoader cl = new CursorLoader(getActivity());
-        cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
-        cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
-        cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
-        return cl;
+        if(!monthly) {
+            CursorLoader cl = new CursorLoader(getActivity());
+            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+            cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
+            cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
+            return cl;
+        }
+        else{
+            CursorLoader cl = new CursorLoader(getActivity());
+            cl.setUri(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY);
+            DateTime dt = new DateTime();
+            dt = dt.withTime(0, 0, 0, 0);
+            dt = dt.withDayOfMonth(1);
+            cl.setSelection(String.format("%s>=?", CameAndWentProvider.WEEK_OF_YEAR));
+            cl.setSelectionArgs(new String[]{String.valueOf(TimeConverter.extractDate(dt.getMillis()))});
+            return cl;
+        }
     }
 
     @Override
@@ -127,6 +147,20 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             if(duration < 0)
                 durationS = "Currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS);
+        }
+    }
+
+    private class MonthlySummaryAdapter extends SummaryCursorAdapter{
+
+        public MonthlySummaryAdapter(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            int week = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
+            double duration = TimeConverter.longAsHour(cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.DURATION)));
+            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d: %sh", week, new DecimalFormat("##.0").format(duration)));
         }
     }
 }

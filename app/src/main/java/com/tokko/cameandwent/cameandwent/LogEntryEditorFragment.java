@@ -55,12 +55,12 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
 
         if(savedInstanceState != null){
             long cameTime = savedInstanceState.getLong(EXTRA_CAME);
-            cameTimePicker.setCurrentHour(TimeConverter.millisToHours(cameTime));
-            cameTimePicker.setCurrentMinute(TimeConverter.millisToMinutes(cameTime));
+            cameTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(cameTime));
+            cameTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(cameTime));
 
             long wentTime = savedInstanceState.getLong(EXTRA_WENT);
-            wentTimePicker.setCurrentHour(TimeConverter.millisToHours(wentTime));
-            wentTimePicker.setCurrentMinute(TimeConverter.millisToMinutes(wentTime));
+            wentTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(wentTime));
+            wentTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(wentTime));
 
             id = savedInstanceState.getLong(EXTRA_ID);
         }
@@ -97,13 +97,13 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
 
         stillAtWorkCheckBox.setChecked(wentTime == 0);
 
-        cameTimePicker.setCurrentHour(TimeConverter.millisToHours(cameTime));
-        cameTimePicker.setCurrentMinute(TimeConverter.millisToMinutes(cameTime));
+        cameTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(cameTime));
+        cameTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(cameTime));
 
         if(wentTime > 0) {
             wentContainer.setVisibility(View.VISIBLE);
-            wentTimePicker.setCurrentHour(TimeConverter.millisToHours(wentTime));
-            wentTimePicker.setCurrentMinute(TimeConverter.millisToMinutes(wentTime));
+            wentTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(wentTime));
+            wentTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(wentTime));
         }
         else
             wentContainer.setVisibility(View.GONE);
