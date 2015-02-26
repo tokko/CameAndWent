@@ -2,6 +2,8 @@ package com.tokko.cameandwent.cameandwent;
 
 import junit.framework.TestCase;
 
+import org.joda.time.DateTime;
+
 import java.util.Calendar;
 import java.util.Random;
 
@@ -22,16 +24,6 @@ public class TimeConverterTest extends TestCase {
         String hour = String.valueOf(c.get(Calendar.HOUR_OF_DAY));
         String minute = String.valueOf(c.get(Calendar.MINUTE));
         long time = TimeConverter.hourAndMinuteToMillis(c.getTimeInMillis(), hour + ":"+minute);
-        assertEquals(c.getTimeInMillis(), time);
-    }
-
-    public void testHourAndMinuteToMillis_Time() throws Exception {
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.MILLISECOND, 0);
-        c.set(Calendar.SECOND, 0);
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
-        long time = TimeConverter.hourAndMinuteToMillis(hour, minute);
         assertEquals(c.getTimeInMillis(), time);
     }
 
@@ -62,13 +54,10 @@ public class TimeConverterTest extends TestCase {
     }
 
     public void testExtractDate() throws Exception {
-        Calendar c = Calendar.getInstance();
-        long time = c.getTimeInMillis();
-        c.set(Calendar.MILLISECOND, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        assertEquals(c.getTimeInMillis(), TimeConverter.extractDate(time));
+        DateTime dt = new DateTime();
+        long time = dt.getMillis();
+        dt.withTime(0, 0, 0, 0);
+        assertEquals(dt.getMillis(), TimeConverter.extractDate(time));
     }
 
     public void testWeeksToMillis() throws Exception {

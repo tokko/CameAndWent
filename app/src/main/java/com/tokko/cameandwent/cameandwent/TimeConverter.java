@@ -1,6 +1,6 @@
 package com.tokko.cameandwent.cameandwent;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
 public class TimeConverter {
 
     public static long hourAndMinuteToMillis(long date, String time) {
@@ -14,50 +14,35 @@ public class TimeConverter {
         return hourAndMinuteToMillis(System.currentTimeMillis(), hour, minute);
     }
     public static long hourAndMinuteToMillis(long time, int hour, int minute){
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(time);
-        c.set(Calendar.MILLISECOND, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.HOUR_OF_DAY, hour);
-        c.set(Calendar.MINUTE, minute);
-        return c.getTimeInMillis();
-    }
+        DateTime dt = new DateTime(time);
+        dt.withMillisOfSecond(0);
+        dt.withSecondOfMinute(0);
+        dt.withHourOfDay(hour);
+        dt.withMinuteOfHour(minute);
+        return dt.getMillis();
+      }
 
     public static int getHour(){
-        return getFieldFromTime(Calendar.HOUR_OF_DAY, System.currentTimeMillis());
-    }
-
-    private static int getFieldFromTime(int field, long l) {
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(l);
-        return c.get(field);
+        return new DateTime().getHourOfDay();
     }
 
     public static int getMinute(){
-        return getFieldFromTime(Calendar.MINUTE, System.currentTimeMillis());
+        return new DateTime().getMinuteOfHour();
     }
 
 
     public static int currentTimeInMillisToCurrentHours(long millis){
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(millis);
-        return c.get(Calendar.HOUR_OF_DAY);
+       return new DateTime(millis).getHourOfDay();
     }
 
     public static int currentTimeInMillisToCurrentMinutes(long millis){
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(millis);
-        return c.get(Calendar.MINUTE);
+        return new DateTime(millis).getMinuteOfHour();
     }
 
     public static long extractDate(long time){
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(time);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        return c.getTimeInMillis();
+        DateTime dt = new DateTime(time);
+        dt.withTime(0, 0, 0, 0);
+        return dt.getMillis();
     }
 
     public static long weeksToMillis(long weeks){
@@ -87,8 +72,6 @@ public class TimeConverter {
         return extractWeek(System.currentTimeMillis());
     }
     public static int extractWeek(long time) {
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(time);
-        return c.get(Calendar.WEEK_OF_YEAR);
+       return new DateTime(time).getWeekOfWeekyear();
     }
 }

@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import roboguice.fragment.RoboDialogFragment;
@@ -106,8 +107,14 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         else{
             CursorLoader cl = new CursorLoader(getActivity());
             cl.setUri(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY);
-           // cl.setSelection(String.format("%s>=?", CameAndWentProvider.DATE));
-           // cl.setSelectionArgs(new String[]{String.valueOf(System.currentTimeMillis() - TimeConverter.weeksToMillis(1))});
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.MILLISECOND, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.HOUR_OF_DAY, 0);
+            c.set(Calendar.DAY_OF_MONTH, 1);
+            c.set(Calendar.WEEK_OF_MONTH, 1);
+            cl.setSelection(String.format("%s>=?", CameAndWentProvider.WEEK_OF_YEAR));
+            cl.setSelectionArgs(new String[]{String.valueOf(c.get(Calendar.WEEK_OF_YEAR))});
             return cl;
         }
     }

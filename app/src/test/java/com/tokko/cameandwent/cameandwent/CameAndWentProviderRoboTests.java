@@ -79,6 +79,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
             weeks[c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR))]++;
             assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
         }
+        c.close();
         for (int week : weeks)
             assertFalse(weeks[week] > 1);
     }
