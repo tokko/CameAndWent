@@ -18,14 +18,16 @@ import java.util.Date;
 public class ReminderScheduler extends BroadcastReceiver{
     public static final String ACTION_WEEKLY_REMINDER = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_REMINDER";
     public static final String ACTION_WEEKLY_SUMMARY = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_SUMMARY";
+    private final SharedPreferences defaultPrefs;
 
     private Context context;
 
     public ReminderScheduler(Context context){
         this.context = context;
+        defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public void scheduleWeeklyReminder(SharedPreferences defaultPrefs){
+    public void scheduleWeeklyReminder(){
         if(!defaultPrefs.getBoolean("enabled", false)) return;
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_WEEKLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -43,10 +45,6 @@ public class ReminderScheduler extends BroadcastReceiver{
         else{
             am.cancel(pi);
         }
-    }
-
-    public void scheduleWeeklyReminder(){
-        scheduleWeeklyReminder(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
     private Calendar setTimeAndMinute(String time){
