@@ -11,9 +11,8 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import org.joda.time.DateTime;
+import org.joda.time.DurationFieldType;
 
 public class ReminderScheduler extends BroadcastReceiver{
     public static final String ACTION_WEEKLY_REMINDER = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_REMINDER";
@@ -33,13 +32,12 @@ public class ReminderScheduler extends BroadcastReceiver{
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if(defaultPrefs.getBoolean("weekly_reminders", false)) {
             if(!defaultPrefs.getString("weekly_reminder_time", "").contains(":")) return;
-            Calendar c = setTimeAndMinute(defaultPrefs.getString("weekly_reminder_time", "0:0"));
+            DateTime dt = setTimeAndMinute(defaultPrefs.getString("weekly_reminder_time", "0:0"));
             int weekday = Integer.valueOf(defaultPrefs.getString("weekly_reminder_day", "0"));
-            c.set(Calendar.DAY_OF_WEEK, weekday);
-            Calendar now = Calendar.getInstance();
-            while (c.before(now)) c.add(Calendar.WEEK_OF_YEAR, 1);
-            long time = c.getTimeInMillis();
-            String timeS = new SimpleDateFormat("yyy-MM-dd HH:mm").format(new Date(c.getTimeInMillis()));
+            dt = dt.withDayOfWeek(weekday);
+            DateTime now = new DateTime();
+            while (dt.isBefore(now)) dt = dt.withFieldAdded(DurationFieldType.days(), 1);
+            long time = dt.getMillis();
             am.set(AlarmManager.RTC, time, pi);
         }
         else{
@@ -47,14 +45,14 @@ public class ReminderScheduler extends BroadcastReceiver{
         }
     }
 
-    private Calendar setTimeAndMinute(String time){
+    private DateTime setTimeAndMinute(String time){
+        DateTime dt = new DateTime();
         String[] split = time.split(":");
         int hour = Integer.valueOf(split[0]);
         int minute = Integer.valueOf(split[1]);
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, hour);
-        c.set(Calendar.MINUTE, minute);
-        return c;
+        dt = dt.withHourOfDay(hour);
+        dt = dt.withSecondOfMinute(minute);
+        return dt;
     }
 
     @Override
