@@ -261,7 +261,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 33;
+        private static final int DATABASE_VERSION = 34;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
@@ -307,6 +307,7 @@ public class CameAndWentProvider extends ContentProvider {
                         break;
                     case 32:
                         db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                    case 33:
                         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
                             ContentValues cv = new ContentValues();
