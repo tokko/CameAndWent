@@ -111,7 +111,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             DateTime dt = new DateTime();
             dt = dt.withTime(0, 0, 0, 0);
             dt = dt.withDayOfMonth(1);
-            cl.setSelection(String.format("%s>=?", CameAndWentProvider.WEEK_OF_YEAR));
+            //cl.setSelection(String.format("%s>=?", CameAndWentProvider.WEEK_OF_YEAR));
             cl.setSelectionArgs(new String[]{String.valueOf(TimeConverter.extractDate(dt.getMillis()))});
             return cl;
         }
