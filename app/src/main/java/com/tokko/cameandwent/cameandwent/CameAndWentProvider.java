@@ -48,6 +48,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_DELETE_DETAIL = "ACTION_DELETE_DETAIL";
     private static final String ACTION_UPDATE_PARTICULAR_LOG_ENTRY = "ACTION_UPDATE_PARTICULAR_LOG_ENTRY";
     private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
+    private static final String ACTION_GET_WEEKS = "ACTION_GET_WEEKS";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -57,6 +58,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_DELETE_DETAIL = 4;
     private static final int KEY_UPDATE_PARTICULAR_LOG_ENTRY = 5;
     private static final int KEY_GET_MONTHLY_SUMMARY = 6;
+    private static final int KEY_GET_GET_WEEKS = 7;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
@@ -66,6 +68,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_DELETE_DETAIL = Uri.parse(URI_TEMPLATE + ACTION_DELETE_DETAIL);
     public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY);
     public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
+    public static final Uri URI_GET_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
 
     private static UriMatcher uriMatcher;
 
@@ -79,6 +82,7 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_DETAIL, KEY_DELETE_DETAIL);
         uriMatcher.addURI(AUTHORITY, ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHLY_SUMMARY, KEY_GET_MONTHLY_SUMMARY);
+        uriMatcher.addURI(AUTHORITY, ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
     }
 
     private DatabaseOpenHelper db;
@@ -99,23 +103,12 @@ public class CameAndWentProvider extends ContentProvider {
 
     public static int SEED_ENTRIES = 0;
     private void seed(){
-       // Calendar now = Calendar.getInstance();
         DateTime dtNow = new DateTime();
 
         DateTime dt = new DateTime();
         dt = dt.withTime(0, 0, 0, 0);
         dt = dt.withFieldAdded(DurationFieldType.weeks(), -WEEKS_BACK+1);
         dt = dt.withDayOfWeek(DateTimeConstants.MONDAY);
-        int currrentDayOfYear = dtNow.getDayOfYear();
-        int dayOfYear = dt.getDayOfYear();
-        /*
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.WEEK_OF_YEAR, -WEEKS_BACK + 1);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        */
         ArrayList<ContentValues> cvs = new ArrayList<>();
         for(; dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
             if(dt.getDayOfWeek() == DateTimeConstants.SATURDAY || dt.getDayOfWeek() == DateTimeConstants.SUNDAY) continue;
@@ -155,6 +148,10 @@ public class CameAndWentProvider extends ContentProvider {
         SQLiteDatabase sdb = db.getReadableDatabase();
         Cursor c;
         switch (uriMatcher.match(uri)){
+            case KEY_GET_GET_WEEKS:
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, null, null);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_WEEKS);
+                return c;
             case KEY_GET_LOG_ENTRIES:
                 c = sdb.query(VIEW_DURATION, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_LOG_ENTRIES);
@@ -166,7 +163,6 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_GET_MONTHLY_SUMMARY:
                 c = sdb.rawQuery("SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
                         " FROM " + VIEW_DURATION + " WHERE " + DATE + ">=? GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", selectionArgs);
-                //c = sdb.query(VIEW_MONTHLY_SUMMARY, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             default:
@@ -203,6 +199,7 @@ public class CameAndWentProvider extends ContentProvider {
                     sdb.insert(TABLE_LOG_NAME, null, values);
                 }
                 if(id > -1) {
+                    getContext().getContentResolver().notifyChange(URI_GET_GET_WEEKS, null);
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
                 }
@@ -222,6 +219,7 @@ public class CameAndWentProvider extends ContentProvider {
                 if(deleted > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_GET_WEEKS, null);
                 }
                 return deleted;
             case KEY_DELETE_DETAIL:
@@ -229,6 +227,8 @@ public class CameAndWentProvider extends ContentProvider {
                 if(deleted > 0){
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DETAILS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_GET_WEEKS, null);
+
                 }
                 return deleted;
             default:
