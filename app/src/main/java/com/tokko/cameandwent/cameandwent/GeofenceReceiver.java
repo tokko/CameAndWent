@@ -21,9 +21,9 @@ import com.google.android.gms.location.LocationServices;
 
 
 public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
-    public static final String ACTION = "com.tokko.cameandwent.GEOFENCE_ACTION";
-    public static final String ACTIVATE_GEOFENCE = "com.tokko.cameandwent.ACTIVATE_GEOFENCE";
-    public static final String DEACTIVATE_GEOFENCE = "com.tokko.cameandwent.DEACTIVATE_GEOFENCE";
+    public static final String ACTION = BuildConfig.APPLICATION_ID+".GEOFENCE_ACTION";
+    public static final String ACTIVATE_GEOFENCE = BuildConfig.APPLICATION_ID+".ACTIVATE_GEOFENCE";
+    public static final String DEACTIVATE_GEOFENCE = BuildConfig.APPLICATION_ID+".DEACTIVATE_GEOFENCE";
 
     private PendingIntent pendingIntent;
     private GoogleApiClient googleApiClient;

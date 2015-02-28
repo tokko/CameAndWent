@@ -34,9 +34,9 @@
         <receiver android:name=".GeofenceReceiver"
             android:enabled="true">
             <intent-filter>
-                <action android:name="com.tokko.cameandwent.GEOFENCE_ACTION" />
-                <action android:name="com.tokko.cameandwent.ACTIVATE_GEOFENCE" />
-                <action android:name="com.tokko.cameandwent.DEACTIVATE_GEOFENCE" />
+                <action android:name="${applicationId}.GEOFENCE_ACTION" />
+                <action android:name="${applicationId}.ACTIVATE_GEOFENCE" />
+                <action android:name="${applicationId}.DEACTIVATE_GEOFENCE" />
             </intent-filter>
         </receiver>
 
