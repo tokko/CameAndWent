@@ -107,8 +107,8 @@ public class ReminderSchedulerTest {
     @Test
     public void scheduleWeeklyReminder_hasReceiverForIntent(){
         ShadowApplication shadowApplication = Robolectric.getShadowApplication();
-        Assert.assertTrue(shadowApplication.hasReceiverForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER)));
-
+        List<ShadowApplication.Wrapper> list = shadowApplication.getRegisteredReceivers();
+        //Assert.assertTrue(shadowApplication.hasReceiverForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER)));
         List<BroadcastReceiver> receiversForIntent = shadowApplication.getReceiversForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
         Assert.assertEquals("Expected one broadcast receiver", 1, receiversForIntent.size());
     }

@@ -34,17 +34,19 @@
         <receiver android:name=".GeofenceReceiver"
             android:enabled="true">
             <intent-filter>
-                <action android:name="${applicationId}.GEOFENCE_ACTION" />
-                <action android:name="${applicationId}.ACTIVATE_GEOFENCE" />
-                <action android:name="${applicationId}.DEACTIVATE_GEOFENCE" />
+                <action android:name="GEOFENCE_ACTION" />
+                <action android:name="ACTIVATE_GEOFENCE" />
+                <action android:name="DEACTIVATE_GEOFENCE" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
         <receiver android:name=".ReminderScheduler"
             android:enabled="true">
             <intent-filter>
-                <action android:name="${applicationId}.ACTION_WEEKLY_REMINDER" />
-                <action android:name="${applicationId}.ACTION_WEEKLY_SUMMARY" />
+                <action android:name="ACTION_WEEKLY_REMINDER" />
+                <action android:name="ACTION_WEEKLY_SUMMARY" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             </receiver>
         <provider

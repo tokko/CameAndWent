@@ -17,8 +17,8 @@ import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;
 
 public class ReminderScheduler extends BroadcastReceiver{
-    public static final String ACTION_WEEKLY_REMINDER = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_REMINDER";
-    public static final String ACTION_WEEKLY_SUMMARY = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_SUMMARY";
+    public static final String ACTION_WEEKLY_REMINDER = "ACTION_WEEKLY_REMINDER";
+    public static final String ACTION_WEEKLY_SUMMARY = "ACTION_WEEKLY_SUMMARY";
     private final SharedPreferences defaultPrefs;
     @Inject private NotificationManager nm;
     protected final int weeklyReminderNotificationId = 2;
