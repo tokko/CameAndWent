@@ -16,7 +16,6 @@ import org.joda.time.DurationFieldType;
 
 public class ReminderScheduler extends BroadcastReceiver{
     public static final String ACTION_WEEKLY_REMINDER = "ACTION_WEEKLY_REMINDER";
-    public static final String ACTION_WEEKLY_SUMMARY = "ACTION_WEEKLY_SUMMARY";
     private SharedPreferences defaultPrefs;
     private NotificationManager nm;
     public static  final int weeklyReminderNotificationId = 2;
@@ -76,7 +75,7 @@ public class ReminderScheduler extends BroadcastReceiver{
         nb.setSmallIcon(R.drawable.ic_launcher);
         if(defaultPrefs.getBoolean("weekly_reminder_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT));
+        nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_WEEKLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));
         return nb.build();
     }
 
@@ -87,9 +86,6 @@ public class ReminderScheduler extends BroadcastReceiver{
             if(!defaultPrefs.getBoolean("weekly_reminders", false)) return;
             nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(weeklyReminderNotificationId, buildWeeklyNotification(context));
-        }
-        else if(intent.getAction().equals(ACTION_WEEKLY_SUMMARY)){
-
         }
     }
 }
