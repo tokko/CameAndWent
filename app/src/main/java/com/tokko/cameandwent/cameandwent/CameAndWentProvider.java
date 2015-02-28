@@ -329,6 +329,7 @@ public class CameAndWentProvider extends ContentProvider {
                         c.close();
                         break;
                     case 35:
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
                         c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
                             ContentValues cv = new ContentValues();
