@@ -11,6 +11,8 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
+import com.google.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;
 
@@ -18,41 +20,64 @@ public class ReminderScheduler extends BroadcastReceiver{
     public static final String ACTION_WEEKLY_REMINDER = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_REMINDER";
     public static final String ACTION_WEEKLY_SUMMARY = BuildConfig.APPLICATION_ID+".ACTION_WEEKLY_SUMMARY";
     private final SharedPreferences defaultPrefs;
-
+    @Inject private NotificationManager nm;
+    protected final int weeklyReminderNotificationId = 2;
     private Context context;
 
+    public ReminderScheduler(){
+        defaultPrefs = null;
+    }
     public ReminderScheduler(Context context){
         this.context = context;
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public void scheduleWeeklyReminder(){
-        if(!defaultPrefs.getBoolean("enabled", false)) return;
+    public long scheduleWeeklyReminder(){
+        if(!defaultPrefs.getBoolean("enabled", false)) return -1;
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_WEEKLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if(defaultPrefs.getBoolean("weekly_reminders", false)) {
-            if(!defaultPrefs.getString("weekly_reminder_time", "").contains(":")) return;
+            if(!defaultPrefs.getString("weekly_reminder_time", "").contains(":")) return -1;
             DateTime dt = setTimeAndMinute(defaultPrefs.getString("weekly_reminder_time", "0:0"));
             int weekday = Integer.valueOf(defaultPrefs.getString("weekly_reminder_day", "0"));
-            dt = dt.withDayOfWeek(weekday);
-            DateTime now = new DateTime();
-            while (dt.isBefore(now)) dt = dt.withFieldAdded(DurationFieldType.days(), 1);
+           // dt = dt.withDayOfWeek(weekday);
+            DateTime now = TimeConverter.getCurrentTime();
+            while (dt.isBefore(now) || dt.getDayOfWeek() != weekday) dt = dt.withFieldAdded(DurationFieldType.days(), 1);
             long time = dt.getMillis();
             am.set(AlarmManager.RTC, time, pi);
+            return time;
         }
         else{
             am.cancel(pi);
+            return -1;
         }
     }
 
     private DateTime setTimeAndMinute(String time){
-        DateTime dt = new DateTime();
+        DateTime dt = TimeConverter.getCurrentTime();
         String[] split = time.split(":");
         int hour = Integer.valueOf(split[0]);
         int minute = Integer.valueOf(split[1]);
         dt = dt.withHourOfDay(hour);
-        dt = dt.withSecondOfMinute(minute);
+        dt = dt.withMinuteOfHour(minute);
         return dt;
+    }
+
+    public Notification buildWeeklyNotification(){
+        return buildWeeklyNotification(context);
+    }
+    public Notification buildWeeklyNotification(Context context){
+        Notification.Builder nb = new Notification.Builder(context);
+        if(defaultPrefs.getBoolean("weekly_reminder_vibrate", false))
+            nb.setVibrate(new long[]{0, 1000});
+        else
+            nb.setVibrate(new long[]{0});
+        nb.setContentTitle("Time to submit time report!");
+        nb.setSmallIcon(R.drawable.ic_launcher);
+        if(defaultPrefs.getBoolean("weekly_reminder_sound", false))
+            nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT));
+        return nb.build();
     }
 
     @Override
@@ -60,18 +85,8 @@ public class ReminderScheduler extends BroadcastReceiver{
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         if(intent.getAction().equals(ACTION_WEEKLY_REMINDER)){
             if(!defaultPrefs.getBoolean("weekly_reminders", false)) return;
-            Notification.Builder nb = new Notification.Builder(context);
-            if(defaultPrefs.getBoolean("weekly_reminder_vibrate", false))
-                nb.setVibrate(new long[]{0, 1000});
-            else
-                nb.setVibrate(new long[]{0});
-            nb.setContentTitle("Time to submit time report!");
-            nb.setSmallIcon(R.drawable.ic_launcher);
-            if(defaultPrefs.getBoolean("weekly_reminder_sound", false))
-                nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-            nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT));
-            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            nm.notify(2, nb.build());
+          // nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            nm.notify(weeklyReminderNotificationId, buildWeeklyNotification(context));
         }
         else if(intent.getAction().equals(ACTION_WEEKLY_SUMMARY)){
 

@@ -1,13 +1,25 @@
 package com.tokko.cameandwent.cameandwent;
 
+import com.google.inject.Singleton;
+
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+
+@Singleton
 public class TimeConverter {
+    public static long CURRENT_TIME = -1;
 
     public static long hourAndMinuteToMillis(long date, String time) {
         String[] split = time.split(":");
         int hour = Integer.valueOf(split[0]);
         int minute = Integer.valueOf(split[1]);
         return hourAndMinuteToMillis(date, hour, minute);
+    }
+
+    public static DateTime getCurrentTime(){
+        if(CURRENT_TIME > -1)
+            return new DateTime(CURRENT_TIME);
+        return new DateTime();
     }
 
     public static long hourAndMinuteToMillis(int hour, int minute) {
@@ -23,11 +35,11 @@ public class TimeConverter {
       }
 
     public static int getHour(){
-        return new DateTime().getHourOfDay();
+        return getCurrentTime().getHourOfDay();
     }
 
     public static int getMinute(){
-        return new DateTime().getMinuteOfHour();
+        return getCurrentTime().getMinuteOfHour();
     }
 
 
@@ -46,7 +58,7 @@ public class TimeConverter {
     }
 
     public static long weeksToMillis(long weeks){
-        return weeks*7*24*60*60*1000;
+        return weeks*DateTimeConstants.MILLIS_PER_WEEK;
     }
 
     public static long timeIntervalAsLong(String time) {
@@ -57,15 +69,15 @@ public class TimeConverter {
     }
 
     public static long hoursAsLong(int hour){
-        return hour*60*60*1000;
+        return hour* DateTimeConstants.MILLIS_PER_HOUR;
     }
 
     public static long minutesAsLong(int minute){
-        return minute*60*1000;
+        return minute*DateTimeConstants.MILLIS_PER_MINUTE;
     }
 
     public static double longAsHour(long time){
-        return time/(60D*60D*1000D);
+        return time/DateTimeConstants.MILLIS_PER_HOUR;
     }
 
     public static int getCurrentWeek(){
