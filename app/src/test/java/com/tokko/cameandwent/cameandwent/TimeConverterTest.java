@@ -81,4 +81,10 @@ public class TimeConverterTest extends TestCase {
         int week = c.get(Calendar.WEEK_OF_YEAR);
         assertEquals(week, TimeConverter.extractWeek(c.getTimeInMillis()));
     }
+
+    public void testExtractMonth(){
+        DateTime dt = new DateTime();
+        int week = dt.getMonthOfYear();
+        assertEquals(week, TimeConverter.extractMonth(dt.getMillis()));
+    }
 }

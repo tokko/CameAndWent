@@ -120,6 +120,16 @@ public class CameAndWentProviderRoboTests extends TestCase{
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_WEEKS, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext(), dt = dt.withFieldAdded(DurationFieldType.weeks(), 1))
             assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
+        c.close();
+    }
+
+    @Test
+    public void getMonths_FetchesAllWeeks(){
+        DateTime dt = TimeConverter.getCurrentTime().withFieldAdded(DurationFieldType.weeks(), -CameAndWentProvider.WEEKS_BACK+1);
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_MONTHS, null, null, null, CameAndWentProvider.MONTH_OF_YEAR);
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext(), dt = dt.withFieldAdded(DurationFieldType.months(), 1))
+            assertEquals(dt.getMonthOfYear(), c.getInt(c.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
+        c.close();
     }
 
     @Test
