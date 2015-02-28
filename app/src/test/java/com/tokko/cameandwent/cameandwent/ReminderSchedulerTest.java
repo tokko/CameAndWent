@@ -1,13 +1,12 @@
 package com.tokko.cameandwent.cameandwent;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-
-import com.google.inject.AbstractModule;
 
 import junit.framework.Assert;
 
@@ -23,14 +22,14 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlarmManager;
 import org.robolectric.shadows.ShadowApplication;
+import org.robolectric.shadows.ShadowNotification;
+import org.robolectric.shadows.ShadowNotificationManager;
 import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.util.List;
 
 import roboguice.RoboGuice;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
@@ -41,11 +40,9 @@ public class ReminderSchedulerTest {
     private AlarmManager alarmManager;
     private ShadowAlarmManager shadowAlarmManager;
     private long currentEpochTime;
-    private NotificationManager notificationManagerMock = mock(NotificationManager.class);
 
     @Before
     public void setup(){
-        RoboGuice.overrideApplicationInjector(Robolectric.application, new MyTestModule());
 
         alarmTime = new DateTime();
         alarmTime = alarmTime.withDate(2010, 3, 4);
@@ -63,6 +60,8 @@ public class ReminderSchedulerTest {
                 .putBoolean("weekly_reminders", true)
                 .putString("weekly_reminder_time", String.format("%d:%d", alarmTime.getHourOfDay(), alarmTime.getMinuteOfHour()))
                 .putString("weekly_reminder_day", String.valueOf(alarmTime.getDayOfWeek()))
+                .putBoolean("weekly_reminder_vibrate", true)
+                .putBoolean("weekly_reminder_sound", true)
                 .apply();
     }
 
@@ -107,22 +106,26 @@ public class ReminderSchedulerTest {
     @Test
     public void scheduleWeeklyReminder_hasReceiverForIntent(){
         ShadowApplication shadowApplication = Robolectric.getShadowApplication();
-        List<ShadowApplication.Wrapper> list = shadowApplication.getRegisteredReceivers();
-        //Assert.assertTrue(shadowApplication.hasReceiverForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER)));
+        Assert.assertTrue(shadowApplication.hasReceiverForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER)));
         List<BroadcastReceiver> receiversForIntent = shadowApplication.getReceiversForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
         Assert.assertEquals("Expected one broadcast receiver", 1, receiversForIntent.size());
     }
     @Test
     public void scheduleWeeklyReminder_OnReceive_NotifiesUser(){
+        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+
         Robolectric.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
-        verify(notificationManagerMock).notify(2, new ReminderScheduler(Robolectric.application.getApplicationContext()).buildWeeklyNotification());
+
+        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+        Assert.assertEquals("Expected one notification", 1, manager.size());
+
+        Notification notification = manager.getNotification(ReminderScheduler.weeklyReminderNotificationId);
+        Assert.assertNotNull(notification);
+        ShadowNotification shadowNotification = Robolectric.shadowOf(notification);
+        Assert.assertNotNull("Expected shadow notification object", shadowNotification);
+        Assert.assertEquals("Time to submit time report!", shadowNotification.getContentTitle());
+
     }
 
-    private class MyTestModule extends AbstractModule{
-        @Override
-        protected void configure() {
-            bind(NotificationManager.class).toInstance(notificationManagerMock);
-        }
-    }
 
 }

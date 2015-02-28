@@ -11,17 +11,15 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
-import com.google.inject.Inject;
-
 import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;
 
 public class ReminderScheduler extends BroadcastReceiver{
     public static final String ACTION_WEEKLY_REMINDER = "ACTION_WEEKLY_REMINDER";
     public static final String ACTION_WEEKLY_SUMMARY = "ACTION_WEEKLY_SUMMARY";
-    private final SharedPreferences defaultPrefs;
-    @Inject private NotificationManager nm;
-    protected final int weeklyReminderNotificationId = 2;
+    private SharedPreferences defaultPrefs;
+    private NotificationManager nm;
+    public static  final int weeklyReminderNotificationId = 2;
     private Context context;
 
     public ReminderScheduler(){
@@ -67,6 +65,8 @@ public class ReminderScheduler extends BroadcastReceiver{
         return buildWeeklyNotification(context);
     }
     public Notification buildWeeklyNotification(Context context){
+        if(defaultPrefs == null)
+            defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         Notification.Builder nb = new Notification.Builder(context);
         if(defaultPrefs.getBoolean("weekly_reminder_vibrate", false))
             nb.setVibrate(new long[]{0, 1000});
@@ -85,7 +85,7 @@ public class ReminderScheduler extends BroadcastReceiver{
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         if(intent.getAction().equals(ACTION_WEEKLY_REMINDER)){
             if(!defaultPrefs.getBoolean("weekly_reminders", false)) return;
-          // nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(weeklyReminderNotificationId, buildWeeklyNotification(context));
         }
         else if(intent.getAction().equals(ACTION_WEEKLY_SUMMARY)){
