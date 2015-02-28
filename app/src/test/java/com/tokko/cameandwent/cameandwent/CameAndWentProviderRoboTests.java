@@ -9,6 +9,8 @@ import android.net.Uri;
 
 import junit.framework.TestCase;
 
+import org.joda.time.DateTime;
+import org.joda.time.DurationFieldType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -110,6 +112,14 @@ public class CameAndWentProviderRoboTests extends TestCase{
         Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
         assertEquals(pre+2, post.getCount()); //new entry + break
         post.close();
+    }
+
+    @Test
+    public void getWeeks_FetchesAllWeeks(){
+        DateTime dt = TimeConverter.getCurrentTime().withFieldAdded(DurationFieldType.weeks(), -CameAndWentProvider.WEEKS_BACK+1);
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_WEEKS, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext(), dt = dt.withFieldAdded(DurationFieldType.weeks(), 1))
+            assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
     }
 
     @Test
