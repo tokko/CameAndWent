@@ -167,7 +167,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
 
         @Override
         protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
-            return ((LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.simple_expandable_list_item_2, null);
+            return ((LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.simple_list_item_1, null);
         }
 
         @Override
