@@ -127,5 +127,17 @@ public class ReminderSchedulerTest {
 
     }
 
+    @Test
+    public void testFuckFace(){
+        int[] weekdays = {
+                DateTimeConstants.MONDAY,
+                DateTimeConstants.TUESDAY,
+                DateTimeConstants.WEDNESDAY,
+                DateTimeConstants.THURSDAY,
+                DateTimeConstants.FRIDAY,
+                DateTimeConstants.SATURDAY,
+                DateTimeConstants.SUNDAY
+        };
+    }
 
 }
