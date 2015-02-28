@@ -36,6 +36,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String WENT = "went";
     public static final String ISBREAK = "isbreak";
     public static final String WEEK_OF_YEAR = "weekofyear";
+    public static final String MONTH_OF_YEAR = "monthofyear";
 
     public static final String DATE = "date";
     public static final String DURATION = "duration";
@@ -49,6 +50,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_UPDATE_PARTICULAR_LOG_ENTRY = "ACTION_UPDATE_PARTICULAR_LOG_ENTRY";
     private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
     private static final String ACTION_GET_WEEKS = "ACTION_GET_WEEKS";
+    private static final String ACTION_GET_MONTHS = "ACTION_GET_MONTHS";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -59,6 +61,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_UPDATE_PARTICULAR_LOG_ENTRY = 5;
     private static final int KEY_GET_MONTHLY_SUMMARY = 6;
     private static final int KEY_GET_GET_WEEKS = 7;
+    private static final int KEY_GET_GET_MONTHS = 8;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
@@ -69,6 +72,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY);
     public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
     public static final Uri URI_GET_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
+    public static final Uri URI_GET_GET_MONTHS = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHS);
 
     private static UriMatcher uriMatcher;
 
@@ -83,6 +87,7 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHLY_SUMMARY, KEY_GET_MONTHLY_SUMMARY);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
+        uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
     }
 
     private DatabaseOpenHelper db;
@@ -136,6 +141,7 @@ public class CameAndWentProvider extends ContentProvider {
         ContentValues cv = new ContentValues();
         cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
         cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(dt.getMillis()));
+        cv.put(MONTH_OF_YEAR, TimeConverter.extractMonth(dt.getMillis()));
         dt = dt.withHourOfDay(firstHour);
         cv.put(CAME, dt.getMillis());
         dt = dt.withHourOfDay(secondHour);
@@ -148,6 +154,10 @@ public class CameAndWentProvider extends ContentProvider {
         SQLiteDatabase sdb = db.getReadableDatabase();
         Cursor c;
         switch (uriMatcher.match(uri)){
+            case KEY_GET_GET_MONTHS:
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, MONTH_OF_YEAR}, null, null, MONTH_OF_YEAR, null, null, null);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_MONTHS);
+                return c;
             case KEY_GET_GET_WEEKS:
                 c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, null, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_WEEKS);
@@ -183,9 +193,9 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_CAME:
                 long came = values.getAsLong(CAME);
                 long date = TimeConverter.extractDate(came);
-                int week = TimeConverter.extractWeek(came);
                 values.put(DATE, date);
-                values.put(WEEK_OF_YEAR, week);
+                values.put(WEEK_OF_YEAR, TimeConverter.extractWeek(came));
+                values.put(MONTH_OF_YEAR, TimeConverter.extractMonth(came));
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
                 int numberOfEventsToday = query(URI_GET_DETAILS, null, String.format("%S=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();
@@ -261,11 +271,12 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 34;
+        private static final int DATABASE_VERSION = 35;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
                 WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
+                MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 CAME + " INTEGER NOT NULL," +
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
@@ -297,6 +308,7 @@ public class CameAndWentProvider extends ContentProvider {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
+            Cursor c = null;
             for(int version = oldVersion; version <= newVersion; version++){
                 switch (version){
                     case 16:
@@ -308,7 +320,7 @@ public class CameAndWentProvider extends ContentProvider {
                     case 32:
                         db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
                     case 33:
-                        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
+                        c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
                             ContentValues cv = new ContentValues();
                             cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getLong(c.getColumnIndex(CAME))));
@@ -316,8 +328,19 @@ public class CameAndWentProvider extends ContentProvider {
                         }
                         c.close();
                         break;
+                    case 35:
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                        c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
+                        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+                            ContentValues cv = new ContentValues();
+                            cv.put(MONTH_OF_YEAR, TimeConverter.extractMonth(c.getLong(c.getColumnIndex(CAME))));
+                            db.update(TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
+                        }
+                        c.close();
+                        break;
                 }
             }
+            if(c != null) c.close();
             onCreate(db);
         }
     }

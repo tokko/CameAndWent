@@ -18,4 +18,18 @@
         <item>6</item>
         <item>7</item>
     </string-array>
+    <string-array name="months">
+        <item>Jan</item>
+        <item>Feb</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Oct</item>
+        <item>Sep</item>
+        <item>Nov</item>
+        <item>Dec</item>
+    </string-array>
 </resources>

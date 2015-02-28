@@ -80,10 +80,11 @@ public class TimeConverter {
         return time/DateTimeConstants.MILLIS_PER_HOUR;
     }
 
-    public static int getCurrentWeek(){
-        return extractWeek(System.currentTimeMillis());
-    }
     public static int extractWeek(long time) {
        return new DateTime(time).getWeekOfWeekyear();
+    }
+
+    public static int extractMonth(long time) {
+        return new DateTime(time).getMonthOfYear();
     }
 }
