@@ -23,9 +23,6 @@ public class ReminderScheduler extends BroadcastReceiver{
     public static final int weeklyReminderNotificationId = 2;
     private Context context;
 
-    public ReminderScheduler(){
-        defaultPrefs = null;
-    }
     public ReminderScheduler(Context context){
         this.context = context;
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -62,9 +59,6 @@ public class ReminderScheduler extends BroadcastReceiver{
         return dt;
     }
 
-    public Notification buildWeeklyNotification(){
-        return buildWeeklyNotification(context);
-    }
     public Notification buildWeeklyNotification(Context context){
         if(defaultPrefs == null)
             defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -81,6 +75,22 @@ public class ReminderScheduler extends BroadcastReceiver{
         return nb.build();
     }
 
+    public Notification buildMonthlyNotification(Context context){
+        if(defaultPrefs == null)
+            defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        Notification.Builder nb = new Notification.Builder(context);
+        if(defaultPrefs.getBoolean("monthly_reminder_vibrate", false))
+            nb.setVibrate(new long[]{0, 1000});
+        else
+            nb.setVibrate(new long[]{0});
+        nb.setContentTitle("Time to submit time report!");
+        nb.setSmallIcon(R.drawable.ic_launcher);
+        if(defaultPrefs.getBoolean("monthly_reminder_sound", false))
+            nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_MONTHLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));
+        return nb.build();
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -88,6 +98,11 @@ public class ReminderScheduler extends BroadcastReceiver{
             if(!defaultPrefs.getBoolean("weekly_reminders", false)) return;
             nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(weeklyReminderNotificationId, buildWeeklyNotification(context));
+        }
+        else if(intent.getAction().equals(ACTION_MONTHLY_REMINDER)){
+            if(!defaultPrefs.getBoolean("monthly_reminders", false)) return;
+            nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            nm.notify(monthlyReminderNotificationId, buildMonthlyNotification(context));
         }
     }
 }

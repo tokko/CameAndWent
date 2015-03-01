@@ -12,6 +12,7 @@ import roboguice.activity.RoboFragmentActivity;
 public class MainActivity extends RoboFragmentActivity implements LogFragment.LogFragmentHost{
     private static final String MAINACTIVITY_SETTINGS_KEY = "mainactivity";
     public static final String ACTION_WEEKLY_SUMMARY = "ACTION_WEEKLY_SUMMARY";
+    public static final String ACTION_MONTHLY_SUMMARY = "ACTION_MONTHLY_SUMMARY";
     private static final String HAS_SHOWN_SETTINGS = "hasshownsettings";
     private LogFragment logFragment;
     private PreferenceFragment preferenceFragment;
@@ -39,6 +40,9 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
         super.onResume();
         if(getIntent() != null && getIntent().getAction().equals(ACTION_WEEKLY_SUMMARY)){
             SummaryFragment.newInstance().show(getSupportFragmentManager(), "summary");
+        }
+        if(getIntent() != null && getIntent().getAction().equals(ACTION_MONTHLY_SUMMARY)){
+            SummaryFragment.newMonthlyInstance().show(getSupportFragmentManager(), "summary");
         }
     }
 
