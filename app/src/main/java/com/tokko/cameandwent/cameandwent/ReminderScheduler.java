@@ -42,9 +42,9 @@ public class ReminderScheduler extends BroadcastReceiver{
             if(!defaultPrefs.getString("weekly_reminder_time", "").contains(":")) return -1;
             DateTime dt = setTimeAndMinute(defaultPrefs.getString("weekly_reminder_time", "0:0"));
             int weekday = Integer.valueOf(defaultPrefs.getString("weekly_reminder_day", "0"));
-           // dt = dt.withDayOfWeek(weekday);
             DateTime now = TimeConverter.getCurrentTime();
-            while (dt.isBefore(now) || dt.getDayOfWeek() != weekday) dt = dt.withFieldAdded(DurationFieldType.days(), 1);
+            while (dt.isBefore(now)) dt = dt.withFieldAdded(DurationFieldType.days(), 1);
+            while (dt.getDayOfWeek() != weekday) dt = dt.withFieldAdded(DurationFieldType.days(), 1);
             long time = dt.getMillis();
             am.set(AlarmManager.RTC, time, pi);
             return time;

@@ -34,35 +34,32 @@ import roboguice.RoboGuice;
 @Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class ReminderSchedulerTest {
-    private DateTime alarmTime;
+    private DateTime weeklyAlarmTime;
     private DateTime monthlyAlarmTime;
     private DateTime currentTime;
 
     private AlarmManager alarmManager;
     private ShadowAlarmManager shadowAlarmManager;
-    private long currentEpochTime;
 
     @Before
     public void setup(){
-        alarmTime = new DateTime();
-        alarmTime = alarmTime.withDate(2010, 3, 4);
-        alarmTime = alarmTime.withTime(12, 30, 0, 0);
-        monthlyAlarmTime = alarmTime.dayOfMonth().withMaximumValue();
-        if(monthlyAlarmTime.getDayOfWeek() == DateTimeConstants.SUNDAY) monthlyAlarmTime.withFieldAdded(DurationFieldType.days(), -2);
-        if(monthlyAlarmTime.getDayOfWeek() == DateTimeConstants.SATURDAY) monthlyAlarmTime.withFieldAdded(DurationFieldType.days(), -1);
-        currentTime = new DateTime(alarmTime)
+        weeklyAlarmTime = new DateTime();
+        weeklyAlarmTime = weeklyAlarmTime.withDate(2010, 3, 4);
+        weeklyAlarmTime = weeklyAlarmTime.withTime(12, 30, 0, 0);
+        monthlyAlarmTime = getMonthlyAlarmTime(weeklyAlarmTime);
+        currentTime = new DateTime(weeklyAlarmTime)
                 .withFieldAdded(DurationFieldType.days(), -5)
                 .withFieldAdded(DurationFieldType.hours(), 3);
 
-        currentEpochTime = (TimeConverter.CURRENT_TIME = currentTime.getMillis());
+        TimeConverter.CURRENT_TIME = currentTime.getMillis();
         alarmManager = (AlarmManager) Robolectric.application.getSystemService(Context.ALARM_SERVICE);
         shadowAlarmManager = Robolectric.shadowOf(alarmManager);
         SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
         sharedPreferences.edit()
                 .putBoolean("enabled", true)
                 .putBoolean("weekly_reminders", true)
-                .putString("weekly_reminder_time", String.format("%d:%d", alarmTime.getHourOfDay(), alarmTime.getMinuteOfHour()))
-                .putString("weekly_reminder_day", String.valueOf(alarmTime.getDayOfWeek()))
+                .putString("weekly_reminder_time", String.format("%d:%d", weeklyAlarmTime.getHourOfDay(), weeklyAlarmTime.getMinuteOfHour()))
+                .putString("weekly_reminder_day", String.valueOf(weeklyAlarmTime.getDayOfWeek()))
                 .putBoolean("weekly_reminder_vibrate", true)
                 .putBoolean("weekly_reminder_sound", true)
                 .putBoolean("monthly_reminders", true)
@@ -70,6 +67,13 @@ public class ReminderSchedulerTest {
                 .putBoolean("monthly_reminder_vibrate", true)
                 .putBoolean("monthly_reminder_sound", true)
                 .apply();
+    }
+
+    private DateTime getMonthlyAlarmTime(DateTime alarmTime) {
+        DateTime dt =  alarmTime.dayOfMonth().withMaximumValue();
+        if(dt.getDayOfWeek() == DateTimeConstants.SUNDAY) dt.withFieldAdded(DurationFieldType.days(), -2);
+        if(dt.getDayOfWeek() == DateTimeConstants.SATURDAY) dt.withFieldAdded(DurationFieldType.days(), -1);
+        return dt;
     }
 
     @After
@@ -84,14 +88,10 @@ public class ReminderSchedulerTest {
         Assert.assertNotNull(shadowAlarmManager.getNextScheduledAlarm());
     }
 
+
     @Test
     public void scheduleWeeklyReminder_SchedulesAlarm_AtCorrectTime(){
-        Assert.assertNull(shadowAlarmManager.getNextScheduledAlarm());
-        long t = new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleWeeklyReminder();
-        Assert.assertEquals(""+(currentEpochTime - t)/ DateTimeConstants.MILLIS_PER_HOUR, alarmTime.getMillis(), t);
-        ShadowAlarmManager.ScheduledAlarm nextAlarm = shadowAlarmManager.getNextScheduledAlarm();
-        Assert.assertNotNull(nextAlarm);
-        Assert.assertEquals(""+(alarmTime.getMillis() - nextAlarm.triggerAtTime)/DateTimeConstants.MILLIS_PER_HOUR, alarmTime.getMillis(), nextAlarm.triggerAtTime);
+        assertAlarm_AtCorrectTime(new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleWeeklyReminder(), weeklyAlarmTime);
     }
 
     @Test
@@ -134,6 +134,12 @@ public class ReminderSchedulerTest {
 
     }
 
+    @Test
+    public void scheduleWeeklyReminder_OnReceive_SchedulesNewAlarm(){
+        Robolectric.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
+        assertAlarm_AtCorrectTime(weeklyAlarmTime);
+    }
+
 
     @Test
     public void scheduleMonthlyReminder_SchedulesAlarm(){
@@ -144,14 +150,26 @@ public class ReminderSchedulerTest {
 
     @Test
     public void scheduleMonthlyReminder_SchedulesAlarm_AtCorrectTime(){
-        Assert.assertNull(shadowAlarmManager.getNextScheduledAlarm());
-        long t = new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleMonthlyReminder();
-        Assert.assertEquals(""+(monthlyAlarmTime.getMillis() - t)/ DateTimeConstants.MILLIS_PER_HOUR, monthlyAlarmTime.getMillis(), t);
-        ShadowAlarmManager.ScheduledAlarm nextAlarm = shadowAlarmManager.getNextScheduledAlarm();
-        Assert.assertNotNull(nextAlarm);
-        Assert.assertEquals(""+(monthlyAlarmTime.getMillis() - nextAlarm.triggerAtTime)/DateTimeConstants.MILLIS_PER_HOUR, monthlyAlarmTime.getMillis(), nextAlarm.triggerAtTime);
+        assertAlarm_AtCorrectTime(new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleMonthlyReminder(), monthlyAlarmTime);
     }
 
+    private void assertAlarm_AtCorrectTime(DateTime alarmTime, int i){
+        assertAlarm_AtCorrectTime(alarmTime.getMillis(), alarmTime, i);
+    }
+    private void assertAlarm_AtCorrectTime(DateTime alarmTime){
+        assertAlarm_AtCorrectTime(alarmTime.getMillis(), alarmTime);
+    }
+
+    private void assertAlarm_AtCorrectTime(long t, DateTime alarmTime) {
+        assertAlarm_AtCorrectTime(t, alarmTime, 0);
+    }
+    private void assertAlarm_AtCorrectTime(long t, DateTime alarmTime, int i){
+        Assert.assertEquals(""+(alarmTime.getMillis() - t)/ DateTimeConstants.MILLIS_PER_HOUR, alarmTime.getMillis(), t);
+        ShadowAlarmManager.ScheduledAlarm nextAlarm = shadowAlarmManager.getScheduledAlarms().get(i);
+        Assert.assertNotNull(nextAlarm);
+        Assert.assertEquals("" + (alarmTime.getMillis() - nextAlarm.triggerAtTime) / DateTimeConstants.MILLIS_PER_HOUR, alarmTime.getMillis(), nextAlarm.triggerAtTime);
+    }
+    
     @Test
     public void scheduleMonthlyReminder_hasReceiverForIntent(){
         ShadowApplication shadowApplication = Robolectric.getShadowApplication();
@@ -174,5 +192,11 @@ public class ReminderSchedulerTest {
         Assert.assertNotNull("Expected shadow notification object", shadowNotification);
         Assert.assertEquals("Time to finalize monthly report!", shadowNotification.getContentTitle());
 
+    }
+
+    @Test
+    public void scheduleMonthlyReminder_OnReceive_SchedulesNewAlarm(){
+        Robolectric.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER));
+        assertAlarm_AtCorrectTime(monthlyAlarmTime, 1);
     }
 }
