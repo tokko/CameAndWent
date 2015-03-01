@@ -177,7 +177,7 @@ public class CameAndWentProvider extends ContentProvider {
                 return c;
             case KEY_GET_MONTHLY_SUMMARY:
                 c = sdb.rawQuery("SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
-                        " FROM " + VIEW_DURATION + " WHERE " + DATE + ">=? GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", selectionArgs);
+                        " FROM " + VIEW_DURATION + " WHERE " + MONTH_OF_YEAR + "=? GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", selectionArgs);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             default:
@@ -276,7 +276,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 35;
+        private static final int DATABASE_VERSION = 38;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
@@ -287,7 +287,7 @@ public class CameAndWentProvider extends ContentProvider {
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
 
         private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
-        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + WEEK_OF_YEAR + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
+        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + WEEK_OF_YEAR + ", " + MONTH_OF_YEAR + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
 
         private static final String CREATE_MONTH_SUMMARY_VIEW = "CREATE VIEW " + VIEW_MONTHLY_SUMMARY + " AS SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
                 " FROM " + VIEW_DURATION + " GROUP BY " + WEEK_OF_YEAR;
@@ -333,8 +333,11 @@ public class CameAndWentProvider extends ContentProvider {
                         }
                         c.close();
                         break;
-                    case 35:
+                    case 34:
                         db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                    case 36:
+                    case 37:
+                    case 35:
                         c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
                             ContentValues cv = new ContentValues();
