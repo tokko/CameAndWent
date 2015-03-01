@@ -44,7 +44,6 @@ public class ReminderSchedulerTest {
 
     @Before
     public void setup(){
-
         alarmTime = new DateTime();
         alarmTime = alarmTime.withDate(2010, 3, 4);
         alarmTime = alarmTime.withTime(12, 30, 0, 0);
@@ -92,7 +91,7 @@ public class ReminderSchedulerTest {
         Assert.assertEquals(""+(currentEpochTime - t)/ DateTimeConstants.MILLIS_PER_HOUR, alarmTime.getMillis(), t);
         ShadowAlarmManager.ScheduledAlarm nextAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertNotNull(nextAlarm);
-        Assert.assertEquals(""+(alarmTime.getMillis() - nextAlarm.triggerAtTime)/(1000*60*60), alarmTime.getMillis(), nextAlarm.triggerAtTime);
+        Assert.assertEquals(""+(alarmTime.getMillis() - nextAlarm.triggerAtTime)/DateTimeConstants.MILLIS_PER_HOUR, alarmTime.getMillis(), nextAlarm.triggerAtTime);
     }
 
     @Test
@@ -147,10 +146,10 @@ public class ReminderSchedulerTest {
     public void scheduleMonthlyReminder_SchedulesAlarm_AtCorrectTime(){
         Assert.assertNull(shadowAlarmManager.getNextScheduledAlarm());
         long t = new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleMonthlyReminder();
-        Assert.assertEquals(""+(currentEpochTime - t)/ DateTimeConstants.MILLIS_PER_HOUR, monthlyAlarmTime.getMillis(), t);
+        Assert.assertEquals(""+(monthlyAlarmTime.getMillis() - t)/ DateTimeConstants.MILLIS_PER_HOUR, monthlyAlarmTime.getMillis(), t);
         ShadowAlarmManager.ScheduledAlarm nextAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertNotNull(nextAlarm);
-        Assert.assertEquals(""+(monthlyAlarmTime.getMillis() - nextAlarm.triggerAtTime)/(1000*60*60), monthlyAlarmTime.getMillis(), nextAlarm.triggerAtTime);
+        Assert.assertEquals(""+(monthlyAlarmTime.getMillis() - nextAlarm.triggerAtTime)/DateTimeConstants.MILLIS_PER_HOUR, monthlyAlarmTime.getMillis(), nextAlarm.triggerAtTime);
     }
 
     @Test

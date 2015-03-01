@@ -31,6 +31,10 @@ public class ReminderScheduler extends BroadcastReceiver{
     }
 
     public long scheduleWeeklyReminder(){
+        return scheduleWeeklyReminder(context);
+    }
+
+    public long scheduleWeeklyReminder(Context context){
         if(!defaultPrefs.getBoolean("enabled", false)) return -1;
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_WEEKLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -51,9 +55,13 @@ public class ReminderScheduler extends BroadcastReceiver{
         }
     }
     public long scheduleMonthlyReminder(){
-        return scheduleMonthlyReminder(TimeConverter.getCurrentTime());
+        return scheduleMonthlyReminder(context);
     }
-    public long scheduleMonthlyReminder(DateTime dt){
+
+    public long scheduleMonthlyReminder(Context context){
+        return scheduleMonthlyReminder(context, TimeConverter.getCurrentTime());
+    }
+    public long scheduleMonthlyReminder(Context context, DateTime dt){
         if(!defaultPrefs.getBoolean("enabled", false)) return -1;
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_WEEKLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -63,10 +71,10 @@ public class ReminderScheduler extends BroadcastReceiver{
                     .dayOfMonth().withMaximumValue();
             DateTime now = TimeConverter.getCurrentTime();
             while(dt.getDayOfWeek() == DateTimeConstants.SUNDAY || dt.getDayOfWeek() == DateTimeConstants.SATURDAY) dt = dt.withFieldAdded(DurationFieldType.days(), -1);
-            if(dt.isBefore(now)) return scheduleMonthlyReminder(now.withFieldAdded(DurationFieldType.months(), 1));
+            if(dt.isBefore(now)) return scheduleMonthlyReminder(context, now.withFieldAdded(DurationFieldType.months(), 1));
             long time = dt.getMillis();
             am.set(AlarmManager.RTC, time, pi);
-            return time;
+            return dt.getMillis();
         }
         else{
             am.cancel(pi);
@@ -110,7 +118,7 @@ public class ReminderScheduler extends BroadcastReceiver{
             nb.setVibrate(new long[]{0, 1000});
         else
             nb.setVibrate(new long[]{0});
-        nb.setContentTitle("Time to submit time report!");
+        nb.setContentTitle("Time to finalize monthly report!");
         nb.setSmallIcon(R.drawable.ic_launcher);
         if(defaultPrefs.getBoolean("monthly_reminder_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -131,7 +139,7 @@ public class ReminderScheduler extends BroadcastReceiver{
             nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(monthlyReminderNotificationId, buildMonthlyNotification(context));
         }
-        scheduleWeeklyReminder();
-        scheduleMonthlyReminder();
+        scheduleWeeklyReminder(context);
+        scheduleMonthlyReminder(context);
     }
 }
