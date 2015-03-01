@@ -63,11 +63,11 @@ public class ReminderScheduler extends BroadcastReceiver{
     }
     public long scheduleMonthlyReminder(Context context, DateTime dt){
         if(!defaultPrefs.getBoolean("enabled", false)) return -1;
-        PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_WEEKLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_MONTHLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        if(defaultPrefs.getBoolean("weekly_reminders", false)) {
-            if(!defaultPrefs.getString("weekly_reminder_time", "").contains(":")) return -1;
-            dt = setTimeAndMinute(dt, defaultPrefs.getString("weekly_reminder_time", "0:0"))
+        if(defaultPrefs.getBoolean("monthly_reminders", false)) {
+            if(!defaultPrefs.getString("monthly_reminder_time", "").contains(":")) return -1;
+            dt = setTimeAndMinute(dt, defaultPrefs.getString("monthly_reminder_time", "0:0"))
                     .dayOfMonth().withMaximumValue();
             DateTime now = TimeConverter.getCurrentTime();
             while(dt.getDayOfWeek() == DateTimeConstants.SUNDAY || dt.getDayOfWeek() == DateTimeConstants.SATURDAY) dt = dt.withFieldAdded(DurationFieldType.days(), -1);

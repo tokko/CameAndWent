@@ -11,6 +11,7 @@ public class BootReceiver extends WakefulBroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         context.sendBroadcast(new Intent(context, GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
         new ReminderScheduler(context).scheduleWeeklyReminder();
+        new ReminderScheduler(context).scheduleMonthlyReminder();
         Toast.makeText(context, "CameAndWent service started", Toast.LENGTH_SHORT).show();
     }
 }
