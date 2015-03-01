@@ -29,7 +29,6 @@ public class CameAndWentProvider extends ContentProvider {
 
     private static final String TABLE_LOG_NAME = "cameandwent";
     private static final String VIEW_DURATION = "durations";
-    private static final String VIEW_MONTHLY_SUMMARY = "monthlysummar";
 
     public static final String ID = "_id";
     public static final String CAME = "came";
@@ -290,8 +289,6 @@ public class CameAndWentProvider extends ContentProvider {
         private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
         private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + WEEK_OF_YEAR + ", " + MONTH_OF_YEAR + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
 
-        private static final String CREATE_MONTH_SUMMARY_VIEW = "CREATE VIEW " + VIEW_MONTHLY_SUMMARY + " AS SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
-                " FROM " + VIEW_DURATION + " GROUP BY " + WEEK_OF_YEAR;
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -305,10 +302,8 @@ public class CameAndWentProvider extends ContentProvider {
 
 
         private void createDurationView(SQLiteDatabase db) {
-            db.execSQL("DROP VIEW IF EXISTS " + VIEW_MONTHLY_SUMMARY);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
             db.execSQL(CREATE_DURATION_VIEW);
-            db.execSQL(CREATE_MONTH_SUMMARY_VIEW);
         }
 
         @Override
