@@ -178,6 +178,7 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_GET_MONTHLY_SUMMARY:
                 c = sdb.rawQuery("SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
                         " FROM " + VIEW_DURATION + " WHERE " + MONTH_OF_YEAR + "=? GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", selectionArgs);
+                c = sdb.query(VIEW_DURATION, new String[]{ID, WEEK_OF_YEAR, "SUM(" + DURATION + ") AS " + DURATION}, selection, selectionArgs, WEEK_OF_YEAR, null, WEEK_OF_YEAR + " ASC", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             default:
