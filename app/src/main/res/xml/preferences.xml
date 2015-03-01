@@ -138,6 +138,38 @@
             android:title="Vibrate"
             android:key="weekly_reminder_vibrate"
             android:dependency="weekly_reminders" />
-        </PreferenceCategory>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:dependency="enabled"
+        android:defaultValue="false"
+        android:key="monthly_reminders_container"
+        android:title="Reminders">
+
+        <CheckBoxPreference
+            android:dependency="monthly_reminders_container"
+            android:defaultValue="true"
+            android:title="monthly Reminder"
+            android:summaryOff="monthly reminders are disabled"
+            android:summaryOn="Reminder will notify at this time on last work day of month"
+            android:key="monthly_reminders"/>
+
+        <com.tokko.cameandwent.cameandwent.TimePreference
+            android:key="monthly_reminder_time"
+            android:dependency="monthly_reminders"
+            android:title="Reminder time"/>
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="Sound"
+            android:key="monthly_reminder_sound"
+            android:dependency="monthly_reminders" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="Vibrate"
+            android:key="monthly_reminder_vibrate"
+            android:dependency="monthly_reminders" />
+    </PreferenceCategory>
 
 </PreferenceScreen>
