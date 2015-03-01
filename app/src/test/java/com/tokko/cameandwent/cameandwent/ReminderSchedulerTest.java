@@ -126,18 +126,4 @@ public class ReminderSchedulerTest {
         Assert.assertEquals("Time to submit time report!", shadowNotification.getContentTitle());
 
     }
-
-    @Test
-    public void testFuckFace(){
-        int[] weekdays = {
-                DateTimeConstants.MONDAY,
-                DateTimeConstants.TUESDAY,
-                DateTimeConstants.WEDNESDAY,
-                DateTimeConstants.THURSDAY,
-                DateTimeConstants.FRIDAY,
-                DateTimeConstants.SATURDAY,
-                DateTimeConstants.SUNDAY
-        };
-    }
-
 }
