@@ -149,7 +149,7 @@
         <CheckBoxPreference
             android:dependency="monthly_reminders_container"
             android:defaultValue="true"
-            android:title="monthly Reminder"
+            android:title="Monthly Reminder"
             android:summaryOff="monthly reminders are disabled"
             android:summaryOn="Reminder will notify at this time on last work day of month"
             android:key="monthly_reminders"/>
