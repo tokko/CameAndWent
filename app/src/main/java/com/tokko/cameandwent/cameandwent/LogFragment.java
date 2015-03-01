@@ -133,6 +133,8 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
         else{
             adapter.setChildrenCursor(loader.getId(), cursor);
         }
+        if(listView.getCount() > 0)
+            listView.expandGroup(listView.getCount()-1);
     }
 
     @Override

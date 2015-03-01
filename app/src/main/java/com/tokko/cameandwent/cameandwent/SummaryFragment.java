@@ -125,6 +125,8 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             adapter.setChildrenCursor(loader.getId(), data);
         else
             adapter.setGroupCursor(data);
+        if(expandableListView.getCount() > 0)
+            expandableListView.expandGroup(expandableListView.getCount()-1);
     }
 
     @Override

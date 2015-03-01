@@ -110,10 +110,7 @@ public class CameAndWentProvider extends ContentProvider {
     private void seed(){
         DateTime dtNow = new DateTime();
 
-        DateTime dt = new DateTime();
-        dt = dt.withTime(0, 0, 0, 0);
-        dt = dt.withFieldAdded(DurationFieldType.weeks(), -WEEKS_BACK+1);
-        dt = dt.withDayOfWeek(DateTimeConstants.MONDAY);
+        DateTime dt = getSeedDateTime();
         ArrayList<ContentValues> cvs = new ArrayList<>();
         for(; dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
             if(dt.getDayOfWeek() == DateTimeConstants.SATURDAY || dt.getDayOfWeek() == DateTimeConstants.SUNDAY) continue;
@@ -137,6 +134,14 @@ public class CameAndWentProvider extends ContentProvider {
         sdb.endTransaction();
     }
 
+    static DateTime getSeedDateTime() {
+        DateTime dt = new DateTime();
+        dt = dt.withTime(0, 0, 0, 0);
+        dt = dt.withFieldAdded(DurationFieldType.weeks(), -WEEKS_BACK+1);
+        dt = dt.withDayOfWeek(DateTimeConstants.MONDAY);
+        return dt;
+    }
+
     private ContentValues buildSeedValues(DateTime dt, int firstHour, int secondHour) {
         ContentValues cv = new ContentValues();
         cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
@@ -155,11 +160,11 @@ public class CameAndWentProvider extends ContentProvider {
         Cursor c;
         switch (uriMatcher.match(uri)){
             case KEY_GET_GET_MONTHS:
-                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, MONTH_OF_YEAR}, null, null, MONTH_OF_YEAR, null, null, null);
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, MONTH_OF_YEAR}, null, null, MONTH_OF_YEAR, null, sortOrder, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_MONTHS);
                 return c;
             case KEY_GET_GET_WEEKS:
-                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, null, null);
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, sortOrder, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_WEEKS);
                 return c;
             case KEY_GET_LOG_ENTRIES:
