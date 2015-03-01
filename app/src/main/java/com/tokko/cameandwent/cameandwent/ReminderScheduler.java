@@ -12,6 +12,7 @@ import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 
 public class ReminderScheduler extends BroadcastReceiver{
@@ -23,6 +24,7 @@ public class ReminderScheduler extends BroadcastReceiver{
     public static final int weeklyReminderNotificationId = 2;
     private Context context;
 
+    public ReminderScheduler(){}
     public ReminderScheduler(Context context){
         this.context = context;
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -48,9 +50,34 @@ public class ReminderScheduler extends BroadcastReceiver{
             return -1;
         }
     }
+    public long scheduleMonthlyReminder(){
+        return scheduleMonthlyReminder(TimeConverter.getCurrentTime());
+    }
+    public long scheduleMonthlyReminder(DateTime dt){
+        if(!defaultPrefs.getBoolean("enabled", false)) return -1;
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(context, ReminderScheduler.class).setAction(ACTION_WEEKLY_REMINDER), PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if(defaultPrefs.getBoolean("weekly_reminders", false)) {
+            if(!defaultPrefs.getString("weekly_reminder_time", "").contains(":")) return -1;
+            dt = setTimeAndMinute(dt, defaultPrefs.getString("weekly_reminder_time", "0:0"))
+                    .dayOfMonth().withMaximumValue();
+            DateTime now = TimeConverter.getCurrentTime();
+            while(dt.getDayOfWeek() == DateTimeConstants.SUNDAY || dt.getDayOfWeek() == DateTimeConstants.SATURDAY) dt = dt.withFieldAdded(DurationFieldType.days(), -1);
+            if(dt.isBefore(now)) return scheduleMonthlyReminder(now.withFieldAdded(DurationFieldType.months(), 1));
+            long time = dt.getMillis();
+            am.set(AlarmManager.RTC, time, pi);
+            return time;
+        }
+        else{
+            am.cancel(pi);
+            return -1;
+        }
+    }
 
-    private DateTime setTimeAndMinute(String time){
-        DateTime dt = TimeConverter.getCurrentTime();
+    private DateTime setTimeAndMinute(String time) {
+        return setTimeAndMinute(TimeConverter.getCurrentTime(), time);
+    }
+    private DateTime setTimeAndMinute(DateTime dt, String time){
         String[] split = time.split(":");
         int hour = Integer.valueOf(split[0]);
         int minute = Integer.valueOf(split[1]);
@@ -104,5 +131,7 @@ public class ReminderScheduler extends BroadcastReceiver{
             nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(monthlyReminderNotificationId, buildMonthlyNotification(context));
         }
+        scheduleWeeklyReminder();
+        scheduleMonthlyReminder();
     }
 }
