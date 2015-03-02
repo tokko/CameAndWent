@@ -28,7 +28,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     @Override
     protected void onStart() {
         super.onStart();
-        getFragmentManager().beginTransaction().replace(android.R.id.content, logFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, logFragment).commit();
         if(!getSharedPreferences(MAINACTIVITY_SETTINGS_KEY, MODE_PRIVATE).getBoolean(HAS_SHOWN_SETTINGS, false)) {
             showSettings();
             getSharedPreferences(MAINACTIVITY_SETTINGS_KEY, MODE_PRIVATE).edit().putBoolean(HAS_SHOWN_SETTINGS, true).commit();

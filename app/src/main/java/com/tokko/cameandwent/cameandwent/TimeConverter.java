@@ -23,7 +23,7 @@ public class TimeConverter {
     }
 
     public static long hourAndMinuteToMillis(int hour, int minute) {
-        return hourAndMinuteToMillis(System.currentTimeMillis(), hour, minute);
+        return hourAndMinuteToMillis(getCurrentTime().getMillis(), hour, minute);
     }
     public static long hourAndMinuteToMillis(long time, int hour, int minute){
         DateTime dt = new DateTime(time);
