@@ -110,7 +110,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         long id = ContentUris.parseId(postInsertUri);
         assertTrue(-1 != id);
         Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
-        assertEquals(pre+2, post.getCount()); //new entry + break
+        assertEquals(pre+1, post.getCount()); //new entry + break
         post.close();
     }
 

@@ -197,10 +197,7 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_CAME:
                 long came = values.getAsLong(CAME);
-                long date = TimeConverter.extractDate(came);
-                values.put(DATE, date);
-                values.put(WEEK_OF_YEAR, TimeConverter.extractWeek(came));
-                values.put(MONTH_OF_YEAR, TimeConverter.extractMonth(came));
+                long date = populateContentValues(values);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
                 int numberOfEventsToday = query(URI_GET_DETAILS, null, String.format("%S=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();
@@ -222,6 +219,18 @@ public class CameAndWentProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI");
         }
+    }
+
+    private long populateContentValues(ContentValues values) {
+        return populateContentValues(values, CAME);
+    }
+    private long populateContentValues(ContentValues values, String field) {
+        long fieldData = values.getAsLong(field);
+        long date = TimeConverter.extractDate(fieldData);
+        values.put(DATE, date);
+        values.put(WEEK_OF_YEAR, TimeConverter.extractWeek(fieldData));
+        values.put(MONTH_OF_YEAR, TimeConverter.extractMonth(fieldData));
+        return date;
     }
 
     @Override
@@ -264,6 +273,7 @@ public class CameAndWentProvider extends ContentProvider {
                 }
                 return updated;
             case KEY_UPDATE_PARTICULAR_LOG_ENTRY:
+                populateContentValues(values, WENT);
                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
