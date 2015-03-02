@@ -68,6 +68,8 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         dateButton.setOnClickListener(this);
         wentTimePicker.setIs24HourView(true);
         cameTimePicker.setIs24HourView(true);
+        DateTime dt = TimeConverter.getCurrentTime();
+        dateButton.setText(dt.getYear() + "-" + dt.getMonthOfYear() + "-" + dt.getDayOfMonth());
 
         if(savedInstanceState != null){
             long cameTime = savedInstanceState.getLong(EXTRA_CAME);
@@ -114,7 +116,6 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         wentTimePicker.setVisibility(wentTime == 0 ? View.GONE : View.VISIBLE);
 
         dateButton.setText(sdf.format(new Date(cameTime)));
-        okButton.setEnabled(true);
 
         cameTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(cameTime));
         cameTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(cameTime));
@@ -172,7 +173,6 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                         dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
-                        okButton.setEnabled(true);
                     }
                 }, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth()).show();
                 break;

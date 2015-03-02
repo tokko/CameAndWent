@@ -71,7 +71,6 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:text="Ok"
-            android:enabled="false"
             android:id="@+id/okButton"
             style="?android:buttonBarButtonStyle"
             android:layout_height="wrap_content" />
