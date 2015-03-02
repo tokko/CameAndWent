@@ -38,10 +38,10 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     @Override
     protected void onResume() {
         super.onResume();
-        if(getIntent() != null && getIntent().getAction().equals(ACTION_WEEKLY_SUMMARY)){
+        if(getIntent() != null && getIntent().getAction() != null && getIntent().getAction().equals(ACTION_WEEKLY_SUMMARY)){
             SummaryFragment.newInstance().show(getSupportFragmentManager(), "summary");
         }
-        if(getIntent() != null && getIntent().getAction().equals(ACTION_MONTHLY_SUMMARY)){
+        if(getIntent() != null && getIntent().getAction() != null && getIntent().getAction().equals(ACTION_MONTHLY_SUMMARY)){
             SummaryFragment.newMonthlyInstance().show(getSupportFragmentManager(), "summary");
         }
     }

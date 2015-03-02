@@ -77,6 +77,7 @@ public class ClockManager {
         else
             nb.setVibrate(new long[]{0});
         nb.setContentTitle(s);
+        nb.setAutoCancel(true);
         nb.setSmallIcon(R.drawable.ic_launcher);
         if(defaultPrefs.getBoolean("notifications_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
