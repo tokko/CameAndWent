@@ -214,6 +214,38 @@ public class CameAndWentProviderRoboTests extends TestCase{
     }
 
     @Test
+    public void updateEntry_ImplicitFieldsUpdated(){
+        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        assertNotNull(toEdit);
+        assertTrue(toEdit.moveToLast());
+        long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
+
+
+        DateTime dt = TimeConverter.getCurrentTime();
+        dt = dt.withFieldAdded(DurationFieldType.months(), 1);
+
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.CAME, dt.getMillis());
+        cv.put(CameAndWentProvider.WENT, dt.withFieldAdded(DurationFieldType.hours(), 4).getMillis());
+
+        int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+        assertEquals(1, updated);
+
+        Cursor afterUpdate = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        assertNotNull(afterUpdate);
+        assertEquals(1, afterUpdate.getCount());
+        assertTrue(afterUpdate.moveToFirst());
+        assertEquals(id, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.ID)));
+        assertEquals(dt.getMillis(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.CAME)));
+        assertEquals(dt.withFieldAdded(DurationFieldType.hours(), 4).getMillis(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.WENT)));
+        assertEquals(dt.getMonthOfYear(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
+        assertEquals(dt.getWeekOfWeekyear(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
+        assertEquals(TimeConverter.extractDate(dt.getMillis()), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.DATE)));
+        toEdit.close();
+        afterUpdate.close();
+    }
+
+    @Test
     public void testAutomaticBreaks(){
         mContentResolver.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
         long time = 1000*60*60*12;

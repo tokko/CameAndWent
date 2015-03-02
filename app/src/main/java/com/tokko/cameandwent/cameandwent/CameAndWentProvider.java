@@ -222,10 +222,13 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private long populateContentValues(ContentValues values) {
-        return populateContentValues(values, CAME);
-    }
-    private long populateContentValues(ContentValues values, String field) {
-        long fieldData = values.getAsLong(field);
+        long fieldData = 0;
+        if(values.containsKey(CAME))
+            fieldData = values.getAsLong(CAME);
+        else if(values.containsKey(WENT))
+            fieldData = values.getAsLong(WENT);
+        else
+            throw new IllegalStateException("FUCK EVERYTHING :<");
         long date = TimeConverter.extractDate(fieldData);
         values.put(DATE, date);
         values.put(WEEK_OF_YEAR, TimeConverter.extractWeek(fieldData));
@@ -273,7 +276,7 @@ public class CameAndWentProvider extends ContentProvider {
                 }
                 return updated;
             case KEY_UPDATE_PARTICULAR_LOG_ENTRY:
-                populateContentValues(values, WENT);
+                populateContentValues(values);
                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
