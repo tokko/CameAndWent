@@ -87,4 +87,13 @@ public class TimeConverter {
     public static int extractMonth(long time) {
         return new DateTime(time).getMonthOfYear();
     }
+
+    public static DateTime parseDate(String date){
+        String[] split = date.split("-");
+        int year = Integer.valueOf(split[0]);
+        int month  = Integer.valueOf(split[1]);
+        int day = Integer.valueOf(split[2]);
+        return new DateTime(year, month, day, 0, 0, 0, 0);
+    }
+
 }
