@@ -20,8 +20,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowPreferenceManager;
 
-import java.util.Calendar;
-
 @Config(emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
 public class CameAndWentProviderRoboTests extends TestCase{
@@ -44,23 +42,6 @@ public class CameAndWentProviderRoboTests extends TestCase{
                 .putString("average_break_duration", "00:30")
                 .apply();
         mShadowContentResolver.call(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, CameAndWentProvider.SEED_METHOD, null, null);
-    }
-
-    @Test
-    public void testWeeks(){
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
-        Calendar cal = Calendar.getInstance();
-        int[] weeks = new int[52];
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
-            long date = c.getLong(c.getColumnIndex(CameAndWentProvider.DATE));
-            int week = c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
-            weeks[week]++;
-            cal.setTimeInMillis(date);
-            assertEquals(week, cal.get(Calendar.WEEK_OF_YEAR));
-        }
-        for (int week : weeks)
-            assertFalse(weeks[week] > 1);
-        c.close();
     }
 
    @Test
