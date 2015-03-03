@@ -4,7 +4,9 @@ import junit.framework.TestCase;
 
 import org.joda.time.DateTime;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 public class TimeConverterTest extends TestCase {
@@ -86,5 +88,13 @@ public class TimeConverterTest extends TestCase {
         DateTime dt = new DateTime();
         int week = dt.getMonthOfYear();
         assertEquals(week, TimeConverter.extractMonth(dt.getMillis()));
+    }
+
+    public void testParseDate(){
+        DateTime dt = new DateTime();
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(dt.getMillis()));
+        dt = dt.withTime(0, 0, 0, 0);
+        DateTime res = TimeConverter.parseDate(date);
+        assertEquals(dt, res);
     }
 }

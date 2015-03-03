@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -10,24 +11,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
+
+import org.joda.time.DateTime;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
-public class LogEntryEditorFragment extends RoboDialogFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> {
+public class LogEntryEditorFragment extends RoboDialogFragment implements View.OnClickListener, android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private static final String EXTRA_ID = "extra_id";
     private static final String EXTRA_CAME = "extra_came";
     private static final String EXTRA_WENT = "extra_went";
 
     @InjectView(R.id.editor_came) private TimePicker cameTimePicker;
     @InjectView(R.id.editor_went) private TimePicker wentTimePicker;
-    @InjectView(R.id.stillAtWorkCheckBox) private CheckBox stillAtWorkCheckBox;
+    @InjectView(R.id.isBreakCheckBox) private CheckBox isBreakCheckBox;
     @InjectView(R.id.cancelButton) private Button cancelButton;
     @InjectView(R.id.okButton) private Button okButton;
     @InjectView(R.id.log_edit_went_container) private LinearLayout wentContainer;
+    @InjectView(R.id.date) private Button dateButton;
 
     private long id;
 
@@ -35,6 +43,13 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         LogEntryEditorFragment f = new LogEntryEditorFragment();
         Bundle b = new Bundle();
         b.putLong(EXTRA_ID, id);
+        f.setArguments(b);
+        return f;
+    }
+
+    public static LogEntryEditorFragment newInstance(){
+        LogEntryEditorFragment f = new LogEntryEditorFragment();
+        Bundle b = new Bundle();
         f.setArguments(b);
         return f;
     }
@@ -47,11 +62,14 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getDialog().setTitle("Edit entry");
         cancelButton.setOnClickListener(this);
         okButton.setOnClickListener(this);
-        stillAtWorkCheckBox.setOnCheckedChangeListener(this);
+        dateButton.setOnClickListener(this);
         wentTimePicker.setIs24HourView(true);
         cameTimePicker.setIs24HourView(true);
+        DateTime dt = TimeConverter.getCurrentTime();
+        dateButton.setText(dt.getYear() + "-" + dt.getMonthOfYear() + "-" + dt.getDayOfMonth());
 
         if(savedInstanceState != null){
             long cameTime = savedInstanceState.getLong(EXTRA_CAME);
@@ -62,10 +80,10 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
             wentTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(wentTime));
             wentTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(wentTime));
 
-            id = savedInstanceState.getLong(EXTRA_ID);
+            id = savedInstanceState.getLong(EXTRA_ID, -1);
         }
         else
-            id = getArguments().getLong(EXTRA_ID);
+            id = getArguments().getLong(EXTRA_ID, -1);
 
     }
 
@@ -95,7 +113,9 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         long cameTime = data.getLong(data.getColumnIndex(CameAndWentProvider.CAME));
         long wentTime = data.getLong(data.getColumnIndex(CameAndWentProvider.WENT));
 
-        stillAtWorkCheckBox.setChecked(wentTime == 0);
+        wentTimePicker.setVisibility(wentTime == 0 ? View.GONE : View.VISIBLE);
+
+        dateButton.setText(sdf.format(new Date(cameTime)));
 
         cameTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(cameTime));
         cameTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(cameTime));
@@ -120,6 +140,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     @Override
     public void onStart() {
         super.onStart();
+        if(id > -1)
         getLoaderManager().initLoader(1, null, this);
     }
 
@@ -129,23 +150,32 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         getLoaderManager().destroyLoader(1);
     }
 
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.okButton:
-                ContentValues cv = new ContentValues();
-                cv.put(CameAndWentProvider.CAME, TimeConverter.hourAndMinuteToMillis(cameTimePicker.getCurrentHour(), cameTimePicker.getCurrentMinute()));
+                final ContentValues cv = new ContentValues();
+                cv.put(CameAndWentProvider.ISBREAK, isBreakCheckBox.isChecked()?1:0);
+                cv.put(CameAndWentProvider.CAME, TimeConverter.parseDate(dateButton.getText().toString()).withTime(cameTimePicker.getCurrentHour(), cameTimePicker.getCurrentMinute(), 0, 0).getMillis());
                 if(wentContainer.getVisibility() == View.VISIBLE)
-                    cv.put(CameAndWentProvider.WENT, TimeConverter.hourAndMinuteToMillis(wentTimePicker.getCurrentHour(), wentTimePicker.getCurrentMinute()));
-                getActivity().getContentResolver().update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, CameAndWentProvider.ID + "=?", new String[]{String.valueOf(id)});
+                    cv.put(CameAndWentProvider.WENT, TimeConverter.parseDate(dateButton.getText().toString()).withTime(wentTimePicker.getCurrentHour(), wentTimePicker.getCurrentMinute(), 0, 0).getMillis());
+                if(id > -1)
+                    getActivity().getContentResolver().update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, CameAndWentProvider.ID + "=?", new String[]{String.valueOf(id)});
+                else
+                    getActivity().getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
             case R.id.cancelButton:
                 dismiss();
                 break;
+            case R.id.date:
+                DateTime dt = TimeConverter.getCurrentTime();
+                new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+                    }
+                }, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth()).show();
+                break;
         }
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        wentTimePicker.setVisibility(isChecked?View.GONE:View.VISIBLE);
     }
 }

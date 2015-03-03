@@ -2,16 +2,15 @@ package com.tokko.cameandwent.cameandwent;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListFragment;
-import android.app.LoaderManager;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
-import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,7 +27,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class LogFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener, View.OnLongClickListener, TimePickerDialog.OnTimeSetListener {
+import roboguice.fragment.RoboListFragment;
+
+public class LogFragment extends RoboListFragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener, View.OnLongClickListener, TimePickerDialog.OnTimeSetListener {
     private LogCursorTreeAdapter adapter;
     private ClockManager cm;
     private ToggleButton tb;
@@ -96,6 +97,9 @@ public class LogFragment extends ListFragment implements LoaderManager.LoaderCal
                     }
                 });
                 adb.show();
+                return true;
+            case R.id.add_entry:
+                LogEntryEditorFragment.newInstance().show(getFragmentManager(), "");
                 return true;
         }
         return super.onOptionsItemSelected(item);

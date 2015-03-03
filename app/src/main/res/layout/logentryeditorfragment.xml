@@ -5,9 +5,27 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="Select date"
+            android:id="@+id/date"
+            android:layout_height="wrap_content" />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:paddingRight="12dp"
+            android:id="@+id/isBreakCheckBox"
+            android:text="Break"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_weight="1"
         android:layout_height="0dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:text="Came:"
@@ -29,18 +47,12 @@
             android:text="Went:"
             style="@android:style/TextAppearance.DeviceDefault.Medium"
             android:layout_height="wrap_content" />
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:checked="true"
-            android:id="@+id/stillAtWorkCheckBox"
-            android:visibility="gone"
-            android:text="Still at work"
-            android:layout_height="wrap_content" />
         <TimePicker
             android:id="@+id/editor_went"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         </LinearLayout>
+
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
