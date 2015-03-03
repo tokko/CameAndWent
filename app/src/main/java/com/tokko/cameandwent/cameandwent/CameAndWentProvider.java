@@ -156,6 +156,7 @@ public class CameAndWentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase sdb = db.getReadableDatabase();
+        String durationCalculation = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
         Cursor c;
         switch (uriMatcher.match(uri)){
             case KEY_GET_GET_MONTHS:
@@ -167,7 +168,7 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_WEEKS);
                 return c;
             case KEY_GET_LOG_ENTRIES:
-                c = sdb.query(VIEW_DURATION, projection, selection, selectionArgs, null, null, sortOrder);
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, DATE, WEEK_OF_YEAR, MONTH_OF_YEAR, durationCalculation}, selection, selectionArgs, DATE, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_LOG_ENTRIES);
                 return c;
             case KEY_GET_DETAILS:
@@ -175,9 +176,7 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             case KEY_GET_MONTHLY_SUMMARY:
-                c = sdb.rawQuery("SELECT " + ID + ", " + WEEK_OF_YEAR  + ", SUM(" + DURATION + ") AS " + DURATION +
-                        " FROM " + VIEW_DURATION + " WHERE " + MONTH_OF_YEAR + "=? GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", selectionArgs);
-                c = sdb.query(VIEW_DURATION, new String[]{ID, WEEK_OF_YEAR, "SUM(" + DURATION + ") AS " + DURATION}, selection, selectionArgs, WEEK_OF_YEAR, null, WEEK_OF_YEAR + " ASC", null);
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR, durationCalculation}, selection, selectionArgs, WEEK_OF_YEAR, null, WEEK_OF_YEAR + " ASC", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             default:
@@ -222,7 +221,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private long populateContentValues(ContentValues values) {
-        long fieldData = 0;
+        long fieldData;
         if(values.containsKey(CAME))
             fieldData = values.getAsLong(CAME);
         else if(values.containsKey(WENT))
@@ -289,7 +288,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 38;
+        private static final int DATABASE_VERSION = 39;
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER NOT NULL DEFAULT 0, " +
@@ -299,9 +298,6 @@ public class CameAndWentProvider extends ContentProvider {
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0);";
 
-        private static final String DURATION_CALC = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
-        private static final String CREATE_DURATION_VIEW = "CREATE VIEW " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + WEEK_OF_YEAR + ", " + MONTH_OF_YEAR + ", " + DURATION_CALC + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE ;
-
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -309,14 +305,6 @@ public class CameAndWentProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREATE);
-            createDurationView(db);
-        }
-
-
-
-        private void createDurationView(SQLiteDatabase db) {
-            db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
-            db.execSQL(CREATE_DURATION_VIEW);
         }
 
         @Override
@@ -354,6 +342,9 @@ public class CameAndWentProvider extends ContentProvider {
                             db.update(TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
                         }
                         c.close();
+                        break;
+                    case 38:
+                        db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
                         break;
                 }
             }
