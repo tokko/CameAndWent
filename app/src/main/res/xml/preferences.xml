@@ -173,6 +173,8 @@
     </PreferenceCategory>
 
     <CheckBoxPreference
+        android:dependency="enabled"
+        android:enabled="false"
         android:defaultValue="false"
         android:title="Consult rounding"
         android:summary="Round daily duration up to closest half-hour"
