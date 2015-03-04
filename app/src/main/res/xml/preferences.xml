@@ -172,4 +172,9 @@
             android:dependency="monthly_reminders" />
     </PreferenceCategory>
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:title="Consult rounding"
+        android:summary="Round daily duration up to closest half-hour"
+        android:key="use_snapup" />
 </PreferenceScreen>

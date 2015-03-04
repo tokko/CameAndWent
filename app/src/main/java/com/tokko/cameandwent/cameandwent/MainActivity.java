@@ -1,8 +1,8 @@
 package com.tokko.cameandwent.cameandwent;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,12 +15,10 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     public static final String ACTION_MONTHLY_SUMMARY = "ACTION_MONTHLY_SUMMARY";
     private static final String HAS_SHOWN_SETTINGS = "hasshownsettings";
     private LogFragment logFragment;
-    private PreferenceFragment preferenceFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        preferenceFragment = new SettingsFragment();
         logFragment = new LogFragment();
     }
 
@@ -55,8 +53,8 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
 
     private void showSettings(){
         //noinspection ConstantConditions
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getFragmentManager().beginTransaction().replace(android.R.id.content, preferenceFragment).addToBackStack("opening settings").commit();
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     @Override

@@ -116,7 +116,7 @@ public class CameAndWentProvider extends ContentProvider {
             ContentValues cv = buildSeedValues(dt, 8, 12);
             cvs.add(cv);
 
-            cv = buildSeedValues(dt, 12, 17, PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("use_snapup", false)?15:0);
+            cv = buildSeedValues(dt, 12, 17, PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("use_snapup", false)?0:0);
             cvs.add(cv);
 
             cv = buildSeedValues(dt, 12, 13);
