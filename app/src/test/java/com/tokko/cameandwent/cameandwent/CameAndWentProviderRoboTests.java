@@ -232,7 +232,6 @@ public class CameAndWentProviderRoboTests extends TestCase{
         mContentResolver.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
         long dTime = TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis();
         long duration = DateTimeConstants.MILLIS_PER_HOUR/2;
-        // provider.call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.DROP_TRIGGER_METHOD, null, null);
 
         ContentValues cv = new ContentValues();
         long came = System.currentTimeMillis();
@@ -241,7 +240,6 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.CAME + " DESC");
 
-        //  Cursor c = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, CameAndWentProvider.CAME + " ASC");
         assertNotNull(c);
         assertEquals(2, c.getCount());
         assertTrue(c.moveToFirst());
