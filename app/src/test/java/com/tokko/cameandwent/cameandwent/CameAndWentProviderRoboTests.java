@@ -37,7 +37,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         mProvider.onCreate();
         ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, mProvider);
         SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
-        sharedPreferences.edit()
+        sharedPreferences.edit().clear()
                 .putBoolean("breaks_enabled", true)
                 .putString("average_break_start", "12:00")
                 .putString("average_break_duration", "00:30")

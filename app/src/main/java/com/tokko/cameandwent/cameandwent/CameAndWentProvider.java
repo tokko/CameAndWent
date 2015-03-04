@@ -141,14 +141,17 @@ public class CameAndWentProvider extends ContentProvider {
         return dt;
     }
 
-    private ContentValues buildSeedValues(DateTime dt, int firstHour, int secondHour) {
+    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour) {
+        return buildSeedValues(dt, cameHour, wentHour, 0);
+    }
+    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour, int wentMinute) {
         ContentValues cv = new ContentValues();
         cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
         cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(dt.getMillis()));
         cv.put(MONTH_OF_YEAR, TimeConverter.extractMonth(dt.getMillis()));
-        dt = dt.withHourOfDay(firstHour);
+        dt = dt.withHourOfDay(cameHour);
         cv.put(CAME, dt.getMillis());
-        dt = dt.withHourOfDay(secondHour);
+        dt = dt.withHourOfDay(wentHour).withMinuteOfHour(wentMinute);
         cv.put(WENT, dt.getMillis());
         return cv;
     }
@@ -186,7 +189,7 @@ public class CameAndWentProvider extends ContentProvider {
     private String getDurationCalculation() {
         String diff = "(" + WENT + "-" + CAME + ")";
         String durationCalculation = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN " + diff + " WHEN 1 THEN -" + diff + " END)";
-        String snapUp = String.format("%s + (%d - (%s%%%d))", durationCalculation, DateTimeConstants.MILLIS_PER_HOUR/2, durationCalculation, DateTimeConstants.MILLIS_PER_HOUR/2);
+        String snapUp = String.format("%s + (%d - (%s%%%d))", durationCalculation, DateTimeConstants.MILLIS_PER_HOUR / 2, durationCalculation, DateTimeConstants.MILLIS_PER_HOUR / 2);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         return (sp.getBoolean("use_snapup", false)?snapUp:durationCalculation) +  " AS " + DURATION;
     }
