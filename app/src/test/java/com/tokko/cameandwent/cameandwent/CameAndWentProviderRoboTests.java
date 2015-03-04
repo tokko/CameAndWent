@@ -10,6 +10,7 @@ import android.net.Uri;
 import junit.framework.TestCase;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 import org.junit.Before;
 import org.junit.Test;
@@ -229,9 +230,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
     @Test
     public void testAutomaticBreaks(){
         mContentResolver.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
-        long time = 1000*60*60*12;
-        long dTime = TimeConverter.extractDate(System.currentTimeMillis())+1000*60*60*12;
-        long duration = 1000*60*30;
+        long dTime = TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis();
+        long duration = DateTimeConstants.MILLIS_PER_HOUR/2;
         // provider.call(CameAndWentProvider.URI_GET_DETAILS, CameAndWentProvider.DROP_TRIGGER_METHOD, null, null);
 
         ContentValues cv = new ContentValues();
@@ -239,7 +239,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         cv.put(CameAndWentProvider.CAME, came);
         mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
 
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(System.currentTimeMillis()))},  CameAndWentProvider.CAME + " DESC");
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.CAME + " DESC");
 
         //  Cursor c = provider.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, CameAndWentProvider.CAME + " ASC");
         assertNotNull(c);
@@ -255,7 +255,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
         mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
         c.close();
-        c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(System.currentTimeMillis()))},  CameAndWentProvider.CAME + " DESC");
+        c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.CAME + " DESC");
         assertNotNull(c);
         assertEquals(3, c.getCount());
         c.close();
