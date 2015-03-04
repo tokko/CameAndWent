@@ -156,7 +156,6 @@ public class CameAndWentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase sdb = db.getReadableDatabase();
-        String durationCalculation = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN (" + WENT + "-" + CAME + ") WHEN 1 THEN -(" + WENT + "-" + CAME +  ") END) AS " + DURATION;
         Cursor c;
         switch (uriMatcher.match(uri)){
             case KEY_GET_GET_MONTHS:
@@ -168,7 +167,7 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_WEEKS);
                 return c;
             case KEY_GET_LOG_ENTRIES:
-                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, DATE, WEEK_OF_YEAR, MONTH_OF_YEAR, durationCalculation}, selection, selectionArgs, DATE, null, sortOrder);
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, DATE, WEEK_OF_YEAR, MONTH_OF_YEAR, getDurationCalculation()}, selection, selectionArgs, DATE, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_LOG_ENTRIES);
                 return c;
             case KEY_GET_DETAILS:
@@ -176,12 +175,24 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             case KEY_GET_MONTHLY_SUMMARY:
-                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR, durationCalculation}, selection, selectionArgs, WEEK_OF_YEAR, null, WEEK_OF_YEAR + " ASC", null);
+                c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR, getDurationCalculation()}, selection, selectionArgs, WEEK_OF_YEAR, null, WEEK_OF_YEAR + " ASC", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DETAILS);
                 return c;
             default:
                 throw new IllegalArgumentException("Unknown URI");
         }
+    }
+
+    private String getDurationCalculation() {
+        String diff = "(" + WENT + "-" + CAME + ")";
+        String durationCalculation = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN " + diff + " WHEN 1 THEN -" + diff + " END)";
+        return durationCalculation  + " AS " + DURATION;
+        /*
+        String snapUp = String.format("%s + (%d - (%s%%%d))", durationCalculation, DateTimeConstants.MILLIS_PER_HOUR/2, durationCalculation, DateTimeConstants.MILLIS_PER_HOUR/2) +  " AS " + DURATION;
+        durationCalculation += " AS " + DURATION;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        return sp.getBoolean("use_snapup", false)?durationCalculation:snapUp;
+        */
     }
 
 
