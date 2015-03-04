@@ -265,7 +265,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         sharedPreferences.edit().putBoolean("use_snapup", true).apply();
 		Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
 		for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
-			assertEquals(DateTimeConstants.MILLIS_PER_HOUR*8+DateTimeConstants.MILLIS_PER_MINUTE*15, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
+			assertEquals(DateTimeConstants.MILLIS_PER_HOUR*8+DateTimeConstants.MILLIS_PER_MINUTE*30, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
 		}
 	}
 }
