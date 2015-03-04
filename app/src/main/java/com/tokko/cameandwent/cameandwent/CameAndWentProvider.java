@@ -191,7 +191,7 @@ public class CameAndWentProvider extends ContentProvider {
         String durationCalculation = "SUM(CASE (" + ISBREAK + ") WHEN 0 THEN " + diff + " WHEN 1 THEN -" + diff + " END)";
         String snapUp = String.format("%s + (%d - (%s%%%d))", durationCalculation, DateTimeConstants.MILLIS_PER_HOUR / 2, durationCalculation, DateTimeConstants.MILLIS_PER_HOUR / 2);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-        return (sp.getBoolean("use_snapup", false)?snapUp:durationCalculation) +  " AS " + DURATION;
+        return (sp.getBoolean("use_snapup", false)?snapUp:durationCalculation) + " AS " + DURATION;
     }
 
 

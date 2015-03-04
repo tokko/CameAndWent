@@ -23,4 +23,9 @@ public class SettingsActivity extends Activity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }
