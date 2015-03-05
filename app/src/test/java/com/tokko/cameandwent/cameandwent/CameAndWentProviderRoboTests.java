@@ -42,7 +42,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
                 .putString("average_break_start", "12:00")
                 .putString("average_break_duration", "00:30")
                 .apply();
-        mShadowContentResolver.call(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, CameAndWentProvider.SEED_METHOD, null, null);
+        //mShadowContentResolver.call(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, CameAndWentProvider.SEED_METHOD, null, null);
+        mProvider.seed();
     }
 
    @Test
@@ -238,7 +239,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         cv.put(CameAndWentProvider.CAME, came);
         mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
 
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.CAME + " DESC");
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.ISBREAK + " DESC");
 
         //TODO: se över varför ordningen på dessa verkar skifta
         assertNotNull(c);
