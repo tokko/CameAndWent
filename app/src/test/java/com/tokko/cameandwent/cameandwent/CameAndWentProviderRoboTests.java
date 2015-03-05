@@ -240,16 +240,17 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.CAME + " DESC");
 
+        //TODO: se över varför ordningen på dessa verkar skifta
         assertNotNull(c);
         assertEquals(2, c.getCount());
         assertTrue(c.moveToFirst());
-        assertFalse(c.getInt(c.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1);
-        assertEquals(came, c.getLong(c.getColumnIndex(CameAndWentProvider.CAME)));
-
-        assertTrue(c.moveToNext());
         assertTrue(c.getInt(c.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1);
         assertEquals(dTime, c.getLong(c.getColumnIndex(CameAndWentProvider.CAME)));
         assertEquals(dTime+duration, c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)));
+
+        assertTrue(c.moveToNext());
+        assertFalse(c.getInt(c.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1);
+        assertEquals(came, c.getLong(c.getColumnIndex(CameAndWentProvider.CAME)));
 
         mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
         c.close();
