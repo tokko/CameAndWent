@@ -135,6 +135,10 @@ public class CameAndWentProvider extends ContentProvider {
 
     public void recreateDurationsView() {
         db.recreateDurationsView(db.getWritableDatabase());
+        getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+        getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
+        getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+        getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
     }
 
     public static int SEED_ENTRIES = 0;
