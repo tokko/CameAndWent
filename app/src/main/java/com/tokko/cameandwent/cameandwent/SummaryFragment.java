@@ -99,7 +99,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         if(!monthly) {
             if(id == -1) {
                 CursorLoader cl = new CursorLoader(getActivity());
-                cl.setUri(CameAndWentProvider.URI_GET_GET_WEEKS);
+                cl.setUri(CameAndWentProvider.URI_GET_WEEKS);
                 return cl;
             }
             else{

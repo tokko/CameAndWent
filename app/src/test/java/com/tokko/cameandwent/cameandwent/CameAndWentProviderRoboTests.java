@@ -98,7 +98,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
     @Test
     public void getWeeks_FetchesAllWeeks(){
         DateTime dt = CameAndWentProvider.getSeedDateTime();
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_WEEKS, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_WEEKS, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext(), dt = dt.withFieldAdded(DurationFieldType.weeks(), 1))
             assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
         c.close();
@@ -167,7 +167,14 @@ public class CameAndWentProviderRoboTests extends TestCase{
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         assertEquals(CameAndWentProvider.SEED_ENTRIES, c.getCount());
         int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, null, null);
-        assertEquals(CameAndWentProvider.SEED_ENTRIES, deleted);
+        assertEquals(c.getCount(), deleted);
+        c.close();
+        c = mContentResolver.query(CameAndWentProvider.URI_GET_DURATIONS, null, null, null, null);
+        assertEquals(0, c.getCount());
+        c.close();
+        c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        assertEquals(0, c.getCount());
+        c.close();
     }
 
     @Test

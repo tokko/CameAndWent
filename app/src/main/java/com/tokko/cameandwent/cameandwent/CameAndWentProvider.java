@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
@@ -67,7 +68,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_GET_LOG_ENTRIES = Uri.parse(URI_TEMPLATE + ACTION_GET_LOG_ENTRIES);
     public static final Uri URI_DELETE_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_DELETE_LOG_ENTRY);
     public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY);
-    public static final Uri URI_GET_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
+    public static final Uri URI_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
     public static final Uri URI_GET_GET_MONTHS = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHS);
     public static final Uri URI_GET_DURATIONS = Uri.parse(URI_TEMPLATE + ACTION_GET_DURATIONS);
     public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
@@ -96,6 +97,7 @@ public class CameAndWentProvider extends ContentProvider {
 
     public static final String SEED_METHOD = "seed";
     public static final String RECRETE_METHOD = "recreate";
+    public static final String MIGRATE_METHOD = "migrate";
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if(method.equals(SEED_METHOD)){
@@ -104,7 +106,32 @@ public class CameAndWentProvider extends ContentProvider {
         else if(method.equals(RECRETE_METHOD)){
             recreateDurationsView();
         }
+        else if(method.equals(MIGRATE_METHOD)){
+            migrateData();
+        }
         return super.call(method, arg, extras);
+    }
+
+    public void migrateData(){
+        SQLiteDatabase db = this.db.getWritableDatabase();
+        Cursor oldData = db.rawQuery("SELECT * FROM cameandwent;", null);
+        Log.d("Provider", oldData.getCount()+"");
+        for (oldData.moveToFirst(); !oldData.isAfterLast(); oldData.moveToNext()){
+            ContentValues cv = new ContentValues();
+            populateContentValuesWithTimeInfo(oldData.getLong(oldData.getColumnIndex(DATE)), cv);
+            db.insert(TIME_TABLE, null, cv);
+            cv.clear();
+            cv.put(DATE, oldData.getLong(oldData.getColumnIndex(DATE)));
+            cv.put(CAME, oldData.getLong(oldData.getColumnIndex(CAME)));
+            cv.put(WENT, oldData.getLong(oldData.getColumnIndex(WENT)));
+            cv.put(ISBREAK, oldData.getLong(oldData.getColumnIndex(ISBREAK)));
+            db.insert(TABLE_LOG_NAME, null, cv);
+        }
+        oldData.close();
+        getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+        getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
+        getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+        getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
     }
 
     public void recreateDurationsView() {
@@ -113,6 +140,7 @@ public class CameAndWentProvider extends ContentProvider {
 
     public static int SEED_ENTRIES = 0;
     public void seed(){
+        Log.d("Provider", "Seeding");
         DateTime dtNow = new DateTime();
 
         DateTime dt = getSeedDateTime();
@@ -186,7 +214,7 @@ public class CameAndWentProvider extends ContentProvider {
                 return c;
             case KEY_GET_GET_WEEKS:
                 c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_WEEKS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_WEEKS);
                 return c;
             case KEY_GET_LOG_ENTRIES:
                 c = sdb.query(TABLE_LOG_NAME, projection, selection, selectionArgs, null, null, sortOrder);
@@ -194,7 +222,7 @@ public class CameAndWentProvider extends ContentProvider {
                 return c;
             case KEY_GET_GET_MONTHLY_SUMMARY:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, new String[]{ID, DATE, WEEK_OF_YEAR, "SUM("+DURATION+") AS " + DURATION}, selection, selectionArgs, WEEK_OF_YEAR, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_DURATIONS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_MONTHLY_SUMMARY);
                 return c;
             case KEY_GET_GET_DURATIONS:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, projection, selection, selectionArgs, null, null, sortOrder, null);
@@ -233,7 +261,7 @@ public class CameAndWentProvider extends ContentProvider {
                     sdb.insert(TABLE_LOG_NAME, null, values);
                 }
                 if(id > -1) {
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                 }
                 return ContentUris.withAppendedId(uri, id);
@@ -259,7 +287,9 @@ public class CameAndWentProvider extends ContentProvider {
                 deleted = sdb.delete(TABLE_LOG_NAME, selection, selectionArgs);
                 if(deleted > 0){
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
                 }
                 return deleted;
             default:
@@ -276,6 +306,9 @@ public class CameAndWentProvider extends ContentProvider {
                  updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
                 }
                 return updated;
             case KEY_UPDATE_PARTICULAR_LOG_ENTRY:
@@ -292,8 +325,9 @@ public class CameAndWentProvider extends ContentProvider {
         }
     }
 
+
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 41;
+        private static final int DATABASE_VERSION = 46;
         /*
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + OLD_TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
@@ -387,22 +421,11 @@ public class CameAndWentProvider extends ContentProvider {
                     case 38:
                         db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
                         break;
-                    case 40:
+                    case 46:
                         db.execSQL(CREATE_LOG);
                         db.execSQL(CREATE_TIME_TABLE);
                         recreateDurationsView(db);
-                        Cursor oldData = db.rawQuery("SELECT * FROM cameandwent;", null);
-                        for (oldData.moveToFirst(); !oldData.isAfterLast(); oldData.moveToNext()){
-                            ContentValues cv = new ContentValues();
-                            populateContentValuesWithTimeInfo(oldData.getLong(oldData.getColumnIndex(DATE)), cv);
-                            db.insert(TIME_TABLE, null, cv);
-                            cv.clear();
-                            cv.put(DATE, oldData.getLong(oldData.getColumnIndex(DATE)));
-                            cv.put(CAME, oldData.getLong(oldData.getColumnIndex(CAME)));
-                            cv.put(WENT, oldData.getLong(oldData.getColumnIndex(WENT)));
-                            cv.put(ISBREAK, oldData.getLong(oldData.getColumnIndex(ISBREAK)));
-                        }
-                        oldData.close();
+                        migrateData();
                         break;
                 }
             }
