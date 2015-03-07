@@ -18,6 +18,7 @@ public class SettingsFragment extends PreferenceFragment {
         getActivity().sendBroadcast(new Intent(getActivity(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
         new ReminderScheduler(getActivity()).scheduleWeeklyReminder();
         new ReminderScheduler(getActivity()).scheduleMonthlyReminder();
+        getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_GET_MONTHS, CameAndWentProvider.RECRETE_METHOD, null, null);
         super.onStop();
     }
 }

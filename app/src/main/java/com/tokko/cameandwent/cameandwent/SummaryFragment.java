@@ -13,6 +13,8 @@ import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import org.joda.time.DateTimeConstants;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -169,8 +171,8 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         @Override
         protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
             String date = sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE))));
-            double duration = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION))/(1000D*60D*60D);
-            String durationS = new DecimalFormat("#.00").format(duration) + "h";
+            double duration = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION))/ (double)DateTimeConstants.MILLIS_PER_HOUR;
+            String durationS = new DecimalFormat("#.0").format(duration) + "h";
             if(duration < 0)
                 durationS = "Currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS);

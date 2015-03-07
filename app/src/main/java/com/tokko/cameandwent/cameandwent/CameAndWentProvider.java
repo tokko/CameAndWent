@@ -107,13 +107,12 @@ public class CameAndWentProvider extends ContentProvider {
             recreateDurationsView();
         }
         else if(method.equals(MIGRATE_METHOD)){
-            migrateData();
+            migrateData(db.getWritableDatabase());
         }
         return super.call(method, arg, extras);
     }
 
-    public void migrateData(){
-        SQLiteDatabase db = this.db.getWritableDatabase();
+    public void migrateData(SQLiteDatabase db){
         Cursor oldData = db.rawQuery("SELECT * FROM cameandwent;", null);
         Log.d("Provider", oldData.getCount()+"");
         for (oldData.moveToFirst(); !oldData.isAfterLast(); oldData.moveToNext()){
@@ -425,7 +424,7 @@ public class CameAndWentProvider extends ContentProvider {
                         db.execSQL(CREATE_LOG);
                         db.execSQL(CREATE_TIME_TABLE);
                         recreateDurationsView(db);
-                        migrateData();
+                        migrateData(db);
                         break;
                 }
             }
