@@ -127,7 +127,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
     @Test
     public void testGetDurations(){
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null, null, null, null);
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DURATIONS, null, null, null, null);
         long duration = TimeConverter.hoursAsLong(8);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
             assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
@@ -214,7 +214,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
     @Test
     public void updateTimeTable_AllFieldsUpdated(){
-        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null, null, null, null);
+        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_DURATIONS, null, null, null, null);
         assertNotNull(toEdit);
         assertTrue(toEdit.moveToLast());
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
@@ -225,7 +225,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         assertEquals(1, updated);
         toEdit.close();
 
-        Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null,String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(dt.getMillis())}, null, null );
+        Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_DURATIONS, null,String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(dt.getMillis())}, null, null );
         assertNotNull(post);
         assertEquals(1, post.getCount());
         assertTrue(post.moveToFirst());
@@ -278,7 +278,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
 		ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext()).edit().putBoolean("use_snapup", true).apply();
         mProvider.recreateDurationsView();
         mProvider.seed();
-		Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null, null, null, null);
+		Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DURATIONS, null, null, null, null);
 		for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             long duration = c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION));
 			assertEquals(TimeConverter.formatInterval(duration), DateTimeConstants.MILLIS_PER_HOUR*8+DateTimeConstants.MILLIS_PER_MINUTE*30, duration);

@@ -27,7 +27,6 @@ public class CameAndWentProvider extends ContentProvider {
 
     private static final String DATABASE_NAME = "cameandwent";
 
-    private static final String OLD_TABLE_LOG_NAME = "cameandwent";
     private static final String TABLE_LOG_NAME = "log";
     private static final String VIEW_DURATION = "durations";
     private static final String TIME_TABLE = "timetable";
@@ -70,7 +69,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY);
     public static final Uri URI_GET_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
     public static final Uri URI_GET_GET_MONTHS = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHS);
-    public static final Uri URI_GET_GET_DURATIONS = Uri.parse(URI_TEMPLATE + ACTION_GET_DURATIONS);
+    public static final Uri URI_GET_DURATIONS = Uri.parse(URI_TEMPLATE + ACTION_GET_DURATIONS);
     public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
 
     private static UriMatcher uriMatcher;
@@ -195,49 +194,16 @@ public class CameAndWentProvider extends ContentProvider {
                 return c;
             case KEY_GET_GET_MONTHLY_SUMMARY:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, new String[]{ID, DATE, WEEK_OF_YEAR, "SUM("+DURATION+") AS " + DURATION}, selection, selectionArgs, WEEK_OF_YEAR, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_DURATIONS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_DURATIONS);
                 return c;
             case KEY_GET_GET_DURATIONS:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, projection, selection, selectionArgs, null, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_DURATIONS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_DURATIONS);
                 return c;
             default:
                 throw new IllegalArgumentException("Unknown URI");
         }
     }
-
-    private String prefix(String prefix, String s, String... subs){
-        if(s == null) return null;
-        for(String sub : subs){
-            s = s.replace(sub, prefix+sub);
-        }
-        return s;
-    }
-    private String[] prefix(String prefix, String[] values, String... subs){
-        if(values == null) return null;
-        for (int i = 0; i<values.length; i++)
-            values[i] = contains(subs, values[i]) ? prefix + values[i] : values[i];
-        return values;
-    }
-
-    private <T> boolean contains(T[] arr, T elem){
-        for (T anArr : arr) if (anArr.equals(elem)) return true;
-        return false;
-    }
-    private <T> String join(T[] t) {
-        return join(", ", t, "*");
-    }
-    private <T> String join(String delim, T[] t, String def){
-        if(t == null || t.length == 0) return def;
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i<t.length; i++){
-            sb.append(t[i]);
-            if(i < t.length-1) sb.append(delim);
-        }
-        return sb.toString();
-    }
-
-
 
     @Override
     public String getType(Uri uri) {
@@ -327,7 +293,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 40;
+        private static final int DATABASE_VERSION = 41;
         /*
         private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + OLD_TABLE_LOG_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
@@ -389,28 +355,28 @@ public class CameAndWentProvider extends ContentProvider {
             for(int version = oldVersion; version <= newVersion; version++){
                 switch (version){
                     case 16:
-                        db.execSQL("ALTER TABLE " + OLD_TABLE_LOG_NAME + " ADD COLUMN " + DATE + " INTEGER NOT NULL DEFAULT 0");
+                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + DATE + " INTEGER NOT NULL DEFAULT 0");
                         break;
                     case 19:
-                        db.execSQL("ALTER TABLE " + OLD_TABLE_LOG_NAME + " ADD COLUMN " + ISBREAK + " INTEGER NOT NULL DEFAULT 0");
+                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + ISBREAK + " INTEGER NOT NULL DEFAULT 0");
                         break;
                     case 32:
-                        db.execSQL("ALTER TABLE " + OLD_TABLE_LOG_NAME + " ADD COLUMN " + WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
                     case 33:
-                        c = db.rawQuery("SELECT * FROM " + OLD_TABLE_LOG_NAME, null);
+                        c = db.rawQuery("SELECT * FROM cameandwent", null);
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
                             ContentValues cv = new ContentValues();
                             cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getLong(c.getColumnIndex(CAME))));
-                            db.update(OLD_TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
+                            db.update("cameandwent", cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
                         }
                         c.close();
                         break;
                     case 34:
-                        db.execSQL("ALTER TABLE " + OLD_TABLE_LOG_NAME + " ADD COLUMN " + MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
                     case 36:
                     case 37:
                     case 35:
-                        c = db.rawQuery("SELECT * FROM " + OLD_TABLE_LOG_NAME, null);
+                        c = db.rawQuery("SELECT * FROM cameandwent", null);
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
                             ContentValues cv = new ContentValues();
                             cv.put(MONTH_OF_YEAR, TimeConverter.extractMonth(c.getLong(c.getColumnIndex(CAME))));
@@ -420,6 +386,23 @@ public class CameAndWentProvider extends ContentProvider {
                         break;
                     case 38:
                         db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+                        break;
+                    case 40:
+                        db.execSQL(CREATE_LOG);
+                        db.execSQL(CREATE_TIME_TABLE);
+                        recreateDurationsView(db);
+                        Cursor oldData = db.rawQuery("SELECT * FROM cameandwent;", null);
+                        for (oldData.moveToFirst(); !oldData.isAfterLast(); oldData.moveToNext()){
+                            ContentValues cv = new ContentValues();
+                            populateContentValuesWithTimeInfo(oldData.getLong(oldData.getColumnIndex(DATE)), cv);
+                            db.insert(TIME_TABLE, null, cv);
+                            cv.clear();
+                            cv.put(DATE, oldData.getLong(oldData.getColumnIndex(DATE)));
+                            cv.put(CAME, oldData.getLong(oldData.getColumnIndex(CAME)));
+                            cv.put(WENT, oldData.getLong(oldData.getColumnIndex(WENT)));
+                            cv.put(ISBREAK, oldData.getLong(oldData.getColumnIndex(ISBREAK)));
+                        }
+                        oldData.close();
                         break;
                 }
             }

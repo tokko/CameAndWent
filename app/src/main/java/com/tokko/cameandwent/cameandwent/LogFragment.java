@@ -113,7 +113,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if(id == -1) {
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+            cl.setUri(CameAndWentProvider.URI_GET_DURATIONS);
             cl.setSortOrder(CameAndWentProvider.DATE + " ASC");
             return cl;
         }
@@ -254,7 +254,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             long wentTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT));
             String wentS = time.format(new Date(wentTime));
             boolean isbreak = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1;
-            String duration = TimeConverter.formatInterval(wentTime-cameTime);
+            String duration = TimeConverter.formatInterval(wentTime - cameTime);
             if(wentTime-cameTime < 0) {
                 wentS = "Currently at work";
                 duration = "Currently unavailable";
