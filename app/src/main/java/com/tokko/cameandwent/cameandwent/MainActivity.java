@@ -3,6 +3,7 @@ package com.tokko.cameandwent.cameandwent;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -10,7 +11,6 @@ import roboguice.activity.RoboFragmentActivity;
 
 
 public class MainActivity extends RoboFragmentActivity implements LogFragment.LogFragmentHost{
-    private static final String MAINACTIVITY_SETTINGS_KEY = "mainactivity";
     public static final String ACTION_WEEKLY_SUMMARY = "ACTION_WEEKLY_SUMMARY";
     public static final String ACTION_MONTHLY_SUMMARY = "ACTION_MONTHLY_SUMMARY";
     private static final String HAS_SHOWN_SETTINGS = "hasshownsettings";
@@ -27,9 +27,9 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     protected void onStart() {
         super.onStart();
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, logFragment).commit();
-        if(!getSharedPreferences(MAINACTIVITY_SETTINGS_KEY, MODE_PRIVATE).getBoolean(HAS_SHOWN_SETTINGS, false)) {
+        if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HAS_SHOWN_SETTINGS, false)) {
             showSettings();
-            getSharedPreferences(MAINACTIVITY_SETTINGS_KEY, MODE_PRIVATE).edit().putBoolean(HAS_SHOWN_SETTINGS, true).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(HAS_SHOWN_SETTINGS, true).commit();
         }
     }
 

@@ -26,7 +26,7 @@ public class CameAndWentProvider extends ContentProvider {
     static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
 
-    private static final String DATABASE_NAME = "cameandwent";
+    public static final String DATABASE_NAME = "cameandwent";
 
     private static final String TABLE_LOG_NAME = "log";
     private static final String VIEW_DURATION = "durations";
@@ -179,6 +179,8 @@ public class CameAndWentProvider extends ContentProvider {
         }
         sdb.setTransactionSuccessful();
         sdb.endTransaction();
+        getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+        getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
     }
 
     static DateTime getSeedDateTime() {
@@ -286,8 +288,8 @@ public class CameAndWentProvider extends ContentProvider {
                 deleted = sdb.delete(TABLE_LOG_NAME, selection, selectionArgs);
                 if(deleted > 0){
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
                     getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
                 }
                 return deleted;
