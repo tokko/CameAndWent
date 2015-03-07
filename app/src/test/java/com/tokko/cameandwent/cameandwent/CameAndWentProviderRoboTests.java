@@ -43,17 +43,9 @@ public class CameAndWentProviderRoboTests extends TestCase{
         mProvider.seed();
     }
 
-   @Test
-   public void testMonthlySummaryView_Created(){
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, null);
-        assertTrue(c.getCount() > 0);
-        String[] names = c.getColumnNames();
-        assertEquals(3, names.length);
-        assertTrue(contains(names, CameAndWentProvider.ID, CameAndWentProvider.WEEK_OF_YEAR, CameAndWentProvider.DURATION));
-        c.close();
-    }
+
     @Test
-    public void testMonthlySummaryView_CorrectData(){
+    public void testMonthlySummary_CorrectData(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
         assertEquals(CameAndWentProvider.WEEKS_BACK, c.getCount());
         long duration = DateTimeConstants.MILLIS_PER_HOUR*40;

@@ -48,30 +48,30 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_GET_LOG_ENTRIES = "ACTION_GET_LOG_ENTRIES";
     private static final String ACTION_DELETE_LOG_ENTRY = "ACTION_DELETE_LOG_ENTRY";
     private static final String ACTION_UPDATE_PARTICULAR_LOG_ENTRY = "ACTION_UPDATE_PARTICULAR_LOG_ENTRY";
-    private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
     private static final String ACTION_GET_WEEKS = "ACTION_GET_WEEKS";
     private static final String ACTION_GET_MONTHS = "ACTION_GET_MONTHS";
     private static final String ACTION_GET_DURATIONS = "ACTION_GET_DURATIONS";
+    private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
     private static final int KEY_GET_LOG_ENTRIES = 2;
     private static final int KEY_DELETE_LOG_ENTRY = 4;
     private static final int KEY_UPDATE_PARTICULAR_LOG_ENTRY = 5;
-    private static final int KEY_GET_MONTHLY_SUMMARY = 6;
     private static final int KEY_GET_GET_WEEKS = 7;
     private static final int KEY_GET_GET_MONTHS = 8;
     private static final int KEY_GET_GET_DURATIONS = 9;
+    private static final int KEY_GET_GET_MONTHLY_SUMMARY = 10;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
     public static final Uri URI_GET_LOG_ENTRIES = Uri.parse(URI_TEMPLATE + ACTION_GET_LOG_ENTRIES);
     public static final Uri URI_DELETE_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_DELETE_LOG_ENTRY);
     public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY);
-    public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
     public static final Uri URI_GET_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
     public static final Uri URI_GET_GET_MONTHS = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHS);
     public static final Uri URI_GET_GET_DURATIONS = Uri.parse(URI_TEMPLATE + ACTION_GET_DURATIONS);
+    public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
 
     private static UriMatcher uriMatcher;
 
@@ -82,10 +82,10 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
         uriMatcher.addURI(AUTHORITY, ACTION_DELETE_LOG_ENTRY, KEY_DELETE_LOG_ENTRY);
         uriMatcher.addURI(AUTHORITY, ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
-        uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHLY_SUMMARY, KEY_GET_MONTHLY_SUMMARY);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_DURATIONS, KEY_GET_GET_DURATIONS);
+        uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHLY_SUMMARY, KEY_GET_GET_MONTHLY_SUMMARY);
     }
 
     private DatabaseOpenHelper db;
@@ -184,10 +184,9 @@ public class CameAndWentProvider extends ContentProvider {
                 c = sdb.query(TABLE_LOG_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_LOG_ENTRIES);
                 return c;
-           case KEY_GET_MONTHLY_SUMMARY:
-              //  c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR, getDurationCalculation()}, selection, selectionArgs, WEEK_OF_YEAR, null, WEEK_OF_YEAR + " ASC", null);
-                c = sdb.rawQuery("SELECT " + join(new String[]{"tt."+ID, WEEK_OF_YEAR, DURATION}) + " FROM " + VIEW_DURATION + " vd LEFT JOIN " + TIME_TABLE + " tt ON vd." + DATE + "=tt." + DATE + " " + (selection!=null?" WHERE " + prefix("tt.", selection, ID, DATE):"") + " GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", prefix("tt.", selectionArgs, ID, DATE));
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_MONTHLY_SUMMARY);
+            case KEY_GET_GET_MONTHLY_SUMMARY:
+                c = sdb.query(VIEW_TIME_TABLE_DURATIONS, new String[]{ID, DATE, WEEK_OF_YEAR, "SUM("+DURATION+") AS " + DURATION}, selection, selectionArgs, WEEK_OF_YEAR, null, sortOrder, null);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_DURATIONS);
                 return c;
             case KEY_GET_GET_DURATIONS:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, projection, selection, selectionArgs, null, null, sortOrder, null);
