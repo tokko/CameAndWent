@@ -86,7 +86,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
                 adb.setPositiveButton("I am sure!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+                        getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, null, null);
                         dialog.dismiss();
                     }
                 });
@@ -120,7 +120,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_DETAILS);
+            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
             cl.setSelection(String.format("%s=?", CameAndWentProvider.DATE));
             cl.setSelectionArgs(new String[]{String.valueOf(args.getLong(CameAndWentProvider.DATE))});
             cl.setSortOrder(CameAndWentProvider.CAME + " ASC");
@@ -162,7 +162,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
                     cm.clockOut();
                 break;
             case R.id.logentry_deletebutton:
-                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_DETAIL, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
+                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
                 break;
             case R.id.logentry_editButton:
                 long fakkingId = (long) v.getTag();
@@ -223,7 +223,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             Bundle b = new Bundle();
             long date = groupCursor.getLong(groupCursor.getColumnIndex(CameAndWentProvider.DATE));
             b.putLong(CameAndWentProvider.DATE, date);
-            return context.getContentResolver().query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
+            return context.getContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
         }
 
         @Override

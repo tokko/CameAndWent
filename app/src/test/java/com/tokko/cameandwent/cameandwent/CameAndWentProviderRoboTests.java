@@ -28,6 +28,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
     private CameAndWentProvider mProvider;
     private ContentResolver mContentResolver;
     private ShadowContentResolver mShadowContentResolver;
+    private SharedPreferences sharedPreferences;
 
     @Before
     public void setup(){
@@ -36,12 +37,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
         mShadowContentResolver = Robolectric.shadowOf(mContentResolver);
         mProvider.onCreate();
         ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, mProvider);
-        SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
-        sharedPreferences.edit().clear()
-                .putBoolean("breaks_enabled", true)
-                .putString("average_break_start", "12:00")
-                .putString("average_break_duration", "00:30")
-                .apply();
+        sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
+        sharedPreferences.edit().clear();
         //mShadowContentResolver.call(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, CameAndWentProvider.SEED_METHOD, null, null);
         mProvider.seed();
     }
@@ -86,14 +83,20 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
     @Test
     public void testCame(){
-        int pre = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null).getCount();
+        int pre = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null).getCount();
         ContentValues cv = new ContentValues();
-        cv.put(CameAndWentProvider.CAME, System.currentTimeMillis());
+        long currentTime = TimeConverter.getCurrentTime().getMillis();
+        cv.put(CameAndWentProvider.CAME, currentTime);
         Uri postInsertUri = mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
         long id = ContentUris.parseId(postInsertUri);
         assertTrue(-1 != id);
-        Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
-        assertEquals(pre+1, post.getCount()); //new entry + break
+        Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        assertEquals(pre+1, post.getCount()); //new entry + break, why do this change randomly?
+        post.close();
+        post = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", id), new String[]{String.valueOf(id)}, null);
+        assertEquals(0, post.getLong(post.getColumnIndex(CameAndWentProvider.WENT)));
+        assertEquals(TimeConverter.extractDate(currentTime), post.getLong(post.getColumnIndex(CameAndWentProvider.DATE)));
+        assertEquals(currentTime, post.getLong(post.getColumnIndex(CameAndWentProvider.CAME)));
         post.close();
     }
 
@@ -128,7 +131,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
     }
 
     @Test
-    public void testGetEntries(){
+    public void testGetDurations(){
+        fail();
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         long duration = TimeConverter.hoursAsLong(8);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
@@ -137,8 +141,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
     }
 
     @Test
-    public void testGetDetails(){
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+    public void testGetLogEntries(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         assertNotNull(c);
         assertEquals(CameAndWentProvider.SEED_ENTRIES, c.getCount());
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
@@ -150,8 +154,8 @@ public class CameAndWentProviderRoboTests extends TestCase{
             assertEquals(date, TimeConverter.extractDate(went));
         }
         c.close();
-        Cursor noBreak = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
-        Cursor isBreak = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(1)}, null);
+        Cursor noBreak = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
+        Cursor isBreak = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(1)}, null);
         assertEquals(CameAndWentProvider.SEED_ENTRIES*2/3, noBreak.getCount());
         assertEquals(noBreak.getColumnCount(), noBreak.getCount()/3, isBreak.getCount());
         noBreak.close();
@@ -161,16 +165,30 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
 
     @Test
-    public void testDeleteDetail(){
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+    public void testDeleteLogAllEntries(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         assertEquals(CameAndWentProvider.SEED_ENTRIES, c.getCount());
-        int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+        int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, null, null);
         assertEquals(CameAndWentProvider.SEED_ENTRIES, deleted);
     }
 
     @Test
+    public void testDeleteLogEntry(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        assertTrue(c.moveToFirst());
+        long id = c.getLong(c.getColumnIndex(CameAndWentProvider.ID));
+        int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+        assertEquals(1, deleted);
+        c.close();
+        c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
+        c.close();
+    }
+
+    @Test
     public void testUpdateEntry(){
-        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         assertNotNull(toEdit);
         assertTrue(toEdit.moveToLast());
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
@@ -184,7 +202,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
         assertEquals(1, updated);
 
-        Cursor afterUpdate = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        Cursor afterUpdate = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
         assertNotNull(afterUpdate);
         assertEquals(1, afterUpdate.getCount());
         assertTrue(afterUpdate.moveToFirst());
@@ -198,7 +216,9 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
     @Test
     public void updateEntry_ImplicitFieldsUpdated(){
-        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, null, null, null);
+        fail();
+        /*
+        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         assertNotNull(toEdit);
         assertTrue(toEdit.moveToLast());
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
@@ -214,7 +234,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
         assertEquals(1, updated);
 
-        Cursor afterUpdate = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        Cursor afterUpdate = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
         assertNotNull(afterUpdate);
         assertEquals(1, afterUpdate.getCount());
         assertTrue(afterUpdate.moveToFirst());
@@ -226,11 +246,12 @@ public class CameAndWentProviderRoboTests extends TestCase{
         assertEquals(TimeConverter.extractDate(dt.getMillis()), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.DATE)));
         toEdit.close();
         afterUpdate.close();
+        */
     }
 
     @Test
     public void testAutomaticBreaks(){
-        mContentResolver.delete(CameAndWentProvider.URI_DELETE_ALL, null, null);
+        mContentResolver.delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, null, null);
         long dTime = TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis();
         long duration = DateTimeConstants.MILLIS_PER_HOUR/2;
 
@@ -239,7 +260,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         cv.put(CameAndWentProvider.CAME, came);
         mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
 
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.ISBREAK + " DESC");
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.ISBREAK + " DESC");
 
         //TODO: se över varför ordningen på dessa verkar skifta
         assertNotNull(c);
@@ -255,7 +276,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
         mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
         c.close();
-        c = mContentResolver.query(CameAndWentProvider.URI_GET_DETAILS, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.CAME + " DESC");
+        c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.CAME + " DESC");
         assertNotNull(c);
         assertEquals(3, c.getCount());
         c.close();
@@ -263,6 +284,12 @@ public class CameAndWentProviderRoboTests extends TestCase{
 	
 	@Test
 	public void snapup_durationsAreProperlySnappedUp(){
+        fail();
+        sharedPreferences.edit()
+                .putBoolean("breaks_enabled", true)
+                .putString("average_break_start", "12:00")
+                .putString("average_break_duration", "00:30")
+                .apply();
 		ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext()).edit().putBoolean("use_snapup", true).apply();
 		Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
 		for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){

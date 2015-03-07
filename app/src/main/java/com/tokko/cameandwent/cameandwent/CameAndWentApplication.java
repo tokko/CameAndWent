@@ -14,7 +14,7 @@ public class CameAndWentApplication extends Application {
         new ReminderScheduler(this).scheduleMonthlyReminder();
         sendBroadcast(new Intent(getApplicationContext(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
         if(BuildConfig.DEBUG){
-            getContentResolver().call(CameAndWentProvider.URI_DELETE_ALL, CameAndWentProvider.SEED_METHOD, null, null);
+            getContentResolver().call(CameAndWentProvider.URI_GET_LOG_ENTRIES, CameAndWentProvider.SEED_METHOD, null, null);
         }
     }
 }
