@@ -218,38 +218,26 @@ public class CameAndWentProviderRoboTests extends TestCase{
     }
 
     @Test
-    public void updateEntry_ImplicitFieldsUpdated(){
-        fail();
-        /*
-        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+    public void updateTimeTable_AllFieldsUpdated(){
+        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null, null, null, null);
         assertNotNull(toEdit);
         assertTrue(toEdit.moveToLast());
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
-
-
-        DateTime dt = TimeConverter.getCurrentTime();
-        dt = dt.withFieldAdded(DurationFieldType.months(), 1);
-
+        DateTime dt = new DateTime(toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.DATE)));
         ContentValues cv = new ContentValues();
-        cv.put(CameAndWentProvider.CAME, dt.getMillis());
-        cv.put(CameAndWentProvider.WENT, dt.withFieldAdded(DurationFieldType.hours(), 4).getMillis());
-
+        cv.put(CameAndWentProvider.DATE, dt.withFieldAdded(DurationFieldType.months(), 1).getMillis());
         int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
         assertEquals(1, updated);
-
-        Cursor afterUpdate = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
-        assertNotNull(afterUpdate);
-        assertEquals(1, afterUpdate.getCount());
-        assertTrue(afterUpdate.moveToFirst());
-        assertEquals(id, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.ID)));
-        assertEquals(dt.getMillis(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.CAME)));
-        assertEquals(dt.withFieldAdded(DurationFieldType.hours(), 4).getMillis(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.WENT)));
-        assertEquals(dt.getMonthOfYear(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
-        assertEquals(dt.getWeekOfWeekyear(), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
-        assertEquals(TimeConverter.extractDate(dt.getMillis()), afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.DATE)));
         toEdit.close();
-        afterUpdate.close();
-        */
+
+        Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null,String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(dt.getMillis())}, null, null );
+        assertNotNull(post);
+        assertEquals(1, post.getCount());
+        assertTrue(post.moveToFirst());
+        assertEquals(dt.getWeekOfWeekyear(), post.getInt(post.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
+        assertEquals(dt.getMonthOfYear(), post.getInt(post.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
+        assertEquals(dt.getMillis(), post.getLong(post.getColumnIndex(CameAndWentProvider.DATE)));
+        post.close();
     }
 
     @Test

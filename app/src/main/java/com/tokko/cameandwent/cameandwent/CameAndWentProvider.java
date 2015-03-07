@@ -306,8 +306,8 @@ public class CameAndWentProvider extends ContentProvider {
                 return updated;
             case KEY_UPDATE_PARTICULAR_LOG_ENTRY:
                 ContentValues timeTableValues = new ContentValues();
-                populateContentValuesWithTimeInfo(values.containsKey(CAME)?values.getAsLong(CAME):values.getAsLong(WENT), timeTableValues);
-                sdb.update(TIME_TABLE, timeTableValues, String.format("%s=?", DATE), new String[]{String.valueOf(values.getAsLong(DATE))});
+                populateContentValuesWithTimeInfo(values.containsKey(DATE)?values.getAsLong(DATE):values.containsKey(CAME)?values.getAsLong(CAME):values.getAsLong(WENT), timeTableValues);
+                sdb.insert(TIME_TABLE, null, timeTableValues);
                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
@@ -332,7 +332,7 @@ public class CameAndWentProvider extends ContentProvider {
 */
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
-                DATE + " INTEGER UNIQUE ON CONFLICT REPLACE, " +
+                DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
                 WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0);";
 
@@ -344,7 +344,7 @@ public class CameAndWentProvider extends ContentProvider {
                 WENT + " INTEGER NOT NULL DEFAULT 0, " +
                 "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE+") ON DELETE CASCADE);";
 
-        private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " NATURAL JOIN " + VIEW_DURATION +";";
+        private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
         private static final String CREATE_CLEANUP_TRIGGER = "CREATE TRIGGER IF NOT EXISTS cleanup AFTER DELETE ON " + TABLE_LOG_NAME + " WHEN NOT EXISTS(SELECT * FROM " + TABLE_LOG_NAME + " WHERE " + DATE + "=old."+DATE+") BEGIN DELETE FROM " + TIME_TABLE + " WHERE " + DATE + "=old."+DATE + "; END";
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
