@@ -132,11 +132,14 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
     @Test
     public void testGetDurations(){
-        fail();
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null, null, null, null);
         long duration = TimeConverter.hoursAsLong(8);
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
-             assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+            assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
+            DateTime dt = new DateTime(c.getLong(c.getColumnIndex(CameAndWentProvider.DATE)));
+            assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
+            assertEquals(dt.getMonthOfYear(), c.getInt(c.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
+        }
         c.close();
     }
 

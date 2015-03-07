@@ -31,6 +31,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String TABLE_LOG_NAME = "log";
     private static final String VIEW_DURATION = "durations";
     private static final String TIME_TABLE = "timetable";
+    private static final String VIEW_TIME_TABLE_DURATIONS =  "timetabledurations";
 
     public static final String ID = "_id";
     public static final String CAME = "came";
@@ -50,6 +51,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
     private static final String ACTION_GET_WEEKS = "ACTION_GET_WEEKS";
     private static final String ACTION_GET_MONTHS = "ACTION_GET_MONTHS";
+    private static final String ACTION_GET_DURATIONS = "ACTION_GET_DURATIONS";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -59,6 +61,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_GET_MONTHLY_SUMMARY = 6;
     private static final int KEY_GET_GET_WEEKS = 7;
     private static final int KEY_GET_GET_MONTHS = 8;
+    private static final int KEY_GET_GET_DURATIONS = 9;
 
     public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
     public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
@@ -68,6 +71,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
     public static final Uri URI_GET_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
     public static final Uri URI_GET_GET_MONTHS = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHS);
+    public static final Uri URI_GET_GET_DURATIONS = Uri.parse(URI_TEMPLATE + ACTION_GET_DURATIONS);
 
     private static UriMatcher uriMatcher;
 
@@ -81,6 +85,7 @@ public class CameAndWentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHLY_SUMMARY, KEY_GET_MONTHLY_SUMMARY);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
         uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
+        uriMatcher.addURI(AUTHORITY, ACTION_GET_DURATIONS, KEY_GET_GET_DURATIONS);
     }
 
     private DatabaseOpenHelper db;
@@ -183,6 +188,10 @@ public class CameAndWentProvider extends ContentProvider {
               //  c = sdb.query(TABLE_LOG_NAME, new String[]{ID, WEEK_OF_YEAR, getDurationCalculation()}, selection, selectionArgs, WEEK_OF_YEAR, null, WEEK_OF_YEAR + " ASC", null);
                 c = sdb.rawQuery("SELECT " + join(new String[]{"tt."+ID, WEEK_OF_YEAR, DURATION}) + " FROM " + VIEW_DURATION + " vd LEFT JOIN " + TIME_TABLE + " tt ON vd." + DATE + "=tt." + DATE + " " + (selection!=null?" WHERE " + prefix("tt.", selection, ID, DATE):"") + " GROUP BY " + WEEK_OF_YEAR + " ORDER BY " + WEEK_OF_YEAR + " ASC", prefix("tt.", selectionArgs, ID, DATE));
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_MONTHLY_SUMMARY);
+                return c;
+            case KEY_GET_GET_DURATIONS:
+                c = sdb.query(VIEW_TIME_TABLE_DURATIONS, projection, selection, selectionArgs, null, null, sortOrder, null);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_DURATIONS);
                 return c;
             default:
                 throw new IllegalArgumentException("Unknown URI");
@@ -335,7 +344,7 @@ public class CameAndWentProvider extends ContentProvider {
                 WENT + " INTEGER NOT NULL DEFAULT 0, " +
                 "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE+") ON DELETE CASCADE);";
 
-        private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + "timetabledurations" + " AS SELECT * FROM " + TIME_TABLE + " NATURAL JOIN " + VIEW_DURATION +";";
+        private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " NATURAL JOIN " + VIEW_DURATION +";";
         private static final String CREATE_CLEANUP_TRIGGER = "CREATE TRIGGER IF NOT EXISTS cleanup AFTER DELETE ON " + TABLE_LOG_NAME + " WHEN NOT EXISTS(SELECT * FROM " + TABLE_LOG_NAME + " WHERE " + DATE + "=old."+DATE+") BEGIN DELETE FROM " + TIME_TABLE + " WHERE " + DATE + "=old."+DATE + "; END";
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
