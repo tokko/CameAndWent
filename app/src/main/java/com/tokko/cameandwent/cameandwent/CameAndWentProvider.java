@@ -96,12 +96,20 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     public static final String SEED_METHOD = "seed";
+    public static final String RECRETE_METHOD = "recreate";
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if(method.equals(SEED_METHOD)){
             seed();
         }
+        else if(method.equals(RECRETE_METHOD)){
+            recreateDurationsView();
+        }
         return super.call(method, arg, extras);
+    }
+
+    public void recreateDurationsView() {
+        db.recreateDurationsView(db.getWritableDatabase());
     }
 
     public static int SEED_ENTRIES = 0;
@@ -122,7 +130,8 @@ public class CameAndWentProvider extends ContentProvider {
             cv = buildSeedValues(dt, 8, 12);
             logEntries.add(cv);
 
-            cv = buildSeedValues(dt, 12, 17, PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("use_snapup", false)?15:0);
+            boolean useSnapup = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("use_snapup", false);
+            cv = buildSeedValues(dt, 12, 17, useSnapup?15:0);
             logEntries.add(cv);
 
             cv = buildSeedValues(dt, 12, 13);
@@ -355,12 +364,14 @@ public class CameAndWentProvider extends ContentProvider {
             db.execSQL(CREATE_TIME_TABLE);
             db.execSQL(CREATE_LOG);
             recreateDurationsView(db);
-            db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
+
         }
 
         public void recreateDurationsView(SQLiteDatabase db){
+            db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
             db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + getDurationCalculation() + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE);
+            db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
         }
 
         private String getDurationCalculation() {

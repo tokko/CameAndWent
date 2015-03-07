@@ -38,7 +38,7 @@ public class CameAndWentProviderRoboTests extends TestCase{
         mProvider.onCreate();
         ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, mProvider);
         sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
-        sharedPreferences.edit().clear();
+        sharedPreferences.edit().clear().apply();
         //mShadowContentResolver.call(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, CameAndWentProvider.SEED_METHOD, null, null);
         mProvider.seed();
     }
@@ -275,8 +275,9 @@ public class CameAndWentProviderRoboTests extends TestCase{
 	
 	@Test
 	public void snapup_durationsAreProperlySnappedUp(){
-
 		ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext()).edit().putBoolean("use_snapup", true).apply();
+        mProvider.recreateDurationsView();
+        mProvider.seed();
 		Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null, null, null, null);
 		for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             long duration = c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION));
