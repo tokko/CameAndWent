@@ -85,7 +85,10 @@ public class CameAndWentProviderRoboTests extends TestCase{
         Cursor post = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
         assertEquals(pre+1, post.getCount()); //new entry + break, why do this change randomly?
         post.close();
-        post = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", id), new String[]{String.valueOf(id)}, null);
+        post = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        assertNotNull(post);
+        assertEquals(1, post.getCount());
+        assertTrue(post.moveToFirst());
         assertEquals(0, post.getLong(post.getColumnIndex(CameAndWentProvider.WENT)));
         assertEquals(TimeConverter.extractDate(currentTime), post.getLong(post.getColumnIndex(CameAndWentProvider.DATE)));
         assertEquals(currentTime, post.getLong(post.getColumnIndex(CameAndWentProvider.CAME)));
@@ -234,6 +237,11 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
     @Test
     public void testAutomaticBreaks(){
+        sharedPreferences.edit()
+                .putBoolean("breaks_enabled", true)
+                .putString("average_break_start", "12:00")
+                .putString("average_break_duration", "00:30")
+                .apply();
         mContentResolver.delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, null, null);
         long dTime = TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis();
         long duration = DateTimeConstants.MILLIS_PER_HOUR/2;
@@ -267,16 +275,12 @@ public class CameAndWentProviderRoboTests extends TestCase{
 	
 	@Test
 	public void snapup_durationsAreProperlySnappedUp(){
-        fail();
-        sharedPreferences.edit()
-                .putBoolean("breaks_enabled", true)
-                .putString("average_break_start", "12:00")
-                .putString("average_break_duration", "00:30")
-                .apply();
+
 		ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext()).edit().putBoolean("use_snapup", true).apply();
-		Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+		Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_GET_DURATIONS, null, null, null, null);
 		for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
-			assertEquals(DateTimeConstants.MILLIS_PER_HOUR*8+DateTimeConstants.MILLIS_PER_MINUTE*30, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
+            long duration = c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION));
+			assertEquals(TimeConverter.formatInterval(duration), DateTimeConstants.MILLIS_PER_HOUR*8+DateTimeConstants.MILLIS_PER_MINUTE*30, duration);
 		}
         c.close();
 	}

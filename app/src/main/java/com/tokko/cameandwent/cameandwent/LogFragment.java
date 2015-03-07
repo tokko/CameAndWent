@@ -25,7 +25,6 @@ import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import roboguice.fragment.RoboListFragment;
 
@@ -236,7 +235,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             long cameTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE));
             String date = sdf.format(new Date(cameTime));
             long durationTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
-            String duration = formatInterval(durationTime);
+            String duration = TimeConverter.formatInterval(durationTime);
             if(cursor.isLast() && getActivity().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false))
                 duration = "currently at work";
             ((TextView)view.findViewById(android.R.id.text1)).setText("Date: " + date);
@@ -255,7 +254,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             long wentTime = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.WENT));
             String wentS = time.format(new Date(wentTime));
             boolean isbreak = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1;
-            String duration = formatInterval(wentTime-cameTime);
+            String duration = TimeConverter.formatInterval(wentTime-cameTime);
             if(wentTime-cameTime < 0) {
                 wentS = "Currently at work";
                 duration = "Currently unavailable";
@@ -274,16 +273,6 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             v2.setTag(fakkingId);
         }
 
-        private String formatInterval(long l)
-        {
-            String prefix = "";
-            if(l < 0){
-                l *= -1;
-                prefix = "-";
-            }
-            final long hr = TimeUnit.MILLISECONDS.toHours(l);
-            final long min = TimeUnit.MILLISECONDS.toMinutes(l - TimeUnit.HOURS.toMillis(hr));
-            return String.format(prefix+"%02d:%02d", hr, min);
-        }
+
     }
 }

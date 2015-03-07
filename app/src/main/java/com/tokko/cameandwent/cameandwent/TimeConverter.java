@@ -5,6 +5,8 @@ import com.google.inject.Singleton;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 
+import java.util.concurrent.TimeUnit;
+
 @Singleton
 public class TimeConverter {
     public static long CURRENT_TIME = -1;
@@ -96,4 +98,15 @@ public class TimeConverter {
         return new DateTime(year, month, day, 0, 0, 0, 0);
     }
 
+    public static String formatInterval(long l)
+    {
+        String prefix = "";
+        if(l < 0){
+            l *= -1;
+            prefix = "-";
+        }
+        final long hr = TimeUnit.MILLISECONDS.toHours(l);
+        final long min = TimeUnit.MILLISECONDS.toMinutes(l - TimeUnit.HOURS.toMillis(hr));
+        return String.format(prefix+"%02d:%02d", hr, min);
+    }
 }
