@@ -10,6 +10,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
 
+import org.joda.time.DateTime;
+
 public class CountDownManager extends BroadcastReceiver{
     public static final int NOTIFICATION_ID = 4;
     private Context context;
@@ -94,10 +96,10 @@ public class CountDownManager extends BroadcastReceiver{
             if(c.getInt(c.getColumnIndex(CameAndWentProvider.ISBREAK)) == 0){
                 if(went == 0)
                     went = TimeConverter.getCurrentTime().getMillis();
-                time += came - went;
+                time += went - came;
             }
             else
-                time += -(came - went);
+                time -= went - came;
         }
         c.close();
         return time;

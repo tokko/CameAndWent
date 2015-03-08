@@ -1,5 +1,7 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import android.net.Uri;
 import junit.framework.Assert;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +22,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowContentResolver;
+import org.robolectric.shadows.ShadowNotification;
+import org.robolectric.shadows.ShadowNotificationManager;
 import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.util.List;
@@ -26,7 +31,7 @@ import java.util.List;
 @Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class CountDownManagerTest {
-    private final DateTime currentTime = new DateTime().withTime(13, 0, 0, 0).withDate(1010, 4, 20);
+    private final DateTime currentTime = new DateTime().withTime(13, 0, 0, 0).withDate(2010, 4, 20);
     private Context context;
     private SharedPreferences sharedPreferences;
     private CountDownManager countDownManager;
@@ -45,8 +50,8 @@ public class CountDownManagerTest {
             @Override
             public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
                 MatrixCursor mc = new MatrixCursor(new String[]{ID, CAME, WENT, ISBREAK, DATE});
-                mc.addRow(new Object[]{1, currentTime.withTime(8, 0, 0, 0).getMillis(), currentTime.withTime(15, 0, 0, 0).getMillis(), 0, TimeConverter.extractDate(currentTime.getMillis())});
-                mc.addRow(new Object[]{1, currentTime.withTime(12, 0, 0, 0).getMillis(), currentTime.withTime(13, 0, 0, 0).getMillis(), 1, TimeConverter.extractDate(currentTime.getMillis())});
+                mc.addRow(new Object[]{1, currentTime.withTime(8, 0, 0, 0).getMillis(), 0, 0, TimeConverter.extractDate(currentTime.getMillis())});
+                mc.addRow(new Object[]{2, currentTime.withTime(12, 0, 0, 0).getMillis(), currentTime.withTime(13, 0, 0, 0).getMillis(), 1, TimeConverter.extractDate(currentTime.getMillis())});
                 return mc;
             }
         });
@@ -135,5 +140,49 @@ public class CountDownManagerTest {
         boolean firstAss = shadowApplication.hasReceiverForIntent(intent);
         List<BroadcastReceiver> receiversForIntent = shadowApplication.getReceiversForIntent(intent);
         return firstAss && 1 == receiversForIntent.size();
+    }
+
+    @Test
+    public void startCountDown_Notifies(){
+        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+        countDownManager.startCountDown();
+
+        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+        Assert.assertEquals("Expected one notification", 1, manager.size());
+
+        Notification notification = manager.getNotification(CountDownManager.NOTIFICATION_ID);
+        Assert.assertNotNull(notification);
+        ShadowNotification shadowNotification = Robolectric.shadowOf(notification);
+        Assert.assertNotNull("Expected shadow notification object", shadowNotification);
+        Assert.assertEquals("Workday countdown", shadowNotification.getContentTitle());
+
+    }
+    @Test
+    public void notificationCounts(){
+        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+        countDownManager.startCountDown();
+
+        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+
+        long duration = 8* DateTimeConstants.MILLIS_PER_HOUR;
+        int hoursLeft = ((currentTime.getHourOfDay()-1)-8); //extra -1 for the lunch break
+        for(int i = 0; i<hoursLeft*DateTimeConstants.MINUTES_PER_HOUR; i++){
+            long remainder = hoursLeft * DateTimeConstants.MILLIS_PER_HOUR - i*DateTimeConstants.MILLIS_PER_MINUTE;
+            context.sendBroadcast(new Intent(Intent.ACTION_TIME_TICK));
+            int progress = (int) ((double)remainder/duration)*100;
+            String progressString = String.format("Time remaining: %s", TimeConverter.formatInterval(remainder));
+            Assert.assertEquals("Expected one notification", 1, manager.size());
+
+            Notification notification = manager.getNotification(CountDownManager.NOTIFICATION_ID);
+            Assert.assertNotNull(notification);
+            ShadowNotification shadowNotification = Robolectric.shadowOf(notification);
+            Assert.assertNotNull("Expected shadow notification object", shadowNotification);
+            Assert.assertEquals("Workday countdown", shadowNotification.getContentTitle());
+            Assert.assertEquals(progressString, shadowNotification.getContentText());
+            Assert.assertEquals(progress, shadowNotification.getProgress().progress);
+            TimeConverter.CURRENT_TIME += DateTimeConstants.MILLIS_PER_MINUTE;
+
+        }
+
     }
 }
