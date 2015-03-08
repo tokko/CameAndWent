@@ -6,6 +6,7 @@ import android.app.backup.BackupDataOutput;
 import android.app.backup.FileBackupHelper;
 import android.app.backup.SharedPreferencesBackupHelper;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,11 +24,13 @@ public class BackupAgent extends BackupAgentHelper {
 
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState) throws IOException {
+        Log.d("BackupAgent", "Restoring");
         super.onRestore(data, appVersionCode, newState);
     }
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data, ParcelFileDescriptor newState) throws IOException {
+        Log.d("BackupAgent", "Backing up");
         super.onBackup(oldState, data, newState);
     }
 
