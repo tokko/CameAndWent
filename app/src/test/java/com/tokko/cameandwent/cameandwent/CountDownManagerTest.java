@@ -143,6 +143,23 @@ public class CountDownManagerTest {
     }
 
     @Test
+    public void whenCountDownDisabled_OnStartCountDown_NothingHappens(){
+        sharedPreferences.edit().clear().apply();
+        Assert.assertEquals(-1, countDownManager.startCountDown());
+        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_ON));
+        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_OFF));
+        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_TIME_TICK));
+        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+        countDownManager.startCountDown();
+
+        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+        Assert.assertEquals("Expected one notification", 0, manager.size());
+
+        Notification notification = manager.getNotification(CountDownManager.NOTIFICATION_ID);
+        Assert.assertNull(notification);
+    }
+
+    @Test
     public void startCountDown_Notifies(){
         NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
         countDownManager.startCountDown();

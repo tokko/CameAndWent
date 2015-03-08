@@ -10,8 +10,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
 
-import org.joda.time.DateTime;
-
 public class CountDownManager extends BroadcastReceiver{
     public static final int NOTIFICATION_ID = 4;
     private Context context;
@@ -52,6 +50,7 @@ public class CountDownManager extends BroadcastReceiver{
     }
 
     public long startCountDown(){
+        if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("countdown", false)) return -1;
         long currentTime = TimeConverter.getCurrentTime().getMillis();
         context.registerReceiver(this, intentFilter);
         registerTimeTickReceiver(context);
@@ -64,7 +63,10 @@ public class CountDownManager extends BroadcastReceiver{
 
     public void stopCountDown(){
         getNotificationManager(context).cancel(NOTIFICATION_ID);
-        context.unregisterReceiver(this);
+        try {
+            context.unregisterReceiver(this);
+        }
+        catch (Exception e){}
         unregisterTickReceiver(context);
     }
 
