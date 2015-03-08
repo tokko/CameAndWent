@@ -264,6 +264,7 @@ public class CameAndWentProvider extends ContentProvider {
                 if(id > -1) {
                     getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
                 }
                 return ContentUris.withAppendedId(uri, id);
             default:
