@@ -94,7 +94,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
         }
         if(id == R.id.restore_data){
             long lastBackup = getSharedPreferences(BackupAgent.BACKUP_PREFS, Context.MODE_PRIVATE).getLong(BackupAgent.LAST_BACKUP, -1);
-            AlertDialog.Builder b = new AlertDialog.Builder(getApplicationContext());
+            AlertDialog.Builder b = new AlertDialog.Builder(this);
             b.setTitle("Restore data");
             if(lastBackup > -1){
                 b.setMessage("Current settings and log will be replaced with the latest backup from " + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(lastBackup)));
@@ -124,6 +124,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
                     }
                 });
             }
+            b.show();
         }
         return super.onOptionsItemSelected(item);
     }
