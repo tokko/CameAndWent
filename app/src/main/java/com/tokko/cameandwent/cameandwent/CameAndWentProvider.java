@@ -135,10 +135,6 @@ public class CameAndWentProvider extends ContentProvider {
 
     public void recreateDurationsView() {
         db.recreateDurationsView(db.getWritableDatabase());
-        getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-        getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
-        getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-        getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
     }
 
     public static int SEED_ENTRIES = 0;
@@ -266,10 +262,9 @@ public class CameAndWentProvider extends ContentProvider {
                     sdb.insert(TABLE_LOG_NAME, null, values);
                 }
                 if(id > -1) {
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
                     getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
                 }
                 return ContentUris.withAppendedId(uri, id);
             default:
@@ -324,10 +319,7 @@ public class CameAndWentProvider extends ContentProvider {
                 sdb.insert(TIME_TABLE, null, timeTableValues);
                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
                 }
                 return updated;
             default:
@@ -338,7 +330,16 @@ public class CameAndWentProvider extends ContentProvider {
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
         private static final int DATABASE_VERSION = 46;
-
+        /*
+        private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + OLD_TABLE_LOG_NAME + "(" +
+                ID + " INTEGER PRIMARY KEY, " +
+                DATE + " INTEGER NOT NULL DEFAULT 0, " +
+                WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
+                MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
+                CAME + " INTEGER NOT NULL," +
+                ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
+                WENT + " INTEGER NOT NULL DEFAULT 0);";
+*/
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
@@ -354,12 +355,14 @@ public class CameAndWentProvider extends ContentProvider {
                 "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE+") ON DELETE CASCADE);";
 
         private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
+        private static final String CREATE_CLEANUP_TRIGGER = "CREATE TRIGGER IF NOT EXISTS cleanup AFTER DELETE ON " + TABLE_LOG_NAME + " WHEN NOT EXISTS(SELECT * FROM " + TABLE_LOG_NAME + " WHERE " + DATE + "=old."+DATE+") BEGIN DELETE FROM " + TIME_TABLE + " WHERE " + DATE + "=old."+DATE + "; END";
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+            //db.execSQL(CREATE);
             db.execSQL(CREATE_TIME_TABLE);
             db.execSQL(CREATE_LOG);
             recreateDurationsView(db);

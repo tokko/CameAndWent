@@ -27,19 +27,16 @@ public class CameAndWentProviderRoboTests extends TestCase{
 
     private CameAndWentProvider mProvider;
     private ContentResolver mContentResolver;
-    private ShadowContentResolver mShadowContentResolver;
     private SharedPreferences sharedPreferences;
 
     @Before
     public void setup(){
         mProvider = new CameAndWentProvider();
         mContentResolver = Robolectric.application.getContentResolver();
-        mShadowContentResolver = Robolectric.shadowOf(mContentResolver);
         mProvider.onCreate();
         ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, mProvider);
         sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
         sharedPreferences.edit().clear().apply();
-        //mShadowContentResolver.call(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, CameAndWentProvider.SEED_METHOD, null, null);
         mProvider.seed();
     }
 

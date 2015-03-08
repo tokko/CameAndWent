@@ -172,6 +172,21 @@
             android:dependency="monthly_reminders" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:dependency="enabled"
+        android:title="Countdown"
+        android:key="countdown_container">
+        <CheckBoxPreference
+            android:dependency="countdown_container"
+            android:title="Enabled"
+            android:key="countdown"
+            android:defaultValue="false"/>
+        <com.tokko.cameandwent.cameandwent.TimePreference
+            android:title="Daily work duration"
+            android:key="daily_work_duration"
+            android:dependency="countdown" />
+    </PreferenceCategory>
+
     <CheckBoxPreference
         android:dependency="enabled"
         android:defaultValue="false"
