@@ -5,6 +5,7 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.FileBackupHelper;
 import android.app.backup.SharedPreferencesBackupHelper;
+import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -12,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class BackupAgent extends BackupAgentHelper {
+    public static final String BACKUP_PREFS = "backupprefs";
+    public static final String LAST_BACKUP = "lastbackup";
 
     @Override
     public void onCreate() {
@@ -31,6 +34,7 @@ public class BackupAgent extends BackupAgentHelper {
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data, ParcelFileDescriptor newState) throws IOException {
         Log.d("BackupAgent", "Backing up");
+        getSharedPreferences(BACKUP_PREFS, Context.MODE_PRIVATE).edit().putLong(LAST_BACKUP, TimeConverter.getCurrentTime().getMillis()).apply();
         super.onBackup(oldState, data, newState);
     }
 

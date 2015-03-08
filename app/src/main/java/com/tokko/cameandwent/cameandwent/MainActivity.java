@@ -1,11 +1,19 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.backup.BackupManager;
+import android.app.backup.RestoreObserver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import roboguice.activity.RoboFragmentActivity;
 
@@ -83,6 +91,39 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
         if(id == R.id.show_monthly_summary){
             SummaryFragment.newMonthlyInstance().show(getSupportFragmentManager(), "monthly_summary");
             return true;
+        }
+        if(id == R.id.restore_data){
+            long lastBackup = getSharedPreferences(BackupAgent.BACKUP_PREFS, Context.MODE_PRIVATE).getLong(BackupAgent.LAST_BACKUP, -1);
+            AlertDialog.Builder b = new AlertDialog.Builder(getApplicationContext());
+            b.setTitle("Restore data");
+            if(lastBackup > -1){
+                b.setMessage("Current settings and log will be replaced with the latest backup from " + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(lastBackup)));
+                b.setPositiveButton("Do it!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new BackupManager(getApplicationContext()).requestRestore(new RestoreObserver() {
+                            @Override
+                            public void restoreStarting(int numPackages) {
+                                super.restoreStarting(numPackages);
+                            }
+                        });
+                    }
+                });
+                b.setNegativeButton("Don't do it!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+            }
+            else {
+                b.setMessage("No backup");
+                b.setNeutralButton("Ok :(", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+            }
         }
         return super.onOptionsItemSelected(item);
     }

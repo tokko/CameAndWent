@@ -8,4 +8,6 @@
         android:showAsAction="ifRoom" />
     <item android:id="@+id/show_monthly_summary"
         android:title="Monthly Summary"/>
+    <item android:id="@+id/restore_data"
+        android:title="Restore data"/>
 </menu>
