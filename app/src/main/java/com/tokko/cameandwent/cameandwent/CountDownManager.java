@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 
 public class CountDownManager extends BroadcastReceiver{
@@ -15,45 +18,53 @@ public class CountDownManager extends BroadcastReceiver{
     private Context context;
     private IntentFilter intentFilter;
     private TickReceiver tickReceiver;
+    private CountDownDatabaseObserver obs;
 
     public CountDownManager(Context context){
         this.context = context;
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        obs = new CountDownDatabaseObserver(new Handler(), context);
     }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-           unregisterTickReceiver(context);
+           unregisterObservers(context);
         }
         else if(intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
             updateNotification(context);
-            registerTimeTickReceiver(context);
+            registerObservers(context);
         }
         else
             throw new IllegalStateException("Unknown intent");
     }
 
-    private void unregisterTickReceiver(Context context) {
-        if(tickReceiver != null) {
-            context.unregisterReceiver(tickReceiver);
-            tickReceiver = null;
-        }
-    }
-
-    private void registerTimeTickReceiver(Context context) {
+    private void registerObservers(Context context) {
         if(tickReceiver == null) {
             tickReceiver = new TickReceiver();
             context.registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
         }
+
+        context.getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_LOG_ENTRIES, false, obs);
+        context.getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_DURATIONS, false, obs);
+
+    }
+
+    private void unregisterObservers(Context context) {
+        if(tickReceiver != null) {
+            context.unregisterReceiver(tickReceiver);
+            tickReceiver = null;
+        }
+        context.getContentResolver().unregisterContentObserver(obs);
     }
 
     public long startCountDown(){
         if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("countdown", false)) return -1;
         long currentTime = TimeConverter.getCurrentTime().getMillis();
         context.registerReceiver(this, intentFilter);
-        registerTimeTickReceiver(context);
+        registerObservers(context);
         updateNotification(context);
         return currentTime;
     }
@@ -67,7 +78,7 @@ public class CountDownManager extends BroadcastReceiver{
             context.unregisterReceiver(this);
         }
         catch (Exception e){}
-        unregisterTickReceiver(context);
+        unregisterObservers(context);
     }
 
     private void updateNotification(Context context){
@@ -108,6 +119,25 @@ public class CountDownManager extends BroadcastReceiver{
 
     }
 
+    public class CountDownDatabaseObserver extends ContentObserver{
+
+        private Context context;
+
+        public CountDownDatabaseObserver(Handler handler,Context context) {
+            super(handler);
+            this.context = context;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateNotification(context);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateNotification(context);
+        }
+    }
     public class TickReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
