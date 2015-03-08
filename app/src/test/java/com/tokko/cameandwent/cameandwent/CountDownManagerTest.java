@@ -41,6 +41,7 @@ public class CountDownManagerTest {
     public void setup(){
         TimeConverter.CURRENT_TIME = currentTime.getMillis();
         context = Robolectric.application.getApplicationContext();
+        Robolectric.getShadowApplication().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).edit().putBoolean(ClockManager.PREF_CLOCKED_IN, true).apply();
         sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().clear()
                 .putBoolean("countdown", true)
@@ -189,6 +190,8 @@ public class CountDownManagerTest {
 
     @Test
     public void whenClockIn_CountDownStarts(){
+        Robolectric.getShadowApplication().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).edit().clear().apply();
+
         ClockManager cm = new ClockManager(context);
         cm.clockIn();
 
