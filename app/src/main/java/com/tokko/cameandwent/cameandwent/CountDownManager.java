@@ -73,15 +73,16 @@ public class CountDownManager extends BroadcastReceiver{
     }
 
     public void stopCountDown(){
-        getNotificationManager(context).cancel(NOTIFICATION_ID);
+        unregisterObservers(context);
         try {
             context.unregisterReceiver(this);
         }
         catch (Exception e){}
-        unregisterObservers(context);
+        getNotificationManager(context).cancel(NOTIFICATION_ID);
     }
 
     private void updateNotification(Context context){
+        if(!context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false)) return;
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         if(!defaultPreferences.getBoolean("countdown", false)){
             getNotificationManager(context).cancel(NOTIFICATION_ID);
