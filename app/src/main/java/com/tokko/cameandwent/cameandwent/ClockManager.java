@@ -19,27 +19,29 @@ public class ClockManager {
     private static final String PREV_SOUNDMODE_KEY = "prevsoundmodekey";
     private  AudioManager am;
     private SharedPreferences sp;
+    private CountDownManager countDownManager;
 
     public ClockManager(Context context) {
         this.context = context;
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         sp = context.getSharedPreferences(CLOCK_PREFS, Context.MODE_PRIVATE);
+        countDownManager = new CountDownManager(context);
     }
 
     public void clockIn(){
-        clockIn(System.currentTimeMillis());
+        clockIn(TimeConverter.getCurrentTime().getMillis());
     }
 
     public void clockOut(){
-       clockOut(System.currentTimeMillis());
+       clockOut(TimeConverter.getCurrentTime().getMillis());
 
     }
 
     public void clockIn(long time) {
         if(!defaultPrefs.getBoolean("enabled", false)) return;
         if(!this.sp.getBoolean(PREF_CLOCKED_IN, false)) {
-            this.sp.edit().putBoolean(PREF_CLOCKED_IN, true).commit();
+            this.sp.edit().putBoolean(PREF_CLOCKED_IN, true).apply();
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.CAME, time);
             context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
@@ -53,6 +55,7 @@ public class ClockManager {
                     am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
             }
             postNotification(1, "Arrived at work");
+            countDownManager.startCountDown();
         }
     }
 
@@ -66,6 +69,7 @@ public class ClockManager {
                 am.setRingerMode(defaultPrefs.getInt(PREV_SOUNDMODE_KEY, AudioManager.RINGER_MODE_NORMAL));
             }
             postNotification(1, "Left work");
+            countDownManager.stopCountDown();
         }
     }
 

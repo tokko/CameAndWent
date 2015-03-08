@@ -3,6 +3,7 @@ package com.tokko.cameandwent.cameandwent;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -43,6 +44,7 @@ public class CountDownManagerTest {
         sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().clear()
                 .putBoolean("countdown", true)
+                .putBoolean("enabled", true)
                 .putString("daily_work_duration", "8:0")
                 .apply();
 
@@ -53,6 +55,16 @@ public class CountDownManagerTest {
                 mc.addRow(new Object[]{1, currentTime.withTime(8, 0, 0, 0).getMillis(), 0, 0, TimeConverter.extractDate(currentTime.getMillis())});
                 mc.addRow(new Object[]{2, currentTime.withTime(12, 0, 0, 0).getMillis(), currentTime.withTime(13, 0, 0, 0).getMillis(), 1, TimeConverter.extractDate(currentTime.getMillis())});
                 return mc;
+            }
+
+            @Override
+            public Uri insert(Uri uri, ContentValues values) {
+                return uri;
+            }
+
+            @Override
+            public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+                return 0;
             }
         });
         countDownManager = new CountDownManager(context);
@@ -174,6 +186,40 @@ public class CountDownManagerTest {
         Assert.assertEquals("Workday countdown", shadowNotification.getContentTitle());
 
     }
+
+    @Test
+    public void whenClockIn_CountDownStarts(){
+        ClockManager cm = new ClockManager(context);
+        cm.clockIn();
+
+        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+        Assert.assertEquals("Expected one notification", 1, manager.size());
+
+        Notification notification = manager.getNotification(CountDownManager.NOTIFICATION_ID);
+        Assert.assertNotNull(notification);
+        ShadowNotification shadowNotification = Robolectric.shadowOf(notification);
+        Assert.assertNotNull("Expected shadow notification object", shadowNotification);
+        Assert.assertEquals("Workday countdown", shadowNotification.getContentTitle());
+    }
+
+    @Test
+    public void whenClockOut_CountDownStops(){
+        ClockManager cm = new ClockManager(context);
+        cm.clockIn();
+        cm.clockOut();
+
+        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+        Assert.assertEquals("Expected one notification", 0, manager.size());
+
+        Notification notification = manager.getNotification(CountDownManager.NOTIFICATION_ID);
+        Assert.assertNull(notification);
+    }
+
+
     @Test
     public void notificationCounts(){
         NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
