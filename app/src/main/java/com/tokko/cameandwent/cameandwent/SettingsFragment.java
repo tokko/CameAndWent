@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ public class SettingsFragment extends PreferenceFragment {
         if(!PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("countdown", false))
             new CountDownManager(getActivity()).stopCountDown();
         getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_GET_MONTHS, CameAndWentProvider.RECRETE_METHOD, null, null);
+        new BackupManager(getActivity()).dataChanged();
         super.onStop();
     }
 }
