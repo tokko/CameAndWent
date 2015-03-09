@@ -92,11 +92,10 @@ public class CountDownManager extends BroadcastReceiver{
         notificationBuilder.setContentTitle("Workday countdown");
         notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
         notificationBuilder.setOngoing(true);
-        double duration = TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
-        double currentDuration = getCurrentDuration(context);
-        double remainder = duration - currentDuration;
-        int progress = (int) ((currentDuration/duration)*100);
-        notificationBuilder.setProgress(100, progress, false);
+        int duration = (int) TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
+        int currentDuration = (int) getCurrentDuration(context);
+        int remainder = duration - currentDuration;
+        notificationBuilder.setProgress(duration, currentDuration, false);
         notificationBuilder.setContentText(String.format("Time remaining: %s", TimeConverter.formatInterval((long)remainder)));
         getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
