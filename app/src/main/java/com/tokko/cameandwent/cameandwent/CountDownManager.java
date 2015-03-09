@@ -44,7 +44,7 @@ public class CountDownManager extends BroadcastReceiver{
     private void registerObservers(Context context) {
         if(tickReceiver == null) {
             tickReceiver = new TickReceiver();
-            context.registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+            context.getApplicationContext().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
         }
 
         context.getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_LOG_ENTRIES, false, obs);
@@ -54,7 +54,7 @@ public class CountDownManager extends BroadcastReceiver{
 
     private void unregisterObservers(Context context) {
         if(tickReceiver != null) {
-            context.unregisterReceiver(tickReceiver);
+            context.getApplicationContext().unregisterReceiver(tickReceiver);
             tickReceiver = null;
         }
         context.getContentResolver().unregisterContentObserver(obs);
@@ -63,7 +63,7 @@ public class CountDownManager extends BroadcastReceiver{
     public long startCountDown(){
         if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("countdown", false)) return -1;
         long currentTime = TimeConverter.getCurrentTime().getMillis();
-        context.registerReceiver(this, intentFilter);
+        context.getApplicationContext().registerReceiver(this, intentFilter);
         registerObservers(context);
         updateNotification(context);
         return currentTime;
@@ -75,7 +75,7 @@ public class CountDownManager extends BroadcastReceiver{
     public void stopCountDown(){
         unregisterObservers(context);
         try {
-            context.unregisterReceiver(this);
+            context.getApplicationContext().unregisterReceiver(this);
         }
         catch (Exception e){}
         getNotificationManager(context).cancel(NOTIFICATION_ID);
