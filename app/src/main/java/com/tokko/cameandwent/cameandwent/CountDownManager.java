@@ -21,7 +21,7 @@ public class CountDownManager extends BroadcastReceiver{
     private CountDownDatabaseObserver obs;
 
     public CountDownManager(Context context){
-        this.context = context;
+        this.context = context.getApplicationContext();
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -46,10 +46,7 @@ public class CountDownManager extends BroadcastReceiver{
             tickReceiver = new TickReceiver();
             context.getApplicationContext().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
         }
-
-        context.getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_LOG_ENTRIES, false, obs);
         context.getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_DURATIONS, false, obs);
-
     }
 
     private void unregisterObservers(Context context) {
