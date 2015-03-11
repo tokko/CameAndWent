@@ -345,7 +345,6 @@ public class CameAndWentProvider extends ContentProvider {
                 "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE+") ON DELETE CASCADE);";
 
         private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
-        private static final String CREATE_CLEANUP_TRIGGER = "CREATE TRIGGER IF NOT EXISTS cleanup AFTER DELETE ON " + TABLE_LOG_NAME + " WHEN NOT EXISTS(SELECT * FROM " + TABLE_LOG_NAME + " WHERE " + DATE + "=old."+DATE+") BEGIN DELETE FROM " + TIME_TABLE + " WHERE " + DATE + "=old."+DATE + "; END";
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
