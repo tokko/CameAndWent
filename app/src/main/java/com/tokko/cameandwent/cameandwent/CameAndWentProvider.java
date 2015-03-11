@@ -102,14 +102,14 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     public static final String SEED_METHOD = "seed";
-    public static final String RECRETE_METHOD = "recreate";
+    public static final String RECREATE_METHOD = "recreate";
     public static final String MIGRATE_METHOD = "migrate";
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if(method.equals(SEED_METHOD)){
             seed();
         }
-        else if(method.equals(RECRETE_METHOD)){
+        else if(method.equals(RECREATE_METHOD)){
             recreateDurationsView();
         }
         else if(method.equals(MIGRATE_METHOD)){
