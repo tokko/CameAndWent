@@ -405,4 +405,42 @@ public class CameAndWentProviderTests extends TestCase{
         c.close();
         c1.close();
     }
+
+    @Test
+    public void updateTag_InvalidId_DoesNothing(){
+        String tag = "bananfisk2000";
+        double latitude = 3.56;
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.TAG, tag);
+        cv.put(CameAndWentProvider.LATITUDE, latitude);
+        int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_TAG, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(-1)});
+        assertEquals(0, updated);
+    }
+
+
+    @Test
+    public void deleteTag(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+        c.moveToLast();
+        long id = c.getLong(c.getColumnIndex(CameAndWentProvider.ID));
+
+        int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_TAG, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+        assertEquals(1, deleted);
+
+        Cursor c1 = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+        assertEquals(c.getCount()-1, c1.getCount());
+        c.close();
+        c1.close();
+    }
+
+    @Test
+    public void deleteTag_InvalidId_DoesNothing(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+        int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_TAG, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(-1)});
+        assertEquals(0, deleted);
+        Cursor c1 = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+        assertEquals(c.getCount(), c1.getCount());
+        c.close();
+        c1.close();
+    }
 }

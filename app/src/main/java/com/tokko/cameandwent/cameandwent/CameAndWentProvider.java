@@ -59,6 +59,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_GET_TAGS = "ACTION_GET_TAGS";
     private static final String ACTION_INSERT_TAG = "ACTION_INSERT_TAG";
     private static final String ACTION_UPDATE_TAG = "ACTION_UPDATE_TAG";
+    private static final String ACTION_DELETE_TAG = "ACTION_DELETE_TAG";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -72,6 +73,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_GET_TAGS = 11;
     private static final int KEY_INSERT_TAG = 12;
     private static final int KEY_UPDATE_TAG = 13;
+    private static final int KEY_DELETE_TAG = 14;
 
     public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
     public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
@@ -85,6 +87,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_GET_TAGS = makeUri(ACTION_GET_TAGS, KEY_GET_TAGS);
     public static final Uri URI_INSERT_TAG = makeUri(ACTION_INSERT_TAG, KEY_INSERT_TAG);
     public static final Uri URI_UPDATE_TAG = makeUri(ACTION_UPDATE_TAG, KEY_UPDATE_TAG);
+    public static final Uri URI_DELETE_TAG = makeUri(ACTION_DELETE_TAG, KEY_DELETE_TAG);
 
     private static UriMatcher uriMatcher;
 
@@ -312,6 +315,15 @@ public class CameAndWentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case KEY_DELETE_LOG_ENTRY:
                 deleted = sdb.delete(TABLE_LOG_NAME, selection, selectionArgs);
+                if(deleted > 0){
+                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
+                }
+                return deleted;
+            case KEY_DELETE_TAG:
+                deleted = sdb.delete(TABLE_TAGS_NAME, selection, selectionArgs);
                 if(deleted > 0){
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
                     getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
