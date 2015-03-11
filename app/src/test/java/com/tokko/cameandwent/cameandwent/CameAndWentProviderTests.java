@@ -348,4 +348,34 @@ public class CameAndWentProviderTests extends TestCase{
         }
         c.close();
     }
+
+    @Test
+    public void createTag(){
+        String tag = "bananfisk2000";
+        double longitude = 2.34;
+        double latitude = 3.56;
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.TAG, tag);
+        cv.put(CameAndWentProvider.LONGITUDE, longitude);
+        cv.put(CameAndWentProvider.LATITUDE, latitude);
+
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+        assertEquals(5, c.getCount());
+        Uri uri = mContentResolver.insert(CameAndWentProvider.URI_INSERT_TAG, cv);
+
+        long id = ContentUris.parseId(uri);
+
+        Cursor c1 = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+        assertNotNull(c1);
+        assertEquals(c.getCount()+1, c1.getCount());
+        c1.close();
+
+        c1 = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        assertTrue(c1.moveToFirst());
+        assertEquals(tag, c1.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
+        assertEquals(longitude, c1.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE)));
+        assertEquals(latitude, c1.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE)));
+        c.close();
+        c1.close();
+    }
 }
