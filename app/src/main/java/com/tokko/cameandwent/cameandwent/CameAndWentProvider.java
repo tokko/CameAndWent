@@ -63,29 +63,22 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_GET_GET_DURATIONS = 9;
     private static final int KEY_GET_GET_MONTHLY_SUMMARY = 10;
 
-    public static final Uri URI_CAME = Uri.parse(URI_TEMPLATE + ACTION_CAME);
-    public static final Uri URI_WENT = Uri.parse(URI_TEMPLATE + ACTION_WENT);
-    public static final Uri URI_GET_LOG_ENTRIES = Uri.parse(URI_TEMPLATE + ACTION_GET_LOG_ENTRIES);
-    public static final Uri URI_DELETE_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_DELETE_LOG_ENTRY);
-    public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = Uri.parse(URI_TEMPLATE + ACTION_UPDATE_PARTICULAR_LOG_ENTRY);
-    public static final Uri URI_GET_WEEKS = Uri.parse(URI_TEMPLATE + ACTION_GET_WEEKS);
-    public static final Uri URI_GET_GET_MONTHS = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHS);
-    public static final Uri URI_GET_DURATIONS = Uri.parse(URI_TEMPLATE + ACTION_GET_DURATIONS);
-    public static final Uri URI_GET_MONTHLY_SUMMARY = Uri.parse(URI_TEMPLATE + ACTION_GET_MONTHLY_SUMMARY);
+    public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
+    public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
+    public static final Uri URI_GET_LOG_ENTRIES =makeUri(ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
+    public static final Uri URI_DELETE_LOG_ENTRY = makeUri(ACTION_DELETE_LOG_ENTRY, KEY_DELETE_LOG_ENTRY);
+    public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = makeUri(ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
+    public static final Uri URI_GET_WEEKS = makeUri(ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
+    public static final Uri URI_GET_GET_MONTHS =makeUri(ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
+    public static final Uri URI_GET_DURATIONS = makeUri(ACTION_GET_DURATIONS, KEY_GET_GET_DURATIONS);
+    public static final Uri URI_GET_MONTHLY_SUMMARY = makeUri(ACTION_GET_MONTHLY_SUMMARY, KEY_GET_GET_MONTHLY_SUMMARY);
 
     private static UriMatcher uriMatcher;
 
-    static{
-        uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(AUTHORITY, ACTION_CAME, KEY_CAME);
-        uriMatcher.addURI(AUTHORITY, ACTION_WENT, KEY_WENT);
-        uriMatcher.addURI(AUTHORITY, ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
-        uriMatcher.addURI(AUTHORITY, ACTION_DELETE_LOG_ENTRY, KEY_DELETE_LOG_ENTRY);
-        uriMatcher.addURI(AUTHORITY, ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
-        uriMatcher.addURI(AUTHORITY, ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
-        uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
-        uriMatcher.addURI(AUTHORITY, ACTION_GET_DURATIONS, KEY_GET_GET_DURATIONS);
-        uriMatcher.addURI(AUTHORITY, ACTION_GET_MONTHLY_SUMMARY, KEY_GET_GET_MONTHLY_SUMMARY);
+    private static Uri makeUri(String action, int key){
+        if(uriMatcher == null) uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        uriMatcher.addURI(AUTHORITY, action, key);
+        return Uri.parse(URI_TEMPLATE + action);
     }
 
     private DatabaseOpenHelper db;
