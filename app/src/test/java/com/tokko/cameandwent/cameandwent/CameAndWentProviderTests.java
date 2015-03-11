@@ -289,4 +289,23 @@ public class CameAndWentProviderTests extends TestCase{
 		}
         c.close();
 	}
+
+    @Test
+    public void getTags(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+        assertNotNull(c);
+        assertEquals(5, c.getCount());
+        assertEquals(4, c.getColumnNames().length);
+        assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
+        assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
+        assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
+        assertTrue(c.getColumnIndex(CameAndWentProvider.LATITUDE) > -1);
+        int suffix = 0;
+        String tag = "TAG";
+        for (assertTrue(c.moveToFirst()); !c.isAfterLast(); c.moveToNext()){
+            assertEquals(tag + suffix++, c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
+            assertEquals(-1D, c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE)));
+            assertEquals(-1D, c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE)));
+        }
+    }
 }

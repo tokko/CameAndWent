@@ -31,6 +31,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String TABLE_LOG_NAME = "log";
     private static final String VIEW_DURATION = "durations";
     private static final String TIME_TABLE = "timetable";
+    private static final String TABLE_TAGS_NAME = "tags";
     private static final String VIEW_TIME_TABLE_DURATIONS =  "timetabledurations";
 
     public static final String ID = "_id";
@@ -39,6 +40,9 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String ISBREAK = "isbreak";
     public static final String WEEK_OF_YEAR = "weekofyear";
     public static final String MONTH_OF_YEAR = "monthofyear";
+    public static final String TAG = "tag";
+    public static final String LONGITUDE = "longitude";
+    public static final String LATITUDE = "latitude";
 
     public static final String DATE = "date";
     public static final String DURATION = "duration";
@@ -63,7 +67,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_GET_GET_MONTHS = 8;
     private static final int KEY_GET_GET_DURATIONS = 9;
     private static final int KEY_GET_GET_MONTHLY_SUMMARY = 10;
-    private static final int KEY_GET_GET_TAGS = 11;
+    private static final int KEY_GET_TAGS = 11;
 
     public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
     public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
@@ -74,7 +78,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_GET_GET_MONTHS =makeUri(ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
     public static final Uri URI_GET_DURATIONS = makeUri(ACTION_GET_DURATIONS, KEY_GET_GET_DURATIONS);
     public static final Uri URI_GET_MONTHLY_SUMMARY = makeUri(ACTION_GET_MONTHLY_SUMMARY, KEY_GET_GET_MONTHLY_SUMMARY);
-    public static final Uri URI_GET_MONTHLY_TAGS = makeUri(ACTION_GET_TAGS, KEY_GET_GET_TAGS);
+    public static final Uri URI_GET_TAGS = makeUri(ACTION_GET_TAGS, KEY_GET_TAGS);
 
     private static UriMatcher uriMatcher;
 
@@ -163,8 +167,15 @@ public class CameAndWentProvider extends ContentProvider {
         SEED_ENTRIES = logEntries.size();
         SQLiteDatabase sdb = db.getWritableDatabase();
         sdb.beginTransaction();
+        sdb.delete(TABLE_TAGS_NAME, null, null);
         sdb.delete(TABLE_LOG_NAME, null, null);
         sdb.delete(TIME_TABLE, null, null);
+        for(int i=0; i<5; i++){
+            ContentValues cv = new ContentValues();
+            cv.put(TAG, "TAG" + i);
+            sdb.insert(TABLE_TAGS_NAME, null, cv);
+        }
+
         for (ContentValues value : timeTables) {
             long id = sdb.insertOrThrow(TIME_TABLE, null, value);
             if(id < 0) throw new IllegalStateException("Insert failed");
@@ -224,6 +235,10 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_GET_GET_DURATIONS:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, projection, selection, selectionArgs, null, null, sortOrder, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_DURATIONS);
+                return c;
+            case KEY_GET_TAGS:
+                c = sdb.query(TABLE_TAGS_NAME, projection, selection, selectionArgs, null, null, sortOrder, null);
+                c.setNotificationUri(getContext().getContentResolver(), URI_GET_TAGS);
                 return c;
             default:
                 throw new IllegalArgumentException("Unknown URI");
@@ -340,6 +355,12 @@ public class CameAndWentProvider extends ContentProvider {
                 WENT + " INTEGER NOT NULL DEFAULT 0, " +
                 "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE+") ON DELETE CASCADE);";
 
+        private static final String CREATE_TAGS = "CREATE TABLE IF NOT EXISTS " + TABLE_TAGS_NAME + "(" +
+                ID + " INTEGER PRIMARY KEY, " +
+                TAG + " TEXT NOT NULL UNIQUE ON CONFLICT ABORT, " +
+                LATITUDE + " INTEGER NOT NULL DEFAULT -1, " +
+                LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
+
         private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -349,6 +370,7 @@ public class CameAndWentProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREATE_TIME_TABLE);
             db.execSQL(CREATE_LOG);
+            db.execSQL(CREATE_TAGS);
             recreateDurationsView(db);
 
         }
@@ -370,6 +392,7 @@ public class CameAndWentProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            onCreate(db);
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
             Cursor c = null;
             for(int version = oldVersion; version <= newVersion; version++){
