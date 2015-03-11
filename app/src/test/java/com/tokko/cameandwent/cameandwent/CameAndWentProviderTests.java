@@ -378,4 +378,31 @@ public class CameAndWentProviderTests extends TestCase{
         c.close();
         c1.close();
     }
+
+    @Test
+    public void updateTag(){
+        String tag = "bananfisk2000";
+        double longitude;
+        double latitude = 3.56;
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.TAG, tag);
+        cv.put(CameAndWentProvider.LATITUDE, latitude);
+
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, null);
+
+        c.moveToLast();
+        long id = c.getLong(c.getColumnIndex(CameAndWentProvider.ID));
+        longitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE));
+
+        int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_TAG, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+        assertEquals(1, updated);
+
+        Cursor c1 = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        assertTrue(c1.moveToFirst());
+        assertEquals(tag, c1.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
+        assertEquals(longitude, c1.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE)));
+        assertEquals(latitude, c1.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE)));
+        c.close();
+        c1.close();
+    }
 }
