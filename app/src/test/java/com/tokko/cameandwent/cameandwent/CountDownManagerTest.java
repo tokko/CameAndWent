@@ -231,22 +231,27 @@ public class CountDownManagerTest {
         ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
 
         int hoursLeft = ((currentTime.getHourOfDay()-1)-8); //extra -1 for the lunch break
+        long startDuration = (8-hoursLeft)*DateTimeConstants.MILLIS_PER_HOUR;
         for(int i = 0; i<hoursLeft*DateTimeConstants.MINUTES_PER_HOUR; i++){
             int remainder = hoursLeft * DateTimeConstants.MILLIS_PER_HOUR - i*DateTimeConstants.MILLIS_PER_MINUTE;
-
+            context.sendBroadcast(new Intent(Intent.ACTION_TIME_TICK));
             String progressString = String.format("Time remaining: %s", TimeConverter.formatInterval((long) remainder));
+
             Assert.assertEquals("Expected one notification", 1, manager.size());
 
             Notification notification = manager.getNotification(CountDownManager.NOTIFICATION_ID);
             Assert.assertNotNull(notification);
+
             ShadowNotification shadowNotification = Robolectric.shadowOf(notification);
             Assert.assertNotNull("Expected shadow notification object", shadowNotification);
             Assert.assertEquals("Workday countdown", shadowNotification.getContentTitle());
             Assert.assertEquals(progressString, shadowNotification.getContentText());
+
             int nProgress = shadowNotification.getProgress().progress;
-            Assert.assertEquals(hoursLeft*DateTimeConstants.MILLIS_PER_HOUR+i*DateTimeConstants.MILLIS_PER_MINUTE, nProgress);
+            Assert.assertEquals(startDuration + i * DateTimeConstants.MILLIS_PER_MINUTE, nProgress);
+
             TimeConverter.CURRENT_TIME += DateTimeConstants.MILLIS_PER_MINUTE;
-            context.sendBroadcast(new Intent(Intent.ACTION_TIME_TICK));
+
         }
 
     }
