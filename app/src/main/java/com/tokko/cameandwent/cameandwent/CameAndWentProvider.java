@@ -330,16 +330,6 @@ public class CameAndWentProvider extends ContentProvider {
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
         private static final int DATABASE_VERSION = 46;
-        /*
-        private static final String CREATE = "CREATE TABLE IF NOT EXISTS " + OLD_TABLE_LOG_NAME + "(" +
-                ID + " INTEGER PRIMARY KEY, " +
-                DATE + " INTEGER NOT NULL DEFAULT 0, " +
-                WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
-                MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
-                CAME + " INTEGER NOT NULL," +
-                ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
-                WENT + " INTEGER NOT NULL DEFAULT 0);";
-*/
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
