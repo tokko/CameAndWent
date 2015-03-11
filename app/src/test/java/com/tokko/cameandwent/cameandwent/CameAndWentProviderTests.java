@@ -23,7 +23,7 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 
 @Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
-public class CameAndWentProviderRoboTests extends TestCase{
+public class CameAndWentProviderTests extends TestCase{
 
     private CameAndWentProvider mProvider;
     private ContentResolver mContentResolver;
