@@ -23,7 +23,7 @@ import java.util.ArrayList;
 public class CameAndWentProvider extends ContentProvider {
     static final int WEEKS_BACK = 5;
 
-    static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".CameAndWentProvider";
+    static final String AUTHORITY = BuildConfig.APPLICATION_ID+".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
 
     public static final String DATABASE_NAME = "cameandwent";
@@ -77,7 +77,7 @@ public class CameAndWentProvider extends ContentProvider {
 
     public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
     public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
-    public static final Uri URI_GET_LOG_ENTRIES =makeUri(ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
+    public static final Uri URI_GET_LOG_ENTRIES = makeUri(ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
     public static final Uri URI_DELETE_LOG_ENTRY = makeUri(ACTION_DELETE_LOG_ENTRY, KEY_DELETE_LOG_ENTRY);
     public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = makeUri(ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
     public static final Uri URI_GET_WEEKS = makeUri(ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
@@ -378,7 +378,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 46;
+        private static final int DATABASE_VERSION = 47;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
@@ -468,7 +468,7 @@ public class CameAndWentProvider extends ContentProvider {
                     case 38:
                         db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
                         break;
-                    case 46:
+                    case 45:
                         db.execSQL(CREATE_LOG);
                         db.execSQL(CREATE_TIME_TABLE);
                         recreateDurationsView(db);
