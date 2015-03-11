@@ -351,7 +351,6 @@ public class CameAndWentProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            //db.execSQL(CREATE);
             db.execSQL(CREATE_TIME_TABLE);
             db.execSQL(CREATE_LOG);
             recreateDurationsView(db);
