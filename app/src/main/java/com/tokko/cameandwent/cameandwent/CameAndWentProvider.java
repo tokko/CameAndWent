@@ -52,6 +52,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String ACTION_GET_MONTHS = "ACTION_GET_MONTHS";
     private static final String ACTION_GET_DURATIONS = "ACTION_GET_DURATIONS";
     private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
+    private static final String ACTION_GET_TAGS = "ACTION_GET_TAGS";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -62,6 +63,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_GET_GET_MONTHS = 8;
     private static final int KEY_GET_GET_DURATIONS = 9;
     private static final int KEY_GET_GET_MONTHLY_SUMMARY = 10;
+    private static final int KEY_GET_GET_TAGS = 11;
 
     public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
     public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
@@ -72,6 +74,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_GET_GET_MONTHS =makeUri(ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
     public static final Uri URI_GET_DURATIONS = makeUri(ACTION_GET_DURATIONS, KEY_GET_GET_DURATIONS);
     public static final Uri URI_GET_MONTHLY_SUMMARY = makeUri(ACTION_GET_MONTHLY_SUMMARY, KEY_GET_GET_MONTHLY_SUMMARY);
+    public static final Uri URI_GET_MONTHLY_TAGS = makeUri(ACTION_GET_TAGS, KEY_GET_GET_TAGS);
 
     private static UriMatcher uriMatcher;
 
