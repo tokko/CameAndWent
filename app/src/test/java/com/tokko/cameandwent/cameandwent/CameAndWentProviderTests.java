@@ -336,4 +336,16 @@ public class CameAndWentProviderTests extends TestCase{
         assertEquals(-1, c.getColumnIndex(CameAndWentProvider.LATITUDE));
         c.close();
     }
+
+    @Test
+    public void getTags_Sortorder(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_TAGS, null, null, null, CameAndWentProvider.TAG + " DESC");
+        assertNotNull(c);
+        int suffix = 4;
+        String tag = "TAG";
+        for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+            assertEquals(tag + suffix--, c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
+        }
+        c.close();
+    }
 }
