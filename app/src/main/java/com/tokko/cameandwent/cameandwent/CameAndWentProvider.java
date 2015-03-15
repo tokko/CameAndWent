@@ -182,7 +182,7 @@ public class CameAndWentProvider extends ContentProvider {
         for(int i=0; i<5; i++){
             ContentValues cv = new ContentValues();
             cv.put(TAG, "TAG" + i);
-            sdb.insert(TABLE_TAGS_NAME, null, cv);
+            sdb.insertOrThrow(TABLE_TAGS_NAME, null, cv);
         }
 
         for (ContentValues value : timeTables) {

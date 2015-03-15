@@ -78,6 +78,7 @@
         <activity
             android:name=".locationtags.LocationTagActivity"
             android:parentActivityName=".locationtags.LocationTagActivity" >
+            <!-- TODO: restore this to its proper location -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
