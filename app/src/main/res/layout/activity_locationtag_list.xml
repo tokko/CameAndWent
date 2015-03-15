@@ -3,5 +3,5 @@
     android:name="com.tokko.cameandwent.cameandwent.locationtags.LocationTagListFragment"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:layout_marginLeft="16dp" android:layout_marginRight="16dp"
-    tools:context="com.tokko.cameandwent.cameandwent.locationtags.LocationTagListActivity"
+    tools:context="com.tokko.cameandwent.cameandwent.locationtags.LocationTagActivity"
     tools:layout="@android:layout/list_content" />
