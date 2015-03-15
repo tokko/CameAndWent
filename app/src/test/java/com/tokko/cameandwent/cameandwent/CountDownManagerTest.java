@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -21,10 +22,12 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowAlarmManager;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowNotification;
 import org.robolectric.shadows.ShadowNotificationManager;
+import org.robolectric.shadows.ShadowPendingIntent;
 import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.util.List;
@@ -72,64 +75,45 @@ public class CountDownManagerTest {
     }
 
     @Test
-    public void startCountDown_receiverRegisteredForScreenOn(){
-        countDownManager.startCountDown();
+    public void receiverRegisteredForScreenOn(){
         assertBroadcastReceiverRegistered(CountDownManager.class);
         Assert.assertTrue(assertHasReceiverForIntent(Intent.ACTION_SCREEN_ON));
     }
 
     @Test
-    public void startCountDown_receiverRegisteredForScreenOff(){
-        countDownManager.startCountDown();
+    public void receiverRegisteredForScreenOff(){
         assertBroadcastReceiverRegistered(CountDownManager.class);
         Assert.assertTrue(assertHasReceiverForIntent(Intent.ACTION_SCREEN_OFF));
     }
 
     @Test
-    public void stopCountDown_receiverRegisteredForScreenOn(){
+    public void countDownStarted_whenScreenOnAlarmIsActivated(){
+        AlarmManager alarmManager = (AlarmManager) Robolectric.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Robolectric.shadowOf(alarmManager);
+        countDownManager.startCountDown();
+//        context.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
+        List<ShadowAlarmManager.ScheduledAlarm> scheduledAlarms = shadowAlarmManager.getScheduledAlarms();
+        Assert.assertEquals(1, scheduledAlarms.size());
+        ShadowAlarmManager.ScheduledAlarm alarm = scheduledAlarms.get(0);
+        Assert.assertEquals(DateTimeConstants.MILLIS_PER_MINUTE, alarm.interval);
+        ShadowPendingIntent shadowPendingIntent = Robolectric.shadowOf(alarm.operation);
+        Assert.assertEquals(CountDownManager.ACTION_COUNTDOWN_TICK, shadowPendingIntent.getSavedIntent().getAction());
+    }
+
+    @Test
+    public void countDownStopped_whenScreenOffAlarmIsCanceled(){
+        AlarmManager alarmManager = (AlarmManager) Robolectric.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Robolectric.shadowOf(alarmManager);
         countDownManager.startCountDown();
         countDownManager.stopCountDown();
-        assertBroadcastReceiverRegistered(CountDownManager.class);
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_ON));
+        List<ShadowAlarmManager.ScheduledAlarm> scheduledAlarms = shadowAlarmManager.getScheduledAlarms();
+        Assert.assertEquals(0, scheduledAlarms.size());
     }
 
     @Test
-    public void stopCountDown_receiverRegisteredForScreenOff(){
-        countDownManager.startCountDown();
-        countDownManager.stopCountDown();
+    public void receiverRegisteredForActionCountDownTick(){
         assertBroadcastReceiverRegistered(CountDownManager.class);
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_OFF));
-    }
-
-    @Test
-    public void default_receiverNotRegisteredForScreenOn(){
-        assertBroadcastReceiverRegistered(CountDownManager.class);
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_ON));
-    }
-
-    @Test
-    public void default_receiverNotRegisteredForScreenOff(){
-        assertBroadcastReceiverRegistered(CountDownManager.class);
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_OFF));
-    }
-
-    @Test
-    public void whenScreenOn_receiverRegisteredForTimeTick(){
-        countDownManager.startCountDown();
-        assertBroadcastReceiverRegistered(CountDownManager.class);
-        Assert.assertTrue(assertHasReceiverForIntent(Intent.ACTION_SCREEN_ON));
-        context.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
-        assertBroadcastReceiverRegistered(CountDownManager.TickReceiver.class);
-        Assert.assertTrue(assertHasReceiverForIntent(Intent.ACTION_TIME_TICK));
-    }
-
-    @Test
-    public void whenScreenOff_receiverRegisteredForTimeTick(){
-        countDownManager.startCountDown();
-        context.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
-        context.sendBroadcast(new Intent(Intent.ACTION_SCREEN_OFF));
-        assertBroadcastReceiverRegistered(CountDownManager.class);
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_TIME_TICK));
+        Assert.assertTrue(assertHasReceiverForIntent(CountDownManager.ACTION_COUNTDOWN_TICK));
     }
 
     public <T> boolean assertBroadcastReceiverRegistered(Class<T> c) {
@@ -159,9 +143,9 @@ public class CountDownManagerTest {
     public void whenCountDownDisabled_OnStartCountDown_NothingHappens(){
         sharedPreferences.edit().clear().apply();
         Assert.assertEquals(-1, countDownManager.startCountDown());
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_ON));
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_SCREEN_OFF));
-        Assert.assertFalse(assertHasReceiverForIntent(Intent.ACTION_TIME_TICK));
+        Assert.assertTrue(assertHasReceiverForIntent(Intent.ACTION_SCREEN_ON));
+        Assert.assertTrue(assertHasReceiverForIntent(Intent.ACTION_SCREEN_OFF));
+        Assert.assertTrue(assertHasReceiverForIntent(CountDownManager.ACTION_COUNTDOWN_TICK));
         NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
         countDownManager.startCountDown();
 
@@ -234,7 +218,7 @@ public class CountDownManagerTest {
         long startDuration = (8-hoursLeft)*DateTimeConstants.MILLIS_PER_HOUR;
         for(int i = 0; i<hoursLeft*DateTimeConstants.MINUTES_PER_HOUR; i++){
             int remainder = hoursLeft * DateTimeConstants.MILLIS_PER_HOUR - i*DateTimeConstants.MILLIS_PER_MINUTE;
-            context.sendBroadcast(new Intent(Intent.ACTION_TIME_TICK));
+            context.sendBroadcast(new Intent(CountDownManager.ACTION_COUNTDOWN_TICK));
             String progressString = String.format("Time remaining: %s", TimeConverter.formatInterval((long) remainder));
 
             Assert.assertEquals("Expected one notification", 1, manager.size());
@@ -248,7 +232,7 @@ public class CountDownManagerTest {
             Assert.assertEquals(progressString, shadowNotification.getContentText());
 
             int nProgress = shadowNotification.getProgress().progress;
-            Assert.assertEquals(startDuration + i * DateTimeConstants.MILLIS_PER_MINUTE, nProgress);
+            Assert.assertEquals(startDuration + i * DateTimeConstants.MILLIS_PER_MINUTE, nProgress, 10 * DateTimeConstants.MILLIS_PER_SECOND);
 
             TimeConverter.CURRENT_TIME += DateTimeConstants.MILLIS_PER_MINUTE;
 

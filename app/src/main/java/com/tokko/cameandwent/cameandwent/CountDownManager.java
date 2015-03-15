@@ -1,11 +1,12 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -13,19 +14,22 @@ import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
-public class CountDownManager extends BroadcastReceiver{
-    public static final int NOTIFICATION_ID = 4;
-    private Context context;
-    private IntentFilter intentFilter;
-    private TickReceiver tickReceiver;
-    private CountDownDatabaseObserver obs;
+import org.joda.time.DateTimeConstants;
 
+public class CountDownManager extends BroadcastReceiver{
+    public static final String ACTION_COUNTDOWN_TICK = "com.tokko.cameandwent.ACTION_COUNTDOWN_TICK";
+    public static final int NOTIFICATION_ID = 4;
+    private static final int REQUEST_CODE = 12;
+    private Context context;
+    private CountDownDatabaseObserver obs;
+    private PendingIntent countDownPendingIntent;
+
+    public CountDownManager(){}
+    
     public CountDownManager(Context context){
         this.context = context.getApplicationContext();
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         obs = new CountDownDatabaseObserver(new Handler(), context);
+        countDownPendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE, new Intent(ACTION_COUNTDOWN_TICK), 0);
     }
 
     @Override
@@ -37,30 +41,27 @@ public class CountDownManager extends BroadcastReceiver{
             updateNotification(context);
             registerObservers(context);
         }
+        else if(intent.getAction().equals(ACTION_COUNTDOWN_TICK))
+            updateNotification(context);
         else
             throw new IllegalStateException("Unknown intent");
     }
 
     private void registerObservers(Context context) {
-        if(tickReceiver == null) {
-            tickReceiver = new TickReceiver();
-            context.getApplicationContext().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        }
-        context.getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_DURATIONS, false, obs);
+        AlarmManager am = (AlarmManager) context.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        am.setInexactRepeating(AlarmManager.RTC, TimeConverter.getCurrentTime().getMillis(), DateTimeConstants.MILLIS_PER_MINUTE, countDownPendingIntent);
+        context.getApplicationContext().getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_DURATIONS, false, obs);
     }
 
     private void unregisterObservers(Context context) {
-        if(tickReceiver != null) {
-            context.getApplicationContext().unregisterReceiver(tickReceiver);
-            tickReceiver = null;
-        }
-        context.getContentResolver().unregisterContentObserver(obs);
+        AlarmManager am = (AlarmManager) context.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        am.cancel(countDownPendingIntent);
+        context.getApplicationContext().getContentResolver().unregisterContentObserver(obs);
     }
 
     public long startCountDown(){
         if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("countdown", false)) return -1;
         long currentTime = TimeConverter.getCurrentTime().getMillis();
-        context.getApplicationContext().registerReceiver(this, intentFilter);
         registerObservers(context);
         updateNotification(context);
         return currentTime;
@@ -71,10 +72,6 @@ public class CountDownManager extends BroadcastReceiver{
 
     public void stopCountDown(){
         unregisterObservers(context);
-        try {
-            context.getApplicationContext().unregisterReceiver(this);
-        }
-        catch (Exception e){}
         getNotificationManager(context).cancel(NOTIFICATION_ID);
     }
 
@@ -133,16 +130,6 @@ public class CountDownManager extends BroadcastReceiver{
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             updateNotification(context);
-        }
-    }
-    public class TickReceiver extends BroadcastReceiver{
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(Intent.ACTION_TIME_TICK)){
-                updateNotification(context);
-            }
-            else
-                throw new IllegalStateException("Unknown action");
         }
     }
 }
