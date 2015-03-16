@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent.locationtags;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,7 +17,7 @@ import com.tokko.cameandwent.cameandwent.R;
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
-public class LocationTagEditorFragment extends RoboDialogFragment {
+public class LocationTagEditorFragment extends RoboDialogFragment implements View.OnClickListener {
 
     private static final String EXTRA_ID = "EXTRA_ID";
     private static final String EXTRA_TAG_TITLE = "EXTRA_TAG_TITLE";
@@ -67,6 +68,9 @@ public class LocationTagEditorFragment extends RoboDialogFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        cancelButton.setOnClickListener(this);
+        okButton.setOnClickListener(this);
+        setLocationButton.setOnClickListener(this);
         populateUI();
     }
 
@@ -107,6 +111,26 @@ public class LocationTagEditorFragment extends RoboDialogFragment {
             latituteTextView.setText(String.valueOf(latitude));
             coordinates.setVisibility(View.VISIBLE);
             setLocationButton.setText("Reset Location");
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.locationtageditor_SetLocation:
+
+                break;
+            case R.id.locationtageditor_okButton:
+                ContentValues cv = new ContentValues();
+                cv.put(CameAndWentProvider.TAG, tagTitleEditText.getText().toString());
+                cv.put(CameAndWentProvider.LATITUDE, latitude);
+                cv.put(CameAndWentProvider.LONGITUDE, longitude);
+                if(id == -1)
+                    getActivity().getContentResolver().insert(CameAndWentProvider.URI_INSERT_TAG, cv);
+                else
+                    getActivity().getContentResolver().update(CameAndWentProvider.URI_UPDATE_TAG, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+            case R.id.locationtageditor_cancelButton:
+                dismiss();
         }
     }
 }
