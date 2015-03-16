@@ -31,6 +31,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
 
     @InjectView(R.id.locationtageditor_cancelButton) private Button cancelButton;
     @InjectView(R.id.locationtageditor_okButton) private Button okButton;
+    @InjectView(R.id.locationtageditor_DeleteButton) private Button deleteButton;
     @InjectView(R.id.locationtageditor_SetLocation) private Button setLocationButton;
     @InjectView(R.id.locationtageditor_TagTitle) private EditText tagTitleEditText;
     @InjectView(R.id.locationtageditor_Latitude) private TextView latitudeTextView;
@@ -82,6 +83,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         cancelButton.setOnClickListener(this);
         okButton.setOnClickListener(this);
         setLocationButton.setOnClickListener(this);
+        deleteButton.setOnClickListener(this);
         populateUI();
     }
 
@@ -117,6 +119,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
 
     private void populateUI() {
         tagTitleEditText.setText(tag);
+        deleteButton.setEnabled(id != -1);
         setCoordinates();
     }
 
@@ -145,6 +148,10 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
                 else
                     getActivity().getContentResolver().update(CameAndWentProvider.URI_UPDATE_TAG, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
             case R.id.locationtageditor_cancelButton:
+                dismiss();
+                break;
+            case R.id.locationtageditor_DeleteButton:
+                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_TAG, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
                 dismiss();
                 break;
         }

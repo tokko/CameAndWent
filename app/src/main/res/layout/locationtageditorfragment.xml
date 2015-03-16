@@ -49,6 +49,13 @@
             android:text="@android:string/cancel"
             android:layout_height="match_parent" />
         <Button
+            android:id="@+id/locationtageditor_DeleteButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="?android:buttonBarButtonStyle"
+            android:text="Delete"
+            android:layout_height="match_parent" />
+        <Button
             android:id="@+id/locationtageditor_okButton"
             android:layout_width="0dp"
             android:layout_weight="1"
