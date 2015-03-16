@@ -218,7 +218,7 @@ public class CameAndWentProvider extends ContentProvider {
         cv.put(CAME, dt.getMillis());
         dt = dt.withHourOfDay(wentHour).withMinuteOfHour(wentMinute);
         cv.put(WENT, dt.getMillis());
-        cv.put(TAG, 1);
+        cv.put(TAG, -1);
         return cv;
     }
 
@@ -384,7 +384,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 52;
+        private static final int DATABASE_VERSION = 60;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
@@ -397,18 +397,18 @@ public class CameAndWentProvider extends ContentProvider {
                 CAME + " INTEGER NOT NULL," +
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0, " +
-                TAG + " INTEGER NOT NULL DEFAULT -1, " +
-                "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE + ") ON DELETE CASCADE, " +
-                "FOREIGN KEY(" + TAG + ") REFERENCES " + TABLE_TAGS_NAME +"(" + ID + "));";
+                TAG + " INTEGER DEFAULT -1, " +
+                "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE + ") ON DELETE CASCADE); ";
+            //    "FOREIGN KEY(" + TAG + ") REFERENCES " + TABLE_TAGS_NAME +"(" + ID + "));";
 
         private static final String CREATE_TAGS = "CREATE TABLE IF NOT EXISTS " + TABLE_TAGS_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
-                TAG + " TEXT NOT NULL UNIQUE ON CONFLICT ABORT, " +
+                TAG + " TEXT, " +
                 LATITUDE + " INTEGER NOT NULL DEFAULT -1, " +
                 LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
 
         private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
-        private static final String CREATE_LOG_VIEW = "CREATE VIEW " + VIEW_LOG + " AS SELECT l."+ID+", l."+CAME+", l."+WENT+", l."+ISBREAK+", l."+DATE+ ", tags."+TAG+" FROM " + TABLE_LOG_NAME + " l LEFT JOIN "+TABLE_TAGS_NAME+" tags ON l."+TAG+"=tags."+ID;
+        private static final String CREATE_LOG_VIEW = "CREATE VIEW " + VIEW_LOG + " AS SELECT l."+ID+", l."+CAME+", l."+WENT+", l."+ISBREAK+", l."+DATE+ ", tags."+TAG+" FROM " + TABLE_LOG_NAME + " l LEFT OUTER JOIN "+TABLE_TAGS_NAME+" tags ON l."+TAG+"=tags."+ID;
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -427,7 +427,7 @@ public class CameAndWentProvider extends ContentProvider {
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
             db.execSQL(CREATE_LOG_VIEW);
-            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tags." + TAG + " FROM " + TABLE_LOG_NAME + " tt JOIN " + TABLE_TAGS_NAME + " tags ON tt." + TAG + "=tags." + ID  + " GROUP BY " + DATE + ", tags." + TAG);
+            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tags." + TAG + " FROM " + TABLE_LOG_NAME + " tt JOIN " + TABLE_TAGS_NAME + " tags ON tt." + TAG + "=tags." + ID  + " GROUP BY " + DATE );
             db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
         }
 
@@ -485,7 +485,7 @@ public class CameAndWentProvider extends ContentProvider {
                         migrateData(db);
                         break;
                     case 49:
-                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER NOT NULL DEFAULT -1 REFERENCES " + TABLE_LOG_NAME + "(" + ID + ")");
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT -1");
                         break;
                 }
             }

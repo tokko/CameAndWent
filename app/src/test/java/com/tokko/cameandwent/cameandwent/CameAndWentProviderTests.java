@@ -145,11 +145,11 @@ public class CameAndWentProviderTests extends TestCase{
             long came = c.getLong(c.getColumnIndex(CameAndWentProvider.CAME));
             long went = c.getLong(c.getColumnIndex(CameAndWentProvider.WENT));
             long date = c.getLong(c.getColumnIndex(CameAndWentProvider.DATE));
-            int tag = c.getInt(c.getColumnIndex(CameAndWentProvider.TAG));
+            String tag = c.getString(c.getColumnIndex(CameAndWentProvider.TAG));
             assertTrue(came < went);
             assertEquals(date, TimeConverter.extractDate(came));
             assertEquals(date, TimeConverter.extractDate(went));
-            assertEquals(1, tag);
+            assertEquals("TAG0", tag);
         }
         c.close();
         Cursor noBreak = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
@@ -199,12 +199,12 @@ public class CameAndWentProviderTests extends TestCase{
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
         long came = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.CAME));
         long date = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.DATE));
-        int tag = 2;
-
+        String tag = "TAG2";
+        int intTag = 3;
         long newWent = System.currentTimeMillis() + 10000;
         ContentValues cv = new ContentValues();
         cv.put(CameAndWentProvider.WENT, newWent);
-        cv.put(CameAndWentProvider.TAG, tag);
+        cv.put(CameAndWentProvider.TAG, intTag);
         int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
         assertEquals(1, updated);
 
@@ -216,11 +216,25 @@ public class CameAndWentProviderTests extends TestCase{
         assertEquals(came, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.CAME)));
         assertEquals(date, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.DATE)));
         assertEquals(newWent, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.WENT)));
-        assertEquals(tag, afterUpdate.getInt(afterUpdate.getColumnIndex(CameAndWentProvider.TAG)));
+        assertEquals(tag, afterUpdate.getString(afterUpdate.getColumnIndex(CameAndWentProvider.TAG)));
         toEdit.close();
         afterUpdate.close();
     }
 
+    @Test
+    public void testGetLogEntriesWhenTagsAreEmpty_TagIsNull(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        int deleted = mContentResolver.delete(CameAndWentProvider.URI_DELETE_TAG, null, null);
+        assertEquals(5, deleted);
+
+        Cursor c1 = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        assertNotNull(c);
+        assertEquals(c.getCount(), c1.getCount());
+        for(assertTrue(c.moveToFirst()); !c.isAfterLast(); c.moveToNext())
+            assertNull(c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
+        c.close();
+        c1.close();
+    }
     @Test
     public void updateTimeTable_AllFieldsUpdated(){
         Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_DURATIONS, null, null, null, null);
