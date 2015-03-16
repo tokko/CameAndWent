@@ -33,6 +33,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String TIME_TABLE = "timetable";
     private static final String TABLE_TAGS_NAME = "tags";
     private static final String VIEW_TIME_TABLE_DURATIONS =  "timetabledurations";
+    private static final String VIEW_LOG = "logview";
 
     public static final String ID = "_id";
     public static final String CAME = "came";
@@ -235,7 +236,7 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_WEEKS);
                 return c;
             case KEY_GET_LOG_ENTRIES:
-                c = sdb.query(TABLE_LOG_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                c = sdb.query(VIEW_LOG, projection, selection, selectionArgs, null, null, sortOrder);
                 c.setNotificationUri(getContext().getContentResolver(), URI_GET_LOG_ENTRIES);
                 return c;
             case KEY_GET_GET_MONTHLY_SUMMARY:
@@ -383,7 +384,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 48;
+        private static final int DATABASE_VERSION = 50;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
@@ -407,6 +408,7 @@ public class CameAndWentProvider extends ContentProvider {
                 LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
 
         private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
+        private static final String CREATE_LOG_VIEW = "CREATE VIEW " + VIEW_LOG + " AS SELECT l.*, tags."+TAG+" FROM " + TABLE_LOG_NAME + " l LEFT JOIN "+TABLE_TAGS_NAME+" tags ON l."+TAG+"=tags."+ID;
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -423,6 +425,8 @@ public class CameAndWentProvider extends ContentProvider {
         public void recreateDurationsView(SQLiteDatabase db){
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+            db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
+            db.execSQL(CREATE_LOG_VIEW);
             db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tags." + TAG + " FROM " + TABLE_LOG_NAME + " tt JOIN " + TABLE_TAGS_NAME + " tags ON tt." + TAG + "=tags." + ID  + " GROUP BY " + DATE + ", tags." + TAG);
             db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
         }
@@ -437,7 +441,6 @@ public class CameAndWentProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            onCreate(db);
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
             Cursor c = null;
             for(int version = oldVersion; version <= newVersion; version++){
@@ -481,7 +484,7 @@ public class CameAndWentProvider extends ContentProvider {
                         recreateDurationsView(db);
                         migrateData(db);
                         break;
-                    case 49:
+                    case 50:
                         db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER NOT NULL DEFAULT -1 REFERENCES " + TABLE_LOG_NAME + "(" + ID + ")");
                         break;
                 }

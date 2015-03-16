@@ -274,6 +274,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             String wentS = time.format(new Date(wentTime));
             boolean isbreak = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1;
             String duration = TimeConverter.formatInterval(wentTime - cameTime);
+            String tag = cursor.getString(cursor.getColumnIndex(CameAndWentProvider.TAG));
             if(wentTime-cameTime < 0) {
                 wentS = "Currently at work";
                 duration = "Currently unavailable";
@@ -281,6 +282,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
             ((TextView)view.findViewById(R.id.log_details_isbreak)).setText((isbreak ? "Break" : "Work") +": " + duration);
+            ((TextView)view.findViewById(R.id.log_details_tag)).setText(tag);
 
             View v1 = view.findViewById(R.id.logentry_deletebutton);
             v1.setOnClickListener(childClickListener);
