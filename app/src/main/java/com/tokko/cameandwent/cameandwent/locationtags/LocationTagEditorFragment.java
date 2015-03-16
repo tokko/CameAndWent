@@ -28,12 +28,12 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     @InjectView(R.id.locationtageditor_okButton) private Button okButton;
     @InjectView(R.id.locationtageditor_SetLocation) private Button setLocationButton;
     @InjectView(R.id.locationtageditor_TagTitle) private EditText tagTitleEditText;
-    @InjectView(R.id.locationtageditor_Latitude) private TextView latituteTextView;
+    @InjectView(R.id.locationtageditor_Latitude) private TextView latitudeTextView;
     @InjectView(R.id.locationtageditor_Longitude) private TextView longitudeTextView;
     @InjectView(R.id.locationtageditor_coordinates) private ViewGroup coordinates;
 
     private long id;
-    private double longitude, latitude;
+    private double longitude = -1, latitude = -1;
     private String tag;
 
     public static LocationTagEditorFragment newInstance(long id) {
@@ -108,7 +108,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         tagTitleEditText.setText(tag);
         if(longitude != -1 && latitude != -1){
             longitudeTextView.setText(String.valueOf(longitude));
-            latituteTextView.setText(String.valueOf(latitude));
+            latitudeTextView.setText(String.valueOf(latitude));
             coordinates.setVisibility(View.VISIBLE);
             setLocationButton.setText("Reset Location");
         }

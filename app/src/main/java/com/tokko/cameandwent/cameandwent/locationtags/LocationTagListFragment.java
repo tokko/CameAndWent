@@ -6,11 +6,15 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import com.tokko.cameandwent.cameandwent.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.R;
 
 import roboguice.fragment.RoboListFragment;
 
@@ -20,9 +24,29 @@ public class LocationTagListFragment extends RoboListFragment implements LoaderM
     private LocationTagListFragmentCallbacks host;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         adapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_1, null, new String[]{CameAndWentProvider.TAG}, new int[]{android.R.id.text1}, 0);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.locationtaglistfragmentmenu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.locationtaglistfragment_addLocationTag:
+                LocationTagEditorFragment.newInstance().show(getFragmentManager(), "tag");
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
