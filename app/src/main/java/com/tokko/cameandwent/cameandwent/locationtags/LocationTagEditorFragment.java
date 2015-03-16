@@ -2,6 +2,7 @@ package com.tokko.cameandwent.cameandwent.locationtags;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -10,14 +11,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.tokko.cameandwent.cameandwent.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.R;
 
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
-public class LocationTagEditorFragment extends RoboDialogFragment implements View.OnClickListener {
+public class LocationTagEditorFragment extends RoboDialogFragment implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final String EXTRA_ID = "EXTRA_ID";
     private static final String EXTRA_TAG_TITLE = "EXTRA_TAG_TITLE";
@@ -35,6 +40,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     private long id;
     private double longitude = -1, latitude = -1;
     private String tag;
+    private GoogleApiClient mGoogleApiClient;
 
     public static LocationTagEditorFragment newInstance(long id) {
         LocationTagEditorFragment f = new LocationTagEditorFragment();
@@ -58,6 +64,11 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
             id = getArguments().getLong(EXTRA_ID, -1);
             loadData();
         }
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     @Override
@@ -106,6 +117,10 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
 
     private void populateUI() {
         tagTitleEditText.setText(tag);
+        setCoordinates();
+    }
+
+    private void setCoordinates() {
         if(longitude != -1 && latitude != -1){
             longitudeTextView.setText(String.valueOf(longitude));
             latitudeTextView.setText(String.valueOf(latitude));
@@ -118,7 +133,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.locationtageditor_SetLocation:
-
+                mGoogleApiClient.connect();
                 break;
             case R.id.locationtageditor_okButton:
                 ContentValues cv = new ContentValues();
@@ -131,6 +146,29 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
                     getActivity().getContentResolver().update(CameAndWentProvider.URI_UPDATE_TAG, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
             case R.id.locationtageditor_cancelButton:
                 dismiss();
+                break;
         }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            Toast.makeText(getActivity(), String.format("Longitude: %f\nLatitude %f", mLastLocation.getLongitude(), mLastLocation.getLatitude()), Toast.LENGTH_SHORT).show();
+            longitude = mLastLocation.getLongitude();
+            latitude = mLastLocation.getLatitude();
+            setCoordinates();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 }
