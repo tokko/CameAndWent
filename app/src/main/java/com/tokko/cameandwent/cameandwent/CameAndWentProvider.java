@@ -384,7 +384,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 50;
+        private static final int DATABASE_VERSION = 52;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
@@ -408,7 +408,7 @@ public class CameAndWentProvider extends ContentProvider {
                 LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
 
         private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
-        private static final String CREATE_LOG_VIEW = "CREATE VIEW " + VIEW_LOG + " AS SELECT l.*, tags."+TAG+" FROM " + TABLE_LOG_NAME + " l LEFT JOIN "+TABLE_TAGS_NAME+" tags ON l."+TAG+"=tags."+ID;
+        private static final String CREATE_LOG_VIEW = "CREATE VIEW " + VIEW_LOG + " AS SELECT l."+ID+", l."+CAME+", l."+WENT+", l."+ISBREAK+", l."+DATE+ ", tags."+TAG+" FROM " + TABLE_LOG_NAME + " l LEFT JOIN "+TABLE_TAGS_NAME+" tags ON l."+TAG+"=tags."+ID;
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -484,7 +484,7 @@ public class CameAndWentProvider extends ContentProvider {
                         recreateDurationsView(db);
                         migrateData(db);
                         break;
-                    case 50:
+                    case 49:
                         db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER NOT NULL DEFAULT -1 REFERENCES " + TABLE_LOG_NAME + "(" + ID + ")");
                         break;
                 }

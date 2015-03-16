@@ -282,7 +282,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
             ((TextView)view.findViewById(R.id.log_details_isbreak)).setText((isbreak ? "Break" : "Work") +": " + duration);
-            ((TextView)view.findViewById(R.id.log_details_tag)).setText(tag);
+            ((TextView)view.findViewById(R.id.log_details_tag)).setText("Tag: " + tag);
 
             View v1 = view.findViewById(R.id.logentry_deletebutton);
             v1.setOnClickListener(childClickListener);
