@@ -217,6 +217,7 @@ public class CameAndWentProvider extends ContentProvider {
         cv.put(CAME, dt.getMillis());
         dt = dt.withHourOfDay(wentHour).withMinuteOfHour(wentMinute);
         cv.put(WENT, dt.getMillis());
+        cv.put(TAG, 1);
         return cv;
     }
 
@@ -395,7 +396,9 @@ public class CameAndWentProvider extends ContentProvider {
                 CAME + " INTEGER NOT NULL," +
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0, " +
-                "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE+") ON DELETE CASCADE);";
+                TAG + " INTEGER NOT NULL DEFAULT -1, " +
+                "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE + ") ON DELETE CASCADE, " +
+                "FOREIGN KEY(" + TAG + ") REFERENCES " + TABLE_TAGS_NAME +"(" + ID + "));";
 
         private static final String CREATE_TAGS = "CREATE TABLE IF NOT EXISTS " + TABLE_TAGS_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
@@ -420,7 +423,7 @@ public class CameAndWentProvider extends ContentProvider {
         public void recreateDurationsView(SQLiteDatabase db){
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
-            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT " + ID + ", " + DATE + ", " + getDurationCalculation() + " FROM " + TABLE_LOG_NAME + " GROUP BY " + DATE);
+            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tags." + TAG + " FROM " + TABLE_LOG_NAME + " tt JOIN " + TABLE_TAGS_NAME + " tags ON tt." + TAG + "=tags." + ID  + " GROUP BY " + DATE + ", tags." + TAG);
             db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
         }
 
@@ -477,6 +480,9 @@ public class CameAndWentProvider extends ContentProvider {
                         db.execSQL(CREATE_TIME_TABLE);
                         recreateDurationsView(db);
                         migrateData(db);
+                        break;
+                    case 49:
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER NOT NULL DEFAULT -1 REFERENCES " + TABLE_LOG_NAME + "(" + ID + ")");
                         break;
                 }
             }

@@ -131,6 +131,7 @@ public class CameAndWentProviderTests extends TestCase{
             DateTime dt = new DateTime(c.getLong(c.getColumnIndex(CameAndWentProvider.DATE)));
             assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
             assertEquals(dt.getMonthOfYear(), c.getInt(c.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
+            assertEquals("TAG0", c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
         }
         c.close();
     }
@@ -144,9 +145,11 @@ public class CameAndWentProviderTests extends TestCase{
             long came = c.getLong(c.getColumnIndex(CameAndWentProvider.CAME));
             long went = c.getLong(c.getColumnIndex(CameAndWentProvider.WENT));
             long date = c.getLong(c.getColumnIndex(CameAndWentProvider.DATE));
+            int tag = c.getInt(c.getColumnIndex(CameAndWentProvider.TAG));
             assertTrue(came < went);
             assertEquals(date, TimeConverter.extractDate(came));
             assertEquals(date, TimeConverter.extractDate(went));
+            assertEquals(1, tag);
         }
         c.close();
         Cursor noBreak = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
@@ -196,11 +199,12 @@ public class CameAndWentProviderTests extends TestCase{
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
         long came = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.CAME));
         long date = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.DATE));
+        int tag = 2;
 
         long newWent = System.currentTimeMillis() + 10000;
         ContentValues cv = new ContentValues();
         cv.put(CameAndWentProvider.WENT, newWent);
-
+        cv.put(CameAndWentProvider.TAG, tag);
         int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
         assertEquals(1, updated);
 
@@ -212,6 +216,7 @@ public class CameAndWentProviderTests extends TestCase{
         assertEquals(came, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.CAME)));
         assertEquals(date, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.DATE)));
         assertEquals(newWent, afterUpdate.getLong(afterUpdate.getColumnIndex(CameAndWentProvider.WENT)));
+        assertEquals(tag, afterUpdate.getInt(afterUpdate.getColumnIndex(CameAndWentProvider.TAG)));
         toEdit.close();
         afterUpdate.close();
     }
@@ -257,7 +262,6 @@ public class CameAndWentProviderTests extends TestCase{
 
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))},  CameAndWentProvider.ISBREAK + " DESC");
 
-        //TODO: se över varför ordningen på dessa verkar skifta
         assertNotNull(c);
         assertEquals(2, c.getCount());
         assertTrue(c.moveToFirst());
