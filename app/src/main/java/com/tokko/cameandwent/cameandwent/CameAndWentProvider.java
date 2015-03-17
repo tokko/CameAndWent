@@ -148,7 +148,10 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     public static int SEED_ENTRIES = 0;
-    public void seed(){
+    public void seed() {
+        seed(db.getWritableDatabase());
+    }
+    public void seed(SQLiteDatabase sdb){
         Log.d("Provider", "Seeding");
         DateTime dtNow = new DateTime();
 
@@ -175,7 +178,6 @@ public class CameAndWentProvider extends ContentProvider {
             logEntries.add(cv);
         }
         SEED_ENTRIES = logEntries.size();
-        SQLiteDatabase sdb = db.getWritableDatabase();
         sdb.beginTransaction();
         sdb.delete(TABLE_TAGS_NAME, null, null);
         sdb.delete(TABLE_LOG_NAME, null, null);
@@ -218,7 +220,7 @@ public class CameAndWentProvider extends ContentProvider {
         cv.put(CAME, dt.getMillis());
         dt = dt.withHourOfDay(wentHour).withMinuteOfHour(wentMinute);
         cv.put(WENT, dt.getMillis());
-        cv.put(TAG, -1);
+        //cv.put(TAG, 1);
         return cv;
     }
 
@@ -356,9 +358,21 @@ public class CameAndWentProvider extends ContentProvider {
                 }
                 return updated;
             case KEY_UPDATE_PARTICULAR_LOG_ENTRY:
-                ContentValues timeTableValues = new ContentValues();
-                populateContentValuesWithTimeInfo(values.containsKey(DATE)?values.getAsLong(DATE):values.containsKey(CAME)?values.getAsLong(CAME):values.getAsLong(WENT), timeTableValues);
-                sdb.insert(TIME_TABLE, null, timeTableValues);
+                ContentValues timeTableValues = null;
+                if(values.containsKey(DATE)){
+                    timeTableValues = new ContentValues();
+                    populateContentValuesWithTimeInfo(values.getAsLong(DATE), timeTableValues);
+                }
+                else if(values.containsKey(CAME)){
+                    timeTableValues = new ContentValues();
+                    populateContentValuesWithTimeInfo(values.getAsLong(CAME), timeTableValues);
+                }
+                else if(values.containsKey(WENT)){
+                    timeTableValues = new ContentValues();
+                    populateContentValuesWithTimeInfo(values.getAsLong(WENT), timeTableValues);
+                }
+                if(timeTableValues != null)
+                    sdb.insert(TIME_TABLE, null, timeTableValues);
                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
                     getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
@@ -397,9 +411,9 @@ public class CameAndWentProvider extends ContentProvider {
                 CAME + " INTEGER NOT NULL," +
                 ISBREAK + " INTEGER NOT NULL DEFAULT 0, " +
                 WENT + " INTEGER NOT NULL DEFAULT 0, " +
-                TAG + " INTEGER DEFAULT -1, " +
-                "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE + ") ON DELETE CASCADE); ";
-            //    "FOREIGN KEY(" + TAG + ") REFERENCES " + TABLE_TAGS_NAME +"(" + ID + "));";
+                TAG + " INTEGER DEFAULT NULL, " +
+                "FOREIGN KEY(" + DATE + ") REFERENCES " + TIME_TABLE +"(" + DATE + ") ON DELETE CASCADE, " +
+                "FOREIGN KEY(" + TAG + ") REFERENCES " + TABLE_TAGS_NAME +"(" + ID + "));";
 
         private static final String CREATE_TAGS = "CREATE TABLE IF NOT EXISTS " + TABLE_TAGS_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
@@ -411,6 +425,7 @@ public class CameAndWentProvider extends ContentProvider {
         private static final String CREATE_LOG_VIEW = "CREATE VIEW " + VIEW_LOG + " AS SELECT l."+ID+", l."+CAME+", l."+WENT+", l."+ISBREAK+", l."+DATE+ ", tags."+TAG+" FROM " + TABLE_LOG_NAME + " l LEFT OUTER JOIN "+TABLE_TAGS_NAME+" tags ON l."+TAG+"=tags."+ID;
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
         }
 
         @Override
@@ -422,12 +437,27 @@ public class CameAndWentProvider extends ContentProvider {
 
         }
 
+        @Override
+        public void onOpen(SQLiteDatabase db) {
+            super.onOpen(db);
+            if(BuildConfig.DEBUG){
+                db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+                db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
+                db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOG_NAME);
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAGS_NAME);
+                db.execSQL("DROP TABLE IF EXISTS " + TIME_TABLE);
+                onCreate(db);
+                seed(db);
+            }
+        }
+
         public void recreateDurationsView(SQLiteDatabase db){
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
             db.execSQL(CREATE_LOG_VIEW);
-            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tags." + TAG + " FROM " + TABLE_LOG_NAME + " tt JOIN " + TABLE_TAGS_NAME + " tags ON tt." + TAG + "=tags." + ID  + " GROUP BY " + DATE );
+            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tags." + TAG + " FROM " + TABLE_LOG_NAME + " tt LEFT OUTER JOIN " + TABLE_TAGS_NAME + " tags ON tt." + TAG + "=tags." + ID  + " GROUP BY " + DATE );
             db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
         }
 
@@ -441,6 +471,7 @@ public class CameAndWentProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
             Cursor c = null;
             for(int version = oldVersion; version <= newVersion; version++){
@@ -485,7 +516,7 @@ public class CameAndWentProvider extends ContentProvider {
                         migrateData(db);
                         break;
                     case 49:
-                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT -1");
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT null");
                         break;
                 }
             }

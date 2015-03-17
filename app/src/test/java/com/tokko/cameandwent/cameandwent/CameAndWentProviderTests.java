@@ -235,6 +235,20 @@ public class CameAndWentProviderTests extends TestCase{
         c.close();
         c1.close();
     }
+
+    @Test
+    public void testGetLogEntriesWhenNoTagsConnected_ReturnsProperData(){
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.TAG, -1);
+        int updated = mContentResolver.update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, null, null);
+        assertEquals(CameAndWentProvider.SEED_ENTRIES, updated);
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, null, null, null);
+        assertEquals(CameAndWentProvider.SEED_ENTRIES, c.getCount());
+        for(assertTrue(c.moveToFirst()); !c.isAfterLast(); c.moveToNext()){
+            assertEquals(null, c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
+        }
+        c.close();
+    }
     @Test
     public void updateTimeTable_AllFieldsUpdated(){
         Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_DURATIONS, null, null, null, null);
