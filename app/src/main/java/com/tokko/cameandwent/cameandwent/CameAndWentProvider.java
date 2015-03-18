@@ -457,7 +457,7 @@ public class CameAndWentProvider extends ContentProvider {
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
             db.execSQL(CREATE_LOG_VIEW);
-            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tags." + TAG + " FROM " + TABLE_LOG_NAME + " tt LEFT OUTER JOIN " + TABLE_TAGS_NAME + " tags ON tt." + TAG + "=tags." + ID  + " GROUP BY " + DATE );
+            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tt." + TAG + " FROM " + VIEW_LOG + " tt GROUP BY " + DATE );
             db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
         }
 
@@ -471,7 +471,7 @@ public class CameAndWentProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+            if(BuildConfig.DEBUG) return;
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
             Cursor c = null;
             for(int version = oldVersion; version <= newVersion; version++){
@@ -512,11 +512,11 @@ public class CameAndWentProvider extends ContentProvider {
                     case 45:
                         db.execSQL(CREATE_LOG);
                         db.execSQL(CREATE_TIME_TABLE);
-                        recreateDurationsView(db);
+                        //recreateDurationsView(db);
                         migrateData(db);
                         break;
                     case 49:
-                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT null");
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL");
                         break;
                 }
             }
