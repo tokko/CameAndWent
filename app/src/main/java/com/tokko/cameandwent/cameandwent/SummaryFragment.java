@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.joda.time.DateTimeConstants;
@@ -20,11 +21,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import roboguice.fragment.RoboDialogFragment;
+import roboguice.inject.InjectView;
 
 public class SummaryFragment extends RoboDialogFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private static final String EXTRA_MONTHLY = "extra_monthly";
     private SummaryCursorAdapter adapter;
-    private ExpandableListView expandableListView;
+    @InjectView(android.R.id.list) private ExpandableListView expandableListView;
+    @InjectView(R.id.summaryFragmentTagSpinner) private Spinner tagSpinner;
     private boolean monthly;
 
 
@@ -65,8 +68,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        expandableListView = new ExpandableListView(getActivity());
-        return expandableListView;
+        return inflater.inflate(R.layout.summaryfragment, null);
     }
 
     @Override
@@ -78,6 +80,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         }
         else {
             getDialog().setTitle("Monthly summary");
+            tagSpinner.setVisibility(View.VISIBLE);
             adapter = new MonthlySummaryAdapter(getActivity());
         }
         expandableListView.setAdapter(adapter);
