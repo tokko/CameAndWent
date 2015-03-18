@@ -31,6 +31,8 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     private static final String EXTRA_ID = "extra_id";
     private static final String EXTRA_CAME = "extra_came";
     private static final String EXTRA_WENT = "extra_went";
+    private static final String EXTRA_ISBREAK = "extra_isbreak";
+    private static final String EXTRA_TAG = "extra_tag";
 
     @InjectView(R.id.editor_came) private TimePicker cameTimePicker;
     @InjectView(R.id.editor_went) private TimePicker wentTimePicker;
@@ -93,6 +95,9 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
             wentTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(wentTime));
             wentTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(wentTime));
 
+            tagId = savedInstanceState.getLong(EXTRA_TAG, -1);
+            scrollTagSpinnerToId();
+            isBreakCheckBox.setChecked(savedInstanceState.getBoolean(EXTRA_ISBREAK, false));
             id = savedInstanceState.getLong(EXTRA_ID, -1);
         }
         else
@@ -106,6 +111,8 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         outState.putLong(EXTRA_ID, id);
         outState.putLong(EXTRA_CAME, TimeConverter.hourAndMinuteToMillis(cameTimePicker.getCurrentHour(), cameTimePicker.getCurrentMinute()));
         outState.putLong(EXTRA_WENT, TimeConverter.hourAndMinuteToMillis(wentTimePicker.getCurrentHour(), wentTimePicker.getCurrentMinute()));
+        outState.putBoolean(EXTRA_ISBREAK, isBreakCheckBox.isChecked());
+        outState.putLong(EXTRA_TAG, tagId);
     }
 
     @Override
@@ -203,6 +210,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                 final ContentValues cv = new ContentValues();
                 cv.put(CameAndWentProvider.ISBREAK, isBreakCheckBox.isChecked()?1:0);
                 cv.put(CameAndWentProvider.CAME, TimeConverter.parseDate(dateButton.getText().toString()).withTime(cameTimePicker.getCurrentHour(), cameTimePicker.getCurrentMinute(), 0, 0).getMillis());
+                cv.put(CameAndWentProvider.TAG, tagSpinner.getSelectedItemId());
                 if(wentContainer.getVisibility() == View.VISIBLE)
                     cv.put(CameAndWentProvider.WENT, TimeConverter.parseDate(dateButton.getText().toString()).withTime(wentTimePicker.getCurrentHour(), wentTimePicker.getCurrentMinute(), 0, 0).getMillis());
                 if(id > -1)
