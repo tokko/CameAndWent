@@ -43,6 +43,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
 
     private CursorAdapter tagSpinnerAdapter;
     private long id;
+    private long tagId = -1;
 
     public static LogEntryEditorFragment newInstance(long id){
         LogEntryEditorFragment f = new LogEntryEditorFragment();
@@ -134,6 +135,8 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                     throw new IllegalStateException("WHAT THE FUCK?");
                 long cameTime = data.getLong(data.getColumnIndex(CameAndWentProvider.CAME));
                 long wentTime = data.getLong(data.getColumnIndex(CameAndWentProvider.WENT));
+                tagId = data.getLong(data.getColumnIndex(CameAndWentProvider.TAG));
+                scrollTagSpinnerToId();
 
                 wentTimePicker.setVisibility(wentTime == 0 ? View.GONE : View.VISIBLE);
 
@@ -149,13 +152,21 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                 }
                 else
                     wentContainer.setVisibility(View.GONE);
-
                 data.close();
                 break;
             case 2:
                 tagSpinnerAdapter.swapCursor(data);
+                scrollTagSpinnerToId();
         }
 
+    }
+
+    private void scrollTagSpinnerToId() {
+        if(tagId > -1)
+            for(int i = 0; i<tagSpinner.getCount(); i++)
+                if(tagSpinner.getItemIdAtPosition(i) == tagId) {
+                    tagSpinner.setSelection(i);
+                }
     }
 
     @Override
