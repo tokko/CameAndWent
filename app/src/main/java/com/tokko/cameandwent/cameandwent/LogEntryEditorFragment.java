@@ -11,8 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CursorAdapter;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 
 import org.joda.time.DateTime;
@@ -36,7 +39,9 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     @InjectView(R.id.okButton) private Button okButton;
     @InjectView(R.id.log_edit_went_container) private LinearLayout wentContainer;
     @InjectView(R.id.date) private Button dateButton;
+    @InjectView(R.id.logentryeditor_TagSpinner) private Spinner tagSpinner;
 
+    private CursorAdapter tagSpinnerAdapter;
     private long id;
 
     public static LogEntryEditorFragment newInstance(long id){
@@ -55,6 +60,12 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        tagSpinnerAdapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_spinner_dropdown_item, null, new String[]{CameAndWentProvider.TAG}, new int[]{android.R.id.text1}, 0);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.logentryeditorfragment, null, false);
     }
@@ -63,6 +74,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getDialog().setTitle("Edit entry");
+        tagSpinner.setAdapter(tagSpinnerAdapter);
         cancelButton.setOnClickListener(this);
         okButton.setOnClickListener(this);
         dateButton.setOnClickListener(this);
@@ -98,56 +110,78 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader cl = new CursorLoader(getActivity());
-        cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
-        cl.setSelection(CameAndWentProvider.ID + "=?");
-        cl.setSelectionArgs(new String[]{String.valueOf(this.id)});
-        return cl;
+        switch(id){
+            case 1:
+                cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+                cl.setSelection(CameAndWentProvider.ID + "=?");
+                cl.setSelectionArgs(new String[]{String.valueOf(this.id)});
+                return cl;
+            case 2:
+                cl.setUri(CameAndWentProvider.URI_GET_TAGS);
+                return cl;
+            default:
+                return cl;
+        }
     }
 
     @Override
     public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
-        if(!data.moveToFirst())
-            throw new IllegalStateException("WHAT THE FUCK??");
-        if(data.getCount() != 1)
-            throw new IllegalStateException("WHAT THE FUCK?");
-        long cameTime = data.getLong(data.getColumnIndex(CameAndWentProvider.CAME));
-        long wentTime = data.getLong(data.getColumnIndex(CameAndWentProvider.WENT));
+        switch(loader.getId()){
+            case 1:
+                if(!data.moveToFirst())
+                    throw new IllegalStateException("WHAT THE FUCK??");
+                if(data.getCount() != 1)
+                    throw new IllegalStateException("WHAT THE FUCK?");
+                long cameTime = data.getLong(data.getColumnIndex(CameAndWentProvider.CAME));
+                long wentTime = data.getLong(data.getColumnIndex(CameAndWentProvider.WENT));
 
-        wentTimePicker.setVisibility(wentTime == 0 ? View.GONE : View.VISIBLE);
+                wentTimePicker.setVisibility(wentTime == 0 ? View.GONE : View.VISIBLE);
 
-        dateButton.setText(sdf.format(new Date(cameTime)));
+                dateButton.setText(sdf.format(new Date(cameTime)));
 
-        cameTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(cameTime));
-        cameTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(cameTime));
+                cameTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(cameTime));
+                cameTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(cameTime));
 
-        if(wentTime > 0) {
-            wentContainer.setVisibility(View.VISIBLE);
-            wentTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(wentTime));
-            wentTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(wentTime));
+                if(wentTime > 0) {
+                    wentContainer.setVisibility(View.VISIBLE);
+                    wentTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(wentTime));
+                    wentTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(wentTime));
+                }
+                else
+                    wentContainer.setVisibility(View.GONE);
+
+                data.close();
+                break;
+            case 2:
+                tagSpinnerAdapter.swapCursor(data);
         }
-        else
-            wentContainer.setVisibility(View.GONE);
 
-        data.close();
     }
 
     @Override
     public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
-        dismiss();
-
+        switch (loader.getId()){
+            case 1:
+                dismiss();
+                break;
+            case 2:
+                tagSpinnerAdapter.swapCursor(null);
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
         if(id > -1)
-        getLoaderManager().initLoader(1, null, this);
+            getLoaderManager().initLoader(1, null, this);
+        getLoaderManager().initLoader(2, null, this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         getLoaderManager().destroyLoader(1);
+        getLoaderManager().destroyLoader(2);
     }
 
 
