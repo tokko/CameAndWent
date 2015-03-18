@@ -58,6 +58,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String GET_DURATIONS = "GET_DURATIONS";
     private static final String GET_MONTHLY_SUMMARY = "GET_MONTHLY_SUMMARY";
     private static final String GET_TAGS = "GET_TAGS";
+    private static final String GET_LOG_ENTRY_FOR_EDIT = "GET_LOG_ENTRY_FOR_EDIT";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -68,6 +69,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_DURATIONS = 9;
     private static final int KEY_MONTHLY_SUMMARY = 10;
     private static final int KEY_TAGS = 11;
+    private static final int KEY_GET_LOG_ENTRY_FOR_EDIT = 12;
 
     public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
     public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
@@ -78,6 +80,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_DURATIONS = makeUri(GET_DURATIONS, KEY_DURATIONS);
     public static final Uri URI_MONTHLY_SUMMARY = makeUri(GET_MONTHLY_SUMMARY, KEY_MONTHLY_SUMMARY);
     public static final Uri URI_TAGS = makeUri(GET_TAGS, KEY_TAGS);
+    public static final Uri URI_GET_LOG_ENTRY_FOR_EDIT = makeUri(GET_LOG_ENTRY_FOR_EDIT, KEY_GET_LOG_ENTRY_FOR_EDIT);
 
     private static UriMatcher uriMatcher;
 
@@ -226,6 +229,10 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_WEEKS:
                 c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, sortOrder, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_WEEKS);
+                return c;
+            case KEY_GET_LOG_ENTRY_FOR_EDIT:
+                c = sdb.query(TABLE_LOG_NAME, projection, selection, selectionArgs, null, null, sortOrder, "1");
+                c.setNotificationUri(getContext().getContentResolver(), URI_LOG_ENTRIES);
                 return c;
             case KEY_LOG_ENTRIES:
                 c = sdb.query(VIEW_LOG, projection, selection, selectionArgs, null, null, sortOrder);

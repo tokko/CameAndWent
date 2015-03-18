@@ -475,4 +475,12 @@ public class CameAndWentProviderTests extends TestCase{
         c.close();
         c1.close();
     }
+
+    @Test
+    public void getLogEntryForEdit_AlwaysReturnsOne(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRY_FOR_EDIT, null, null, null, null);
+        assertNotNull(c);
+        assertTrue(c.moveToFirst());
+        assertEquals(1, c.getCount());
+    }
 }

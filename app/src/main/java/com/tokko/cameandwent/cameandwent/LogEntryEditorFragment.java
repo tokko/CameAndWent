@@ -113,7 +113,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         CursorLoader cl = new CursorLoader(getActivity());
         switch(id){
             case 1:
-                cl.setUri(CameAndWentProvider.URI_LOG_ENTRIES);
+                cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRY_FOR_EDIT);
                 cl.setSelection(CameAndWentProvider.ID + "=?");
                 cl.setSelectionArgs(new String[]{String.valueOf(this.id)});
                 return cl;
