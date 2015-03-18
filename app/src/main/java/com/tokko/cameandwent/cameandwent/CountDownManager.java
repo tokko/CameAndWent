@@ -50,7 +50,7 @@ public class CountDownManager extends BroadcastReceiver{
     private void registerObservers(Context context) {
         AlarmManager am = (AlarmManager) context.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         am.setInexactRepeating(AlarmManager.RTC, TimeConverter.getCurrentTime().getMillis(), DateTimeConstants.MILLIS_PER_MINUTE, countDownPendingIntent);
-        context.getApplicationContext().getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_DURATIONS, false, obs);
+        context.getApplicationContext().getContentResolver().registerContentObserver(CameAndWentProvider.URI_DURATIONS, false, obs);
     }
 
     private void unregisterObservers(Context context) {
@@ -95,7 +95,7 @@ public class CountDownManager extends BroadcastReceiver{
     }
 
     private long getCurrentDuration(Context context){
-        Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))}, null, null);
+        Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))}, null, null);
         long time = 0;
         for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             long went = c.getLong(c.getColumnIndex(CameAndWentProvider.WENT));

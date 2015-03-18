@@ -50,45 +50,34 @@ public class CameAndWentProvider extends ContentProvider {
 
     private static final String ACTION_CAME = "ACTION_CAME";
     private static final String ACTION_WENT = "ACTION_WENT";
-    private static final String ACTION_GET_LOG_ENTRIES = "ACTION_GET_LOG_ENTRIES";
-    private static final String ACTION_DELETE_LOG_ENTRY = "ACTION_DELETE_LOG_ENTRY";
-    private static final String ACTION_UPDATE_PARTICULAR_LOG_ENTRY = "ACTION_UPDATE_PARTICULAR_LOG_ENTRY";
-    private static final String ACTION_GET_WEEKS = "ACTION_GET_WEEKS";
-    private static final String ACTION_GET_MONTHS = "ACTION_GET_MONTHS";
-    private static final String ACTION_GET_DURATIONS = "ACTION_GET_DURATIONS";
-    private static final String ACTION_GET_MONTHLY_SUMMARY = "ACTION_GET_MONTHLY_SUMMARY";
-    private static final String ACTION_GET_TAGS = "ACTION_GET_TAGS";
-    private static final String ACTION_INSERT_TAG = "ACTION_INSERT_TAG";
-    private static final String ACTION_UPDATE_TAG = "ACTION_UPDATE_TAG";
-    private static final String ACTION_DELETE_TAG = "ACTION_DELETE_TAG";
+
+    //"TABLES"
+    private static final String GET_LOG_ENTRIES = "GET_LOG_ENTRIES";
+    private static final String GET_WEEKS = "GET_WEEKS";
+    private static final String GET_MONTHS = "GET_MONTHS";
+    private static final String GET_DURATIONS = "GET_DURATIONS";
+    private static final String GET_MONTHLY_SUMMARY = "GET_MONTHLY_SUMMARY";
+    private static final String GET_TAGS = "GET_TAGS";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
-    private static final int KEY_GET_LOG_ENTRIES = 2;
-    private static final int KEY_DELETE_LOG_ENTRY = 4;
-    private static final int KEY_UPDATE_PARTICULAR_LOG_ENTRY = 5;
-    private static final int KEY_GET_GET_WEEKS = 7;
-    private static final int KEY_GET_GET_MONTHS = 8;
-    private static final int KEY_GET_GET_DURATIONS = 9;
-    private static final int KEY_GET_GET_MONTHLY_SUMMARY = 10;
-    private static final int KEY_GET_TAGS = 11;
-    private static final int KEY_INSERT_TAG = 12;
-    private static final int KEY_UPDATE_TAG = 13;
-    private static final int KEY_DELETE_TAG = 14;
+
+    private static final int KEY_LOG_ENTRIES = 2;
+    private static final int KEY_WEEKS = 7;
+    private static final int KEY_MONTHS = 8;
+    private static final int KEY_DURATIONS = 9;
+    private static final int KEY_MONTHLY_SUMMARY = 10;
+    private static final int KEY_TAGS = 11;
 
     public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
     public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
-    public static final Uri URI_GET_LOG_ENTRIES = makeUri(ACTION_GET_LOG_ENTRIES, KEY_GET_LOG_ENTRIES);
-    public static final Uri URI_DELETE_LOG_ENTRY = makeUri(ACTION_DELETE_LOG_ENTRY, KEY_DELETE_LOG_ENTRY);
-    public static final Uri URI_UPDATE_PARTICULAR_LOG_ENTRY = makeUri(ACTION_UPDATE_PARTICULAR_LOG_ENTRY, KEY_UPDATE_PARTICULAR_LOG_ENTRY);
-    public static final Uri URI_GET_WEEKS = makeUri(ACTION_GET_WEEKS, KEY_GET_GET_WEEKS);
-    public static final Uri URI_GET_GET_MONTHS =makeUri(ACTION_GET_MONTHS, KEY_GET_GET_MONTHS);
-    public static final Uri URI_GET_DURATIONS = makeUri(ACTION_GET_DURATIONS, KEY_GET_GET_DURATIONS);
-    public static final Uri URI_GET_MONTHLY_SUMMARY = makeUri(ACTION_GET_MONTHLY_SUMMARY, KEY_GET_GET_MONTHLY_SUMMARY);
-    public static final Uri URI_GET_TAGS = makeUri(ACTION_GET_TAGS, KEY_GET_TAGS);
-    public static final Uri URI_INSERT_TAG = makeUri(ACTION_INSERT_TAG, KEY_INSERT_TAG);
-    public static final Uri URI_UPDATE_TAG = makeUri(ACTION_UPDATE_TAG, KEY_UPDATE_TAG);
-    public static final Uri URI_DELETE_TAG = makeUri(ACTION_DELETE_TAG, KEY_DELETE_TAG);
+
+    public static final Uri URI_LOG_ENTRIES = makeUri(GET_LOG_ENTRIES, KEY_LOG_ENTRIES);
+    public static final Uri URI_WEEKS = makeUri(GET_WEEKS, KEY_WEEKS);
+    public static final Uri URI_MONTHS =makeUri(GET_MONTHS, KEY_MONTHS);
+    public static final Uri URI_DURATIONS = makeUri(GET_DURATIONS, KEY_DURATIONS);
+    public static final Uri URI_MONTHLY_SUMMARY = makeUri(GET_MONTHLY_SUMMARY, KEY_MONTHLY_SUMMARY);
+    public static final Uri URI_TAGS = makeUri(GET_TAGS, KEY_TAGS);
 
     private static UriMatcher uriMatcher;
 
@@ -137,10 +126,11 @@ public class CameAndWentProvider extends ContentProvider {
             db.insert(TABLE_LOG_NAME, null, cv);
         }
         oldData.close();
-        getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-        getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
-        getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-        getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
+        getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+        getContext().getContentResolver().notifyChange(URI_MONTHLY_SUMMARY, null);
+        getContext().getContentResolver().notifyChange(URI_MONTHS, null);
+        getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+        getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
     }
 
     public void recreateDurationsView() {
@@ -198,8 +188,8 @@ public class CameAndWentProvider extends ContentProvider {
         }
         sdb.setTransactionSuccessful();
         sdb.endTransaction();
-        getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-        getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+        getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+        getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
     }
 
     static DateTime getSeedDateTime() {
@@ -229,29 +219,29 @@ public class CameAndWentProvider extends ContentProvider {
         SQLiteDatabase sdb = db.getReadableDatabase();
         Cursor c;
         switch (uriMatcher.match(uri)){
-            case KEY_GET_GET_MONTHS:
+            case KEY_MONTHS:
                 c = sdb.query(TIME_TABLE, new String[]{ID, MONTH_OF_YEAR}, null, null, MONTH_OF_YEAR, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_GET_MONTHS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_MONTHS);
                 return c;
-            case KEY_GET_GET_WEEKS:
+            case KEY_WEEKS:
                 c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_WEEKS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_WEEKS);
                 return c;
-            case KEY_GET_LOG_ENTRIES:
+            case KEY_LOG_ENTRIES:
                 c = sdb.query(VIEW_LOG, projection, selection, selectionArgs, null, null, sortOrder);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_LOG_ENTRIES);
+                c.setNotificationUri(getContext().getContentResolver(), URI_LOG_ENTRIES);
                 return c;
-            case KEY_GET_GET_MONTHLY_SUMMARY:
+            case KEY_MONTHLY_SUMMARY:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, new String[]{ID, DATE, WEEK_OF_YEAR, "SUM("+DURATION+") AS " + DURATION}, selection, selectionArgs, WEEK_OF_YEAR, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_MONTHLY_SUMMARY);
+                c.setNotificationUri(getContext().getContentResolver(), URI_MONTHLY_SUMMARY);
                 return c;
-            case KEY_GET_GET_DURATIONS:
+            case KEY_DURATIONS:
                 c = sdb.query(VIEW_TIME_TABLE_DURATIONS, projection, selection, selectionArgs, null, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_DURATIONS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_DURATIONS);
                 return c;
-            case KEY_GET_TAGS:
+            case KEY_TAGS:
                 c = sdb.query(TABLE_TAGS_NAME, projection, selection, selectionArgs, null, null, sortOrder, null);
-                c.setNotificationUri(getContext().getContentResolver(), URI_GET_TAGS);
+                c.setNotificationUri(getContext().getContentResolver(), URI_TAGS);
                 return c;
             default:
                 throw new IllegalArgumentException("Unknown URI");
@@ -275,7 +265,7 @@ public class CameAndWentProvider extends ContentProvider {
                 values.put(DATE, date);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-                int numberOfEventsToday = query(URI_GET_LOG_ENTRIES, null, String.format("%s=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();
+                int numberOfEventsToday = query(URI_LOG_ENTRIES, null, String.format("%s=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();
                 boolean breaksEnabled = sp.getBoolean("breaks_enabled", false);
                 if(breaksEnabled && numberOfEventsToday == 1){
                     values.clear();
@@ -286,18 +276,18 @@ public class CameAndWentProvider extends ContentProvider {
                     sdb.insert(TABLE_LOG_NAME, null, values);
                 }
                 if(id > -1) {
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
                 }
                 return ContentUris.withAppendedId(uri, id);
-            case KEY_INSERT_TAG:
+            case KEY_TAGS:
                 id = sdb.insert(TABLE_TAGS_NAME, null, values);
                 if(id > -1){
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_TAGS, null);
+                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_TAGS, null);
                 }
                 return ContentUris.withAppendedId(uri, id);
             default:
@@ -318,24 +308,23 @@ public class CameAndWentProvider extends ContentProvider {
         SQLiteDatabase sdb = db.getWritableDatabase();
         int deleted;
         switch (uriMatcher.match(uri)){
-            case KEY_DELETE_LOG_ENTRY:
+            case KEY_LOG_ENTRIES:
                 deleted = sdb.delete(TABLE_LOG_NAME, selection, selectionArgs);
                 if(deleted > 0){
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
+                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
                 }
                 return deleted;
-            case KEY_DELETE_TAG:
+            case KEY_TAGS:
                 deleted = sdb.delete(TABLE_TAGS_NAME, selection, selectionArgs);
                 if(deleted > 0){
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_TAGS, null);
-
+                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
+                    getContext().getContentResolver().notifyChange(URI_TAGS, null);
                 }
                 return deleted;
             default:
@@ -351,13 +340,13 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_WENT:
                  updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
                 }
                 return updated;
-            case KEY_UPDATE_PARTICULAR_LOG_ENTRY:
+            case KEY_LOG_ENTRIES:
                 ContentValues timeTableValues = null;
                 if(values.containsKey(DATE)){
                     timeTableValues = new ContentValues();
@@ -375,20 +364,20 @@ public class CameAndWentProvider extends ContentProvider {
                     sdb.insert(TIME_TABLE, null, timeTableValues);
                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
                 }
                 return updated;
-            case KEY_UPDATE_TAG:
+            case KEY_TAGS:
                 updated = sdb.update(TABLE_TAGS_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
-                    getContext().getContentResolver().notifyChange(URI_GET_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_GET_MONTHS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_GET_TAGS, null);
+                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
+                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
+                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
+                    getContext().getContentResolver().notifyChange(URI_TAGS, null);
                 }
                 return updated;
             default:

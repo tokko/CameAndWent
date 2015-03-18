@@ -113,12 +113,12 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         CursorLoader cl = new CursorLoader(getActivity());
         switch(id){
             case 1:
-                cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+                cl.setUri(CameAndWentProvider.URI_LOG_ENTRIES);
                 cl.setSelection(CameAndWentProvider.ID + "=?");
                 cl.setSelectionArgs(new String[]{String.valueOf(this.id)});
                 return cl;
             case 2:
-                cl.setUri(CameAndWentProvider.URI_GET_TAGS);
+                cl.setUri(CameAndWentProvider.URI_TAGS);
                 return cl;
             default:
                 return cl;
@@ -206,7 +206,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                 if(wentContainer.getVisibility() == View.VISIBLE)
                     cv.put(CameAndWentProvider.WENT, TimeConverter.parseDate(dateButton.getText().toString()).withTime(wentTimePicker.getCurrentHour(), wentTimePicker.getCurrentMinute(), 0, 0).getMillis());
                 if(id > -1)
-                    getActivity().getContentResolver().update(CameAndWentProvider.URI_UPDATE_PARTICULAR_LOG_ENTRY, cv, CameAndWentProvider.ID + "=?", new String[]{String.valueOf(id)});
+                    getActivity().getContentResolver().update(CameAndWentProvider.URI_LOG_ENTRIES, cv, CameAndWentProvider.ID + "=?", new String[]{String.valueOf(id)});
                 else
                     getActivity().getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
             case R.id.cancelButton:

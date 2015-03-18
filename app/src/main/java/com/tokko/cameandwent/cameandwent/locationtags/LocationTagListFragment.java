@@ -65,7 +65,7 @@ public class LocationTagListFragment extends RoboListFragment implements LoaderM
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader cl = new CursorLoader(getActivity());
-        cl.setUri(CameAndWentProvider.URI_GET_TAGS);
+        cl.setUri(CameAndWentProvider.URI_TAGS);
         return cl;
     }
 

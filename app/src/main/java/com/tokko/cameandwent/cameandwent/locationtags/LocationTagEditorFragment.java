@@ -105,7 +105,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
 
     private void loadData(){
         if(id == -1) return;
-        Cursor c = getActivity().getContentResolver().query(CameAndWentProvider.URI_GET_TAGS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
+        Cursor c = getActivity().getContentResolver().query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
         if(!c.moveToFirst())
            throw new IllegalStateException("Invalid id: " + id);
         if(c.getCount() != 1)
@@ -144,14 +144,14 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
                 cv.put(CameAndWentProvider.LATITUDE, latitude);
                 cv.put(CameAndWentProvider.LONGITUDE, longitude);
                 if(id == -1)
-                    getActivity().getContentResolver().insert(CameAndWentProvider.URI_INSERT_TAG, cv);
+                    getActivity().getContentResolver().insert(CameAndWentProvider.URI_TAGS, cv);
                 else
-                    getActivity().getContentResolver().update(CameAndWentProvider.URI_UPDATE_TAG, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+                    getActivity().getContentResolver().update(CameAndWentProvider.URI_TAGS, cv, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
             case R.id.locationtageditor_cancelButton:
                 dismiss();
                 break;
             case R.id.locationtageditor_DeleteButton:
-                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_TAG, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+                getActivity().getContentResolver().delete(CameAndWentProvider.URI_TAGS, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
                 dismiss();
                 break;
         }

@@ -85,7 +85,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
                 adb.setPositiveButton("I am sure!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, null, null);
+                        getActivity().getContentResolver().delete(CameAndWentProvider.URI_LOG_ENTRIES, null, null);
                         dialog.dismiss();
                     }
                 });
@@ -107,7 +107,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
                 adb.setPositiveButton("#yolo", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_GET_MONTHS, CameAndWentProvider.MIGRATE_METHOD, null, null);
+                        getActivity().getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.MIGRATE_METHOD, null, null);
                         dialog.dismiss();
                     }
                 });
@@ -132,13 +132,13 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if(id == -1) {
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_DURATIONS);
+            cl.setUri(CameAndWentProvider.URI_DURATIONS);
             cl.setSortOrder(CameAndWentProvider.DATE + " ASC");
             return cl;
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+            cl.setUri(CameAndWentProvider.URI_LOG_ENTRIES);
             cl.setSelection(String.format("%s=?", CameAndWentProvider.DATE));
             cl.setSelectionArgs(new String[]{String.valueOf(args.getLong(CameAndWentProvider.DATE))});
             cl.setSortOrder(CameAndWentProvider.CAME + " ASC");
@@ -180,7 +180,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
                     cm.clockOut();
                 break;
             case R.id.logentry_deletebutton:
-                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
+                getActivity().getContentResolver().delete(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
                 break;
             case R.id.logentry_editButton:
                 long fakkingId = (long) v.getTag();
@@ -241,7 +241,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             Bundle b = new Bundle();
             long date = groupCursor.getLong(groupCursor.getColumnIndex(CameAndWentProvider.DATE));
             b.putLong(CameAndWentProvider.DATE, date);
-            return context.getContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
+            return context.getContentResolver().query(CameAndWentProvider.URI_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
         }
 
         @Override

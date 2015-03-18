@@ -30,10 +30,10 @@ public class CameAndWentApplication extends Application {
                 super.onChange(selfChange);
             }
         };
-        getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_DURATIONS, true, obs);
-        getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_LOG_ENTRIES, true, obs);
+        getContentResolver().registerContentObserver(CameAndWentProvider.URI_DURATIONS, true, obs);
+        getContentResolver().registerContentObserver(CameAndWentProvider.URI_LOG_ENTRIES, true, obs);
         if(BuildConfig.DEBUG){
-            getContentResolver().call(CameAndWentProvider.URI_GET_LOG_ENTRIES, CameAndWentProvider.SEED_METHOD, null, null);
+            getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.SEED_METHOD, null, null);
         }
     }
 }

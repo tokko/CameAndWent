@@ -25,7 +25,7 @@ public class SettingsFragment extends PreferenceFragment {
             new CountDownManager(getActivity()).startCountDown();
         if(!PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("countdown", false))
             new CountDownManager(getActivity()).stopCountDown();
-        getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_GET_MONTHS, CameAndWentProvider.RECREATE_METHOD, null, null);
+        getActivity().getContentResolver().call(CameAndWentProvider.URI_MONTHS, CameAndWentProvider.RECREATE_METHOD, null, null);
         new BackupManager(getActivity()).dataChanged();
         super.onStop();
     }

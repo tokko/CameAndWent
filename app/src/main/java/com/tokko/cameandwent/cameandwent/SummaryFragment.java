@@ -101,12 +101,12 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         if(!monthly) {
             if(id == -1) {
                 CursorLoader cl = new CursorLoader(getActivity());
-                cl.setUri(CameAndWentProvider.URI_GET_WEEKS);
+                cl.setUri(CameAndWentProvider.URI_WEEKS);
                 return cl;
             }
             else{
                 CursorLoader cl = new CursorLoader(getActivity());
-                cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+                cl.setUri(CameAndWentProvider.URI_LOG_ENTRIES);
                 cl.setSelection(String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR));
                 cl.setSelectionArgs(new String[]{String.valueOf(id)});
                 return cl;
@@ -114,7 +114,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_GET_MONTHS);
+            cl.setUri(CameAndWentProvider.URI_MONTHS);
             return cl;
         }
     }
@@ -149,7 +149,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
             int week = groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
-            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DURATIONS, null, String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR), new String[]{String.valueOf(week)}, null);
+            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_DURATIONS, null, String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR), new String[]{String.valueOf(week)}, null);
             return c;
         }
 
@@ -197,7 +197,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             cl.setSelectionArgs(new String[]{String.valueOf(TimeConverter.extractDate(dt.getMillis()))});
             */
             if(groupCursor.getCount() <= 0) return null;
-            return getActivity().getContentResolver().query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, String.format("%s=?", CameAndWentProvider.MONTH_OF_YEAR), new String[]{String.valueOf(groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)))}, null);
+            return getActivity().getContentResolver().query(CameAndWentProvider.URI_MONTHLY_SUMMARY, null, String.format("%s=?", CameAndWentProvider.MONTH_OF_YEAR), new String[]{String.valueOf(groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)))}, null);
         }
 
         @Override
