@@ -187,15 +187,6 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
 
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
-                        /*
-
-            CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY);
-            DateTime dt = new DateTime();
-            dt = dt.withTime(0, 0, 0, 0);
-            dt = dt.withDayOfMonth(1);
-            cl.setSelectionArgs(new String[]{String.valueOf(TimeConverter.extractDate(dt.getMillis()))});
-            */
             if(groupCursor.getCount() <= 0) return null;
             return getActivity().getContentResolver().query(CameAndWentProvider.URI_MONTHLY_SUMMARY, null, String.format("%s=?", CameAndWentProvider.MONTH_OF_YEAR), new String[]{String.valueOf(groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)))}, null);
         }
