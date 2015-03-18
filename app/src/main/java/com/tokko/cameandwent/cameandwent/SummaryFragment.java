@@ -9,8 +9,10 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -29,7 +31,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     @InjectView(android.R.id.list) private ExpandableListView expandableListView;
     @InjectView(R.id.summaryFragmentTagSpinner) private Spinner tagSpinner;
     private boolean monthly;
-
+    private CursorAdapter spinnerAdapter;
 
     public static SummaryFragment newInstance() {
         SummaryFragment fragment = new SummaryFragment();
@@ -57,6 +59,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         else if(getArguments() != null){
             monthly = getArguments().getBoolean(EXTRA_MONTHLY, false);
         }
+        spinnerAdapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_spinner_dropdown_item, null, new String[]{CameAndWentProvider.TAG}, new int[]{android.R.id.text1}, 0);
     }
 
     @Override
@@ -81,6 +84,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         else {
             getDialog().setTitle("Monthly summary");
             tagSpinner.setVisibility(View.VISIBLE);
+            tagSpinner.setAdapter(spinnerAdapter);
             adapter = new MonthlySummaryAdapter(getActivity());
         }
         expandableListView.setAdapter(adapter);
@@ -91,6 +95,8 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     public void onStart() {
         super.onStart();
         getLoaderManager().initLoader(-1, null, this);
+        if(monthly)
+            getLoaderManager().initLoader(-2, null, this);
     }
 
     @Override
@@ -117,27 +123,37 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_MONTHS);
-            return cl;
+            switch (id){
+                case -2:
+                    cl.setUri(CameAndWentProvider.URI_TAGS);
+                    return cl;
+                default:
+                    cl.setUri(CameAndWentProvider.URI_MONTHS);
+                    return cl;
+            }
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if(loader.getId() != -1)
+        if(loader.getId() >= 0)
             adapter.setChildrenCursor(loader.getId(), data);
-        else
+        else if(loader.getId() == -1)
             adapter.setGroupCursor(data);
+        else if(loader.getId() == -2)
+            spinnerAdapter.swapCursor(data);
         if(expandableListView.getCount() > 0)
-            expandableListView.expandGroup(expandableListView.getCount()-1);
+            expandableListView.expandGroup(expandableListView.getCount() - 1);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        if(loader.getId() != -1)
+        if(loader.getId() > 0)
             adapter.setChildrenCursor(loader.getId(), null);
-        else
+        else if(loader.getId() == -1)
             adapter.setGroupCursor(null);
+        else if(loader.getId() == -2)
+            spinnerAdapter.swapCursor(null);
     }
 
     private class SummaryCursorAdapter extends CursorTreeAdapter{
