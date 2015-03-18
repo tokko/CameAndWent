@@ -483,4 +483,12 @@ public class CameAndWentProviderTests extends TestCase{
         assertTrue(c.moveToFirst());
         assertEquals(1, c.getCount());
     }
+
+    @Test
+    public void getLogEntryForEdit_ReturnsCorrectRow(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRY_FOR_EDIT, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{"1"}, null);
+        assertNotNull(c);
+        assertTrue(c.moveToFirst());
+        assertEquals(1, c.getInt(c.getColumnIndex(CameAndWentProvider.ID)));
+    }
 }
