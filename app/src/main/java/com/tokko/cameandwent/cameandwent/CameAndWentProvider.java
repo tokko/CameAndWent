@@ -179,8 +179,9 @@ public class CameAndWentProvider extends ContentProvider {
         sdb.delete(TABLE_TAGS_NAME, null, null);
         sdb.delete(TABLE_LOG_NAME, null, null);
         sdb.delete(TIME_TABLE, null, null);
-        for(int i=0; i<5; i++){
+        for(int i=1; i<=5; i++){
             ContentValues cv = new ContentValues();
+            cv.put(ID, i);
             cv.put(TAG, "TAG" + i);
             sdb.insertOrThrow(TABLE_TAGS_NAME, null, cv);
         }
@@ -280,6 +281,7 @@ public class CameAndWentProvider extends ContentProvider {
                 sdb.insert(TIME_TABLE, null, timeTableValues);
                 values.put(DATE, date);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
+                long tagId = values.containsKey(TAG) ? values.getAsLong(TAG) : -1;
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
                 int numberOfEventsToday = query(URI_LOG_ENTRIES, null, String.format("%s=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();
                 boolean breaksEnabled = sp.getBoolean("breaks_enabled", false);
@@ -289,6 +291,8 @@ public class CameAndWentProvider extends ContentProvider {
                     values.put(WENT, values.getAsLong(CAME) + TimeConverter.timeIntervalAsLong(sp.getString("average_break_duration", "0:0")));
                     values.put(DATE, date);
                     values.put(ISBREAK, 1);
+                    if(tagId > -1)
+                        values.put(TAG, tagId);
                     sdb.insert(TABLE_LOG_NAME, null, values);
                 }
                 if(id > -1) {
@@ -432,7 +436,7 @@ public class CameAndWentProvider extends ContentProvider {
 
         private static final String CREATE_VIEW_DURATIONS = "CREATE VIEW IF NOT EXISTS " + VIEW_DURATIONS + " AS SELECT tt." + ID + ", tt." + DATE + ", %s, tt." + TAG + " FROM " + VIEW_LOG + " tt GROUP BY " + DATE + ", " + TAG;
 
-        private static final String CREATE_VIEW_DURATIONS_PER_DAY = "CREATE VIEW IF NOT EXISTS " + VIEW_DURATIONS_PER_DAY + " AS SELECT " + ID + ", " + DATE  + ", "+DURATION+" AS " + DURATION + " FROM " + VIEW_TIME_TABLE_DURATIONS + " GROUP BY " + DATE;
+        private static final String CREATE_VIEW_DURATIONS_PER_DAY = "CREATE VIEW IF NOT EXISTS " + VIEW_DURATIONS_PER_DAY + " AS SELECT " + ID + ", " + DATE  + ", " + WEEK_OF_YEAR + ", " + MONTH_OF_YEAR + ", " + TAG + ", SUM("+DURATION+") AS " + DURATION + " FROM " + VIEW_TIME_TABLE_DURATIONS + " GROUP BY " + DATE;
 
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);

@@ -124,14 +124,13 @@ public class CameAndWentProviderTests extends TestCase{
 
     @Test
     public void testGetDurations(){
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_DURATIONS, null, null, null, null);
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_DURATIONS_PER_DAY, null, null, null, null);
         long duration = TimeConverter.hoursAsLong(8);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
             assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
             DateTime dt = new DateTime(c.getLong(c.getColumnIndex(CameAndWentProvider.DATE)));
             assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
             assertEquals(dt.getMonthOfYear(), c.getInt(c.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
-            assertEquals("TAG1", c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
         }
         c.close();
     }
@@ -149,7 +148,7 @@ public class CameAndWentProviderTests extends TestCase{
             assertTrue(came < went);
             assertEquals(date, TimeConverter.extractDate(came));
             assertEquals(date, TimeConverter.extractDate(went));
-            assertEquals("TAG1", tag);
+            assertEquals(new DateTime(went).getHourOfDay() == 17 ? "TAG2": "TAG1", tag);
         }
         c.close();
         Cursor noBreak = mContentResolver.query(CameAndWentProvider.URI_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);
@@ -199,7 +198,7 @@ public class CameAndWentProviderTests extends TestCase{
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
         long came = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.CAME));
         long date = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.DATE));
-        String tag = "TAG2";
+        String tag = "TAG3";
         int intTag = 3;
         long newWent = System.currentTimeMillis() + 10000;
         ContentValues cv = new ContentValues();
@@ -251,7 +250,7 @@ public class CameAndWentProviderTests extends TestCase{
     }
     @Test
     public void updateTimeTable_AllFieldsUpdated(){
-        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_DURATIONS, null, null, null, null);
+        Cursor toEdit = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRY_FOR_EDIT, null, null, null, null);
         assertNotNull(toEdit);
         assertTrue(toEdit.moveToLast());
         long id = toEdit.getLong(toEdit.getColumnIndex(CameAndWentProvider.ID));
@@ -264,11 +263,12 @@ public class CameAndWentProviderTests extends TestCase{
 
         Cursor post = mContentResolver.query(CameAndWentProvider.URI_DURATIONS, null,String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(dt.getMillis())}, null, null );
         assertNotNull(post);
-        assertEquals(1, post.getCount());
-        assertTrue(post.moveToFirst());
-        assertEquals(dt.getWeekOfWeekyear(), post.getInt(post.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
-        assertEquals(dt.getMonthOfYear(), post.getInt(post.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
-        assertEquals(dt.getMillis(), post.getLong(post.getColumnIndex(CameAndWentProvider.DATE)));
+        assertEquals(2, post.getCount());
+        for(assertTrue(post.moveToFirst()); !post.isAfterLast(); post.moveToNext()) {
+            assertEquals(dt.getWeekOfWeekyear(), post.getInt(post.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
+            assertEquals(dt.getMonthOfYear(), post.getInt(post.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
+            assertEquals(dt.getMillis(), post.getLong(post.getColumnIndex(CameAndWentProvider.DATE)));
+        }
         post.close();
     }
 
@@ -317,7 +317,7 @@ public class CameAndWentProviderTests extends TestCase{
 		Cursor c = mContentResolver.query(CameAndWentProvider.URI_DURATIONS, null, null, null, null);
 		for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             long duration = c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION));
-			assertEquals(TimeConverter.formatInterval(duration), DateTimeConstants.MILLIS_PER_HOUR*8+DateTimeConstants.MILLIS_PER_MINUTE*30, duration);
+			assertTrue(duration%(DateTimeConstants.MILLIS_PER_HOUR/2) == 0);
 		}
         c.close();
 	}
@@ -332,7 +332,7 @@ public class CameAndWentProviderTests extends TestCase{
         assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
         assertTrue(c.getColumnIndex(CameAndWentProvider.LATITUDE) > -1);
-        int suffix = 0;
+        int suffix = 1;
         String tag = "TAG";
         for (assertTrue(c.moveToFirst()); !c.isAfterLast(); c.moveToNext()){
             assertEquals(tag + suffix++, c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
@@ -373,7 +373,7 @@ public class CameAndWentProviderTests extends TestCase{
     public void getTags_Sortorder(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, null, null, CameAndWentProvider.TAG + " DESC");
         assertNotNull(c);
-        int suffix = 4;
+        int suffix = 5;
         String tag = "TAG";
         for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             assertEquals(tag + suffix--, c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
