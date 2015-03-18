@@ -29,11 +29,12 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String DATABASE_NAME = "cameandwent";
 
     private static final String TABLE_LOG_NAME = "log";
-    private static final String VIEW_DURATION = "durations";
+    private static final String VIEW_DURATIONS = "durations";
     private static final String TIME_TABLE = "timetable";
     private static final String TABLE_TAGS_NAME = "tags";
     private static final String VIEW_TIME_TABLE_DURATIONS =  "timetabledurations";
     private static final String VIEW_LOG = "logview";
+    private static final String VIEW_DURATIONS_PER_DAY = "durationsperday";
 
     public static final String ID = "_id";
     public static final String CAME = "came";
@@ -59,6 +60,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final String GET_MONTHLY_SUMMARY = "GET_MONTHLY_SUMMARY";
     private static final String GET_TAGS = "GET_TAGS";
     private static final String GET_LOG_ENTRY_FOR_EDIT = "GET_LOG_ENTRY_FOR_EDIT";
+    private static final String GET_DURATIONS_PER_DAY = "GET_DURATIONS_PER_DAY";
 
     private static final int KEY_CAME = 0;
     private static final int KEY_WENT = 1;
@@ -70,6 +72,7 @@ public class CameAndWentProvider extends ContentProvider {
     private static final int KEY_MONTHLY_SUMMARY = 10;
     private static final int KEY_TAGS = 11;
     private static final int KEY_GET_LOG_ENTRY_FOR_EDIT = 12;
+    private static final int KEY_DURATIONS_PER_DAY = 13;
 
     public static final Uri URI_CAME = makeUri(ACTION_CAME, KEY_CAME);
     public static final Uri URI_WENT = makeUri(ACTION_WENT, KEY_WENT);
@@ -81,6 +84,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final Uri URI_MONTHLY_SUMMARY = makeUri(GET_MONTHLY_SUMMARY, KEY_MONTHLY_SUMMARY);
     public static final Uri URI_TAGS = makeUri(GET_TAGS, KEY_TAGS);
     public static final Uri URI_GET_LOG_ENTRY_FOR_EDIT = makeUri(GET_LOG_ENTRY_FOR_EDIT, KEY_GET_LOG_ENTRY_FOR_EDIT);
+    public static final Uri URI_DURATIONS_PER_DAY = makeUri(GET_DURATIONS_PER_DAY, KEY_DURATIONS_PER_DAY);
 
     private static UriMatcher uriMatcher;
 
@@ -137,7 +141,7 @@ public class CameAndWentProvider extends ContentProvider {
     }
 
     public void recreateDurationsView() {
-        db.recreateDurationsView(db.getWritableDatabase());
+        db.recreateViews(db.getWritableDatabase());
     }
 
     public static int SEED_ENTRIES = 0;
@@ -159,14 +163,14 @@ public class CameAndWentProvider extends ContentProvider {
             cv.put(MONTH_OF_YEAR, TimeConverter.extractMonth(dt.getMillis()));
             timeTables.add(cv);
 
-            cv = buildSeedValues(dt, 8, 12);
+            cv = buildSeedValues(dt, 8, 12, 1);
             logEntries.add(cv);
 
             boolean useSnapup = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("use_snapup", false);
-            cv = buildSeedValues(dt, 12, 17, useSnapup?15:0);
+            cv = buildSeedValues(dt, 12, 17, useSnapup?15:0, 2);
             logEntries.add(cv);
 
-            cv = buildSeedValues(dt, 12, 13);
+            cv = buildSeedValues(dt, 12, 13, 1);
             cv.put(ISBREAK, 1);
             logEntries.add(cv);
         }
@@ -203,17 +207,18 @@ public class CameAndWentProvider extends ContentProvider {
         return dt;
     }
 
-    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour) {
-        return buildSeedValues(dt, cameHour, wentHour, 0);
+    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour, int tag) {
+        return buildSeedValues(dt, cameHour, wentHour, 0, tag);
     }
-    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour, int wentMinute) {
+
+    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour, int wentMinute, int tag) {
         ContentValues cv = new ContentValues();
         dt = dt.withHourOfDay(cameHour);
         cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
         cv.put(CAME, dt.getMillis());
         dt = dt.withHourOfDay(wentHour).withMinuteOfHour(wentMinute);
         cv.put(WENT, dt.getMillis());
-        cv.put(TAG, 2);
+        cv.put(TAG, tag);
         return cv;
     }
 
@@ -229,6 +234,10 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_WEEKS:
                 c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR}, null, null, WEEK_OF_YEAR, null, sortOrder, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_WEEKS);
+                return c;
+            case KEY_DURATIONS_PER_DAY:
+                c = sdb.query(VIEW_DURATIONS_PER_DAY, projection, selection, selectionArgs, DATE, null, sortOrder, null);
+                c.setNotificationUri(getContext().getContentResolver(), URI_DURATIONS_PER_DAY);
                 return c;
             case KEY_GET_LOG_ENTRY_FOR_EDIT:
                 c = sdb.query(TABLE_LOG_NAME, projection, selection, selectionArgs, null, null, sortOrder, "1");
@@ -417,8 +426,14 @@ public class CameAndWentProvider extends ContentProvider {
                 LATITUDE + " INTEGER NOT NULL DEFAULT -1, " +
                 LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
 
-        private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATION +" vd ON tt." + DATE + "=vd."+DATE;
+        private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATIONS +" vd USING(" + DATE + ") GROUP BY " + DATE + ", " + TAG;
+
         private static final String CREATE_LOG_VIEW = "CREATE VIEW " + VIEW_LOG + " AS SELECT l."+ID+", l."+CAME+", l."+WENT+", l."+ISBREAK+", l."+DATE+ ", tags."+TAG+" FROM " + TABLE_LOG_NAME + " l LEFT OUTER JOIN "+TABLE_TAGS_NAME+" tags ON l."+TAG+"=tags."+ID;
+
+        private static final String CREATE_VIEW_DURATIONS = "CREATE VIEW IF NOT EXISTS " + VIEW_DURATIONS + " AS SELECT tt." + ID + ", tt." + DATE + ", %s, tt." + TAG + " FROM " + VIEW_LOG + " tt GROUP BY " + DATE + ", " + TAG;
+
+        private static final String CREATE_VIEW_DURATIONS_PER_DAY = "CREATE VIEW IF NOT EXISTS " + VIEW_DURATIONS_PER_DAY + " AS SELECT " + ID + ", " + DATE  + ", "+DURATION+" AS " + DURATION + " FROM " + VIEW_TIME_TABLE_DURATIONS + " GROUP BY " + DATE;
+
         public DatabaseOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
@@ -429,7 +444,7 @@ public class CameAndWentProvider extends ContentProvider {
             db.execSQL(CREATE_TIME_TABLE);
             db.execSQL(CREATE_LOG);
             db.execSQL(CREATE_TAGS);
-            recreateDurationsView(db);
+            recreateViews(db);
 
         }
 
@@ -437,7 +452,7 @@ public class CameAndWentProvider extends ContentProvider {
         public void onOpen(SQLiteDatabase db) {
             super.onOpen(db);
             if(BuildConfig.DEBUG){
-                db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+                db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATIONS);
                 db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
                 db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOG_NAME);
@@ -448,13 +463,15 @@ public class CameAndWentProvider extends ContentProvider {
             }
         }
 
-        public void recreateDurationsView(SQLiteDatabase db){
+        public void recreateViews(SQLiteDatabase db){
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);
-            db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+            db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATIONS);
             db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
+            db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATIONS_PER_DAY);
             db.execSQL(CREATE_LOG_VIEW);
-            db.execSQL("CREATE VIEW IF NOT EXISTS " + VIEW_DURATION + " AS SELECT tt." + ID + ", tt." + DATE + ", " + getDurationCalculation() + ", tt." + TAG + " FROM " + VIEW_LOG + " tt GROUP BY " + DATE );
+            db.execSQL(String.format(CREATE_VIEW_DURATIONS, getDurationCalculation()));
             db.execSQL(CREATE_TIME_TABLE_DURATION_JOIN_VIEW);
+            db.execSQL(CREATE_VIEW_DURATIONS_PER_DAY);
         }
 
         private String getDurationCalculation() {
@@ -503,12 +520,12 @@ public class CameAndWentProvider extends ContentProvider {
                         c.close();
                         break;
                     case 38:
-                        db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATION);
+                        db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATIONS);
                         break;
                     case 45:
                         db.execSQL(CREATE_LOG);
                         db.execSQL(CREATE_TIME_TABLE);
-                        //recreateDurationsView(db);
+                        //recreateViews(db);
                         migrateData(db);
                         break;
                     case 49:

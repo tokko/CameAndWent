@@ -132,7 +132,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if(id == -1) {
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_DURATIONS);
+            cl.setUri(CameAndWentProvider.URI_DURATIONS_PER_DAY);
             cl.setSortOrder(CameAndWentProvider.DATE + " ASC");
             return cl;
         }

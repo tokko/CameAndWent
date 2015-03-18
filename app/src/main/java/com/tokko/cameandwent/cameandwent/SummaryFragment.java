@@ -149,8 +149,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
             int week = groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
-            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_DURATIONS, null, String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR), new String[]{String.valueOf(week)}, null);
-            return c;
+            return context.getContentResolver().query(CameAndWentProvider.URI_DURATIONS, null, String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR), new String[]{String.valueOf(week)}, null);
         }
 
         @Override
@@ -175,7 +174,9 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             String durationS = new DecimalFormat("#.0").format(duration) + "h";
             if(duration < 0)
                 durationS = "Currently at work";
-            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS);
+            String tag = cursor.getString(cursor.getColumnIndex(CameAndWentProvider.TAG));
+            tag = tag != null ? ("\nTag: " + tag):null;
+            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS + (tag != null ? tag : ""));
         }
     }
 
