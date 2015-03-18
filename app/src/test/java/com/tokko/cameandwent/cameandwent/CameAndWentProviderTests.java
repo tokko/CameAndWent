@@ -131,7 +131,7 @@ public class CameAndWentProviderTests extends TestCase{
             DateTime dt = new DateTime(c.getLong(c.getColumnIndex(CameAndWentProvider.DATE)));
             assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
             assertEquals(dt.getMonthOfYear(), c.getInt(c.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
-            assertEquals("TAG0", c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
+            assertEquals("TAG1", c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
         }
         c.close();
     }
@@ -149,7 +149,7 @@ public class CameAndWentProviderTests extends TestCase{
             assertTrue(came < went);
             assertEquals(date, TimeConverter.extractDate(came));
             assertEquals(date, TimeConverter.extractDate(went));
-            assertEquals("TAG0", tag);
+            assertEquals("TAG1", tag);
         }
         c.close();
         Cursor noBreak = mContentResolver.query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.ISBREAK), new String[]{String.valueOf(0)}, null);

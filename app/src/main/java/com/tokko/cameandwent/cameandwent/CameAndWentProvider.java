@@ -220,7 +220,7 @@ public class CameAndWentProvider extends ContentProvider {
         cv.put(CAME, dt.getMillis());
         dt = dt.withHourOfDay(wentHour).withMinuteOfHour(wentMinute);
         cv.put(WENT, dt.getMillis());
-        //cv.put(TAG, 1);
+        cv.put(TAG, 2);
         return cv;
     }
 
@@ -417,7 +417,7 @@ public class CameAndWentProvider extends ContentProvider {
 
         private static final String CREATE_TAGS = "CREATE TABLE IF NOT EXISTS " + TABLE_TAGS_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
-                TAG + " TEXT, " +
+                TAG + " TEXT UNIQUE ON CONFLICT IGNORE, " +
                 LATITUDE + " INTEGER NOT NULL DEFAULT -1, " +
                 LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
 
