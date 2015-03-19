@@ -26,7 +26,7 @@ import java.util.Date;
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
-public class SummaryFragment extends RoboDialogFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
+public class SummaryFragment extends RoboDialogFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemSelectedListener {
     private static final String EXTRA_MONTHLY = "extra_monthly";
     private static final String ARG_TAG = "arg_tag";
     private SummaryCursorAdapter adapter;
@@ -87,7 +87,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             getDialog().setTitle("Monthly summary");
             tagSpinner.setVisibility(View.VISIBLE);
             tagSpinner.setAdapter(spinnerAdapter);
-            tagSpinner.setOnItemClickListener(this);
+            tagSpinner.setOnItemSelectedListener(this);
             adapter = new MonthlySummaryAdapter(getActivity());
         }
         expandableListView.setAdapter(adapter);
@@ -119,18 +119,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             }
             else{
                 CursorLoader cl = new CursorLoader(getActivity());
-                cl.setUri(CameAndWentProvider.URI_LOG_ENTRIES);
-                String selection = String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR);
-                String[]selectionArgs = new String[]{String.valueOf(id)};
-                if(args != null){
-                    String tag = args.getString(ARG_TAG, null);
-                    if(tag != null){
-                        selection += String.format(" AND %s=?", CameAndWentProvider.TAG);
-                        selectionArgs = new String[]{selectionArgs[0], tag};
-                    }
-                }
-                cl.setSelection(selection);
-                cl.setSelectionArgs(selectionArgs);
+                cl.setUri(CameAndWentProvider.URI_MONTHS);
                 return cl;
             }
         }
@@ -141,8 +130,20 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
                     cl.setUri(CameAndWentProvider.URI_TAGS);
                     return cl;
                 default:
-                    cl.setUri(CameAndWentProvider.URI_MONTHS);
+                    cl.setUri(CameAndWentProvider.URI_DURATIONS);
+                    String selection = String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR);
+                    String[]selectionArgs = new String[]{String.valueOf(id)};
+                    if(args != null){
+                        String tag = args.getString(ARG_TAG, null);
+                        if(tag != null){
+                            selection += String.format(" AND %s=?", CameAndWentProvider.TAG);
+                            selectionArgs = new String[]{selectionArgs[0], tag};
+                        }
+                    }
+                    cl.setSelection(selection);
+                    cl.setSelectionArgs(selectionArgs);
                     return cl;
+
             }
         }
     }
@@ -170,7 +171,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         Cursor c = spinnerAdapter.getCursor();
         int pos = c.getPosition();
         c.moveToPosition(position);
@@ -180,6 +181,11 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         Bundle b = new Bundle();
         b.putString(ARG_TAG, tag);
         getLoaderManager().initLoader(-1, b, this);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     private class SummaryCursorAdapter extends CursorTreeAdapter{
