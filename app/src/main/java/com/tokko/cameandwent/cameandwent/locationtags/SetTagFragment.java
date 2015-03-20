@@ -32,6 +32,14 @@ public class SetTagFragment extends RoboDialogFragment implements LoaderManager.
     public static SetTagFragment newInstance(){
         return new SetTagFragment();
     }
+    public static SetTagFragment newInstance(String title)
+    {
+        SetTagFragment f = newInstance();
+        Bundle b = new Bundle();
+        b.putString("EXTRA_TITLE", title);
+        f.setArguments(b);
+        return f;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,6 +59,8 @@ public class SetTagFragment extends RoboDialogFragment implements LoaderManager.
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getDialog().setTitle("Tag Everything");
+        if(getArguments()!=null)
+            getDialog().setTitle(getArguments().getString("EXTRA_TITLE"));
     }
 
     @Override

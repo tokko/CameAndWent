@@ -178,7 +178,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             case R.id.clock_button:
                 ToggleButton b = (ToggleButton) v;
                 if(b.isChecked()){
-                    SetTagFragment.newInstance().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    SetTagFragment.newInstance("Choose Tag").setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             cm.clockIn(id);
@@ -224,7 +224,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
     @Override
     public void onTimeSet(TimePicker view, final int hourOfDay, final int minute) {
         if(!tb.isChecked()){
-            SetTagFragment.newInstance().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            SetTagFragment.newInstance("Choose Tag").setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     cm.clockIn(TimeConverter.hourAndMinuteToMillis(hourOfDay, minute), id);

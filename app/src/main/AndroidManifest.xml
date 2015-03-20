@@ -32,13 +32,14 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".CountDownManager">
+        <receiver android:name=".CountDownManager" >
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_OFF" />
                 <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="com.tokko.cameandwent.ACTION_COUNTDOWN_TICK" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".GeofenceReceiver"
             android:enabled="true" >
@@ -50,6 +51,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".ReminderScheduler"
             android:enabled="true" >
@@ -78,16 +80,26 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
-
         <activity
             android:name=".locationtags.LocationTagActivity"
             android:parentActivityName=".locationtags.LocationTagActivity" >
-            <!-- TODO: restore this to its proper location -->
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".locationtags.LocationTagActivity" />
         </activity>
+
+        <receiver
+            android:name=".manualclockin.GpsLocationReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
+                <action android:name="com.tokko.cameandwent.ACTION_CLOCKOUT_FROM_NOTIFICATION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
