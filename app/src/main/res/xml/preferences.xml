@@ -12,8 +12,8 @@
 
         <com.tokko.cameandwent.cameandwent.LocationPreference
             android:dependency="enabled"
-            android:title="Set location"
-            android:summary="Sets the current location as origin"
+            android:title="Manage locations"
+            android:summary="Manages your locations"
             android:key="origin" />
 
         <EditTextPreference
