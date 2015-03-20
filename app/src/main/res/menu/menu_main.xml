@@ -10,4 +10,6 @@
         android:title="Monthly Summary"/>
     <item android:id="@+id/restore_data"
         android:title="Restore data"/>
+    <item android:id="@+id/tag_everything"
+        android:title="Tag everything"/>
 </menu>

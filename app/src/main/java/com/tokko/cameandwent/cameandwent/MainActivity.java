@@ -12,6 +12,8 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -125,6 +127,11 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
                 });
             }
             b.show();
+            return true;
+        }
+        if(id == R.id.tag_everything){
+            SetTagFragment.newInstance().show(getFragmentManager(), "t");
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
