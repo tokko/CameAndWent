@@ -192,4 +192,10 @@
         android:title="Consult rounding"
         android:summary="Round daily duration up to closest half-hour"
         android:key="use_snapup" />
+    <CheckBoxPreference
+        android:dependency="enabled"
+        android:defaultValue="false"
+        android:title="GPS disabled safeguard"
+        android:summary="If clocked in and GPS provider is disabled a notification will ask if you want to clock out"
+        android:key="clockoutquestion" />
 </PreferenceScreen>

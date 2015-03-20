@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -60,6 +61,11 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 Log.d("recvr", "exited");
+                if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("clockoutquestion", false)){
+                    LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+                    if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                        return;
+                }
                 cm.clockOut();
             }
         }

@@ -20,6 +20,8 @@ public class GpsLocationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("clockoutquestion", false)) return;
+
         if(intent.getAction().equals("android.location.PROVIDERS_CHANGED")){
             if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("enabled", false)) return;
             boolean clockedIn = context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false);
