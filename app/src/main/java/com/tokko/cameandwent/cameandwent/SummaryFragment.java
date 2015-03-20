@@ -130,14 +130,14 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
                     cl.setUri(CameAndWentProvider.URI_TAGS);
                     return cl;
                 default:
-                    cl.setUri(CameAndWentProvider.URI_DURATIONS);
-                    String selection = String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR);
-                    String[]selectionArgs = new String[]{String.valueOf(id)};
+                    cl.setUri(CameAndWentProvider.URI_MONTHS);
+                    String selection = ""; //String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR);
+                    String[]selectionArgs = null; // = new String[]{String.valueOf(id)};
                     if(args != null){
                         String tag = args.getString(ARG_TAG, null);
                         if(tag != null){
-                            selection += String.format(" AND %s=?", CameAndWentProvider.TAG);
-                            selectionArgs = new String[]{selectionArgs[0], tag};
+                            selection += String.format("%s=?", CameAndWentProvider.TAG);
+                            selectionArgs = new String[]{tag};
                         }
                     }
                     cl.setSelection(selection);
