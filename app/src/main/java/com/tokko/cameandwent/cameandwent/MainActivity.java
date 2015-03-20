@@ -23,7 +23,7 @@ import roboguice.activity.RoboFragmentActivity;
 public class MainActivity extends RoboFragmentActivity implements LogFragment.LogFragmentHost{
     public static final String ACTION_WEEKLY_SUMMARY = "ACTION_WEEKLY_SUMMARY";
     public static final String ACTION_MONTHLY_SUMMARY = "ACTION_MONTHLY_SUMMARY";
-    private static final String HAS_SHOWN_SETTINGS = "hasshownsettings";
+    private static final String HAS_SHOWN_SETTINGS = "hasshownsettings_2";
     private LogFragment logFragment;
 
     @Override
@@ -37,6 +37,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     protected void onStart() {
         super.onStart();
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, logFragment).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("origin").commit();
         if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HAS_SHOWN_SETTINGS, false)) {
             showSettings();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(HAS_SHOWN_SETTINGS, true).commit();

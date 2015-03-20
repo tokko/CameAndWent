@@ -13,8 +13,7 @@
         <com.tokko.cameandwent.cameandwent.LocationPreference
             android:dependency="enabled"
             android:title="Manage locations"
-            android:summary="Manages your locations"
-            android:key="origin" />
+            android:summary="Manages your locations" />
 
         <EditTextPreference
             android:dependency="enabled"
