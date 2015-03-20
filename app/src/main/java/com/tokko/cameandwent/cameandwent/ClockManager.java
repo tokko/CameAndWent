@@ -29,8 +29,8 @@ public class ClockManager {
         countDownManager = new CountDownManager(context);
     }
 
-    public void clockIn(){
-        clockIn(TimeConverter.getCurrentTime().getMillis());
+    public void clockIn(long id){
+        clockIn(TimeConverter.getCurrentTime().getMillis(), id);
     }
 
     public void clockOut(){
@@ -38,12 +38,13 @@ public class ClockManager {
 
     }
 
-    public void clockIn(long time) {
+    public void clockIn(long time, long id) {
         if(!defaultPrefs.getBoolean("enabled", false)) return;
         if(!this.sp.getBoolean(PREF_CLOCKED_IN, false)) {
             this.sp.edit().putBoolean(PREF_CLOCKED_IN, true).apply();
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.CAME, time);
+            cv.put(CameAndWentProvider.TAG, id);
             context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
             if (defaultPrefs.getBoolean("soundmode", false)) {
                 defaultPrefs.edit().putInt(PREV_SOUNDMODE_KEY, am.getRingerMode()).apply();

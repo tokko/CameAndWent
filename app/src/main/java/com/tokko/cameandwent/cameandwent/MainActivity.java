@@ -131,7 +131,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
             return true;
         }
         if(id == R.id.tag_everything){
-            SetTagFragment.newInstance().show(getFragmentManager(), "t");
+            SetTagFragment.newInstance().show(getSupportFragmentManager(), "t");
             return true;
         }
         return super.onOptionsItemSelected(item);

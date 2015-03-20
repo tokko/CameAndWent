@@ -1,16 +1,15 @@
 package com.tokko.cameandwent.cameandwent.locationtags;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
-import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
-import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +20,13 @@ import android.widget.SimpleCursorAdapter;
 
 import com.tokko.cameandwent.cameandwent.CameAndWentProvider;
 
-public class SetTagFragment extends DialogFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
+import roboguice.fragment.RoboDialogFragment;
+
+public class SetTagFragment extends RoboDialogFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
 
     private ListView lv;
     private CursorAdapter adapter;
+    private AdapterView.OnItemClickListener onItemClickListener;
 
 
     public static SetTagFragment newInstance(){
@@ -80,28 +82,38 @@ public class SetTagFragment extends DialogFragment implements LoaderManager.Load
         adapter.swapCursor(null);
     }
 
+    public SetTagFragment setOnItemClickListener(AdapterView.OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
+        return this;
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
-        final Context context = getActivity();
-        AlertDialog.Builder adb = new AlertDialog.Builder(context);
-        adb.setTitle("Tag all entries");
-        adb.setMessage("This will tag ALL current entries with this tag. This can not be undone. Are you sure?");
-        adb.setPositiveButton("#yolo", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ContentValues cv = new ContentValues();
-                cv.put(CameAndWentProvider.TAG, id);
-                context.getContentResolver().update(CameAndWentProvider.URI_LOG_ENTRIES, cv, null, null);
-                dismiss();
-            }
-        });
-        adb.setNegativeButton("No, don't do it", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dismiss();
-            }
-        });
-        adb.show();
+        if(onItemClickListener != null){
+            onItemClickListener.onItemClick(parent, view, position, id);
+        }
+        else {
+            final Context context = getActivity();
+            AlertDialog.Builder adb = new AlertDialog.Builder(context);
+            adb.setTitle("Tag all entries");
+            adb.setMessage("This will tag ALL current entries with this tag. This can not be undone. Are you sure?");
+            adb.setPositiveButton("#yolo", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    ContentValues cv = new ContentValues();
+                    cv.put(CameAndWentProvider.TAG, id);
+                    context.getContentResolver().update(CameAndWentProvider.URI_LOG_ENTRIES, cv, null, null);
+                    dismiss();
+                }
+            });
+            adb.setNegativeButton("No, don't do it", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dismiss();
+                }
+            });
+            adb.show();
+        }
         dismiss();
     }
 }

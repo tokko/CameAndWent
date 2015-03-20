@@ -17,11 +17,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
+
+import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -174,8 +177,14 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
         switch (v.getId()){
             case R.id.clock_button:
                 ToggleButton b = (ToggleButton) v;
-                if(b.isChecked())
-                    cm.clockIn();
+                if(b.isChecked()){
+                    SetTagFragment.newInstance().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            cm.clockIn(id);
+                        }
+                    }).show(getFragmentManager(), "a");
+                }
                 else
                     cm.clockOut();
                 break;
@@ -213,9 +222,14 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
     }
 
     @Override
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+    public void onTimeSet(TimePicker view, final int hourOfDay, final int minute) {
         if(!tb.isChecked()){
-            cm.clockIn(TimeConverter.hourAndMinuteToMillis(hourOfDay, minute));
+            SetTagFragment.newInstance().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    cm.clockIn(TimeConverter.hourAndMinuteToMillis(hourOfDay, minute), id);
+                }
+            }).show(getFragmentManager(), "e");
             tb.setChecked(true);
         }
         else{
