@@ -532,7 +532,7 @@ public class CameAndWentProvider extends ContentProvider {
                         migrateData(db);
                         break;
                     case 49:
-                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL");
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE +"(" + DATE + ") ON DELETE CASCADE");
                         break;
                 }
             }
