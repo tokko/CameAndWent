@@ -98,6 +98,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
                 googleApiClient.connect();
             }
         }
+        c.close();
     }
 
     @Override
