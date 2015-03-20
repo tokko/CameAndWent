@@ -31,7 +31,8 @@ public class GpsLocationReceiver extends BroadcastReceiver {
                     Notification.Builder nb = new Notification.Builder(context);
                     nb.setContentTitle("Clock in?");
                     nb.setContentText("GPS switched off, clock out?");
-
+                    nb.setSmallIcon(R.drawable.ic_launcher);
+                    nb.setAutoCancel(true);
                     RemoteViews rvs = new RemoteViews(context.getPackageName(), R.layout.notificationclockoutbutton);
                     rvs.setOnClickPendingIntent(R.id.clockoutnotificationbutton, PendingIntent.getBroadcast(context.getApplicationContext(), 1, new Intent(ACTION_CLOCKOUT), PendingIntent.FLAG_UPDATE_CURRENT));
                     nb.setContent(rvs);
@@ -41,6 +42,7 @@ public class GpsLocationReceiver extends BroadcastReceiver {
         }
         else if(intent.getAction().equals(ACTION_CLOCKOUT)){
             new ClockManager(context).clockOut();
+            ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(10);
         }
         else
             throw new IllegalStateException("Unknown action");
