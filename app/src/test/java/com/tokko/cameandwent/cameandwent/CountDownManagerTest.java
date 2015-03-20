@@ -177,7 +177,7 @@ public class CountDownManagerTest {
         Robolectric.getShadowApplication().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).edit().clear().apply();
 
         ClockManager cm = new ClockManager(context);
-        cm.clockIn();
+        cm.clockIn(1);
 
         NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -194,7 +194,7 @@ public class CountDownManagerTest {
     @Test
     public void whenClockOut_CountDownStops(){
         ClockManager cm = new ClockManager(context);
-        cm.clockIn();
+        cm.clockIn(1);
         cm.clockOut();
 
         NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
