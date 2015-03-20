@@ -34,6 +34,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     @InjectView(R.id.summaryFragmentTagSpinner) private Spinner tagSpinner;
     private boolean monthly;
     private CursorAdapter spinnerAdapter;
+    private String tag;
 
     public static SummaryFragment newInstance() {
         SummaryFragment fragment = new SummaryFragment();
@@ -131,17 +132,6 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
                     return cl;
                 default:
                     cl.setUri(CameAndWentProvider.URI_MONTHS);
-                    String selection = ""; //String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR);
-                    String[]selectionArgs = null; // = new String[]{String.valueOf(id)};
-                    if(args != null){
-                        String tag = args.getString(ARG_TAG, null);
-                        if(tag != null){
-                            selection += String.format("%s=?", CameAndWentProvider.TAG);
-                            selectionArgs = new String[]{tag};
-                        }
-                    }
-                    cl.setSelection(selection);
-                    cl.setSelectionArgs(selectionArgs);
                     return cl;
 
             }
@@ -175,12 +165,10 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         Cursor c = spinnerAdapter.getCursor();
         int pos = c.getPosition();
         c.moveToPosition(position);
-        String tag = c.getString(c.getColumnIndex(CameAndWentProvider.TAG));
+        tag = c.getString(c.getColumnIndex(CameAndWentProvider.TAG));
         c.moveToPosition(pos);
         getLoaderManager().destroyLoader(-1);
-        Bundle b = new Bundle();
-        b.putString(ARG_TAG, tag);
-        getLoaderManager().initLoader(-1, b, this);
+        getLoaderManager().initLoader(-1, null, this);
     }
 
     @Override
@@ -240,7 +228,13 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
             if(groupCursor.getCount() <= 0) return null;
-            return getActivity().getContentResolver().query(CameAndWentProvider.URI_MONTHLY_SUMMARY, null, String.format("%s=?", CameAndWentProvider.MONTH_OF_YEAR), new String[]{String.valueOf(groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)))}, null);
+            String selection = String.format("%s=?", CameAndWentProvider.MONTH_OF_YEAR);
+            String[]selectionArgs = new String[]{String.valueOf(groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)))};
+            if(tag != null){
+                selection += String.format(" AND %s=?", CameAndWentProvider.TAG);
+                selectionArgs = new String[]{selectionArgs[0], tag};
+            }
+            return getActivity().getContentResolver().query(CameAndWentProvider.URI_MONTHLY_SUMMARY, null, selection, selectionArgs, CameAndWentProvider.WEEK_OF_YEAR);
         }
 
         @Override

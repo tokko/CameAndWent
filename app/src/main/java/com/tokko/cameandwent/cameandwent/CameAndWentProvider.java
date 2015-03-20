@@ -449,7 +449,6 @@ public class CameAndWentProvider extends ContentProvider {
             db.execSQL(CREATE_LOG);
             db.execSQL(CREATE_TAGS);
             recreateViews(db);
-
         }
 
         @Override
