@@ -59,6 +59,8 @@ public class SetTagFragment extends RoboDialogFragment implements LoaderManager.
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getDialog().setTitle("Tag Everything");
+        getDialog().setCanceledOnTouchOutside(false);
+        getDialog().setCancelable(false);
         if(getArguments()!=null)
             getDialog().setTitle(getArguments().getString("EXTRA_TITLE"));
     }
