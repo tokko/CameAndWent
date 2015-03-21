@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
 import junit.framework.Assert;
 
 import org.joda.time.DateTime;

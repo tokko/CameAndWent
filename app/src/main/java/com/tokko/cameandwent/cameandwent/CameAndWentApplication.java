@@ -8,6 +8,10 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
+import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
+
 public class CameAndWentApplication extends Application {
 
     @Override

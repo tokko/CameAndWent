@@ -11,6 +11,10 @@ import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
 
+import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
 public class ClockManager {
     public static final String CLOCK_PREFS = "clock";
     public static final String PREF_CLOCKED_IN = "clockedIn";

@@ -18,7 +18,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
-import com.tokko.cameandwent.cameandwent.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 
 import roboguice.fragment.RoboDialogFragment;
 

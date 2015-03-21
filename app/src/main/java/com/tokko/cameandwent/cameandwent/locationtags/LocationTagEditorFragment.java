@@ -16,8 +16,8 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.tokko.cameandwent.cameandwent.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;

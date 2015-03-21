@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.settings;
 
 import android.app.Activity;
 import android.os.Bundle;

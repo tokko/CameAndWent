@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.log;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,7 +24,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
+import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -297,7 +301,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
             ((TextView)view.findViewById(R.id.log_details_isbreak)).setText((isbreak ? "Break" : "Work") +": " + duration);
             TextView tagView = (TextView)view.findViewById(R.id.log_details_tag);
-            tagView.setVisibility(tag != null?View.VISIBLE: View.GONE);
+            tagView.setVisibility(tag != null ? View.VISIBLE : View.GONE);
             tagView.setText("Tag: " + tag);
 
             View v1 = view.findViewById(R.id.logentry_deletebutton);

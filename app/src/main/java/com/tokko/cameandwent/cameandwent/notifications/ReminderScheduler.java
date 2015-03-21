@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.notifications;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -10,6 +10,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.preference.PreferenceManager;
+
+import com.tokko.cameandwent.cameandwent.MainActivity;
+import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;

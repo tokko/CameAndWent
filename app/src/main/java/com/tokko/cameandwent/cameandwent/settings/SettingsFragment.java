@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.settings;
 
 import android.app.backup.BackupManager;
 import android.content.Context;
@@ -6,6 +6,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+
+import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
+import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
 
 public class SettingsFragment extends PreferenceFragment {
     public SettingsFragment() {

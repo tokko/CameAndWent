@@ -61,7 +61,7 @@ category#android.intent.category.LAUNCHER
 ADDED from AndroidManifest.xml:23:17
 	android:name
 		ADDED from AndroidManifest.xml:23:27
-receiver#com.tokko.cameandwent.cameandwent.BootReceiver
+receiver#com.tokko.cameandwent.cameandwent.receivers.BootReceiver
 ADDED from AndroidManifest.xml:27:9
 	android:name
 		ADDED from AndroidManifest.xml:27:19
@@ -71,7 +71,7 @@ action#android.intent.action.BOOT_COMPLETED
 ADDED from AndroidManifest.xml:29:17
 	android:name
 		ADDED from AndroidManifest.xml:29:25
-receiver#com.tokko.cameandwent.cameandwent.GeofenceReceiver
+receiver#com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver
 ADDED from AndroidManifest.xml:33:9
 	android:enabled
 		ADDED from AndroidManifest.xml:34:13
@@ -91,7 +91,7 @@ action#com.tokko.cameandwent.DEACTIVATE_GEOFENCE
 ADDED from AndroidManifest.xml:38:17
 	android:name
 		ADDED from AndroidManifest.xml:38:25
-provider#com.tokko.cameandwent.cameandwent.CameAndWentProvider
+provider#com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider
 ADDED from AndroidManifest.xml:42:9
 	android:authorities
 		ADDED from AndroidManifest.xml:43:13

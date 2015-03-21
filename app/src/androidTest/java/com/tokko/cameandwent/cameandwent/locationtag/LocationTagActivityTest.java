@@ -2,7 +2,7 @@ package com.tokko.cameandwent.cameandwent.locationtag;
 
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.tokko.cameandwent.cameandwent.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.locationtags.LocationTagActivity;
 
 

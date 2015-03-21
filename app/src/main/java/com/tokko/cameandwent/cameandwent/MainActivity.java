@@ -12,7 +12,12 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.tokko.cameandwent.cameandwent.backup.BackupAgent;
 import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
+import com.tokko.cameandwent.cameandwent.log.LogEntryEditorFragment;
+import com.tokko.cameandwent.cameandwent.log.LogFragment;
+import com.tokko.cameandwent.cameandwent.settings.SettingsActivity;
+import com.tokko.cameandwent.cameandwent.summaries.SummaryFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

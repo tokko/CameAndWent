@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.providers;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -14,6 +14,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.tokko.cameandwent.cameandwent.BuildConfig;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
@@ -22,9 +25,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class CameAndWentProvider extends ContentProvider {
-    static final int WEEKS_BACK = 5;
+    public static final int WEEKS_BACK = 5;
 
-    static final String AUTHORITY = BuildConfig.APPLICATION_ID+".CameAndWentProvider";
+    public static final String AUTHORITY = BuildConfig.APPLICATION_ID+".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
 
     public static final String DATABASE_NAME = "cameandwent";
@@ -201,7 +204,7 @@ public class CameAndWentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
     }
 
-    static DateTime getSeedDateTime() {
+    public static DateTime getSeedDateTime() {
         DateTime dt = TimeConverter.getCurrentTime();
         dt = dt.withTime(0, 0, 0, 0);
         dt = dt.withFieldAdded(DurationFieldType.weeks(), -WEEKS_BACK+1);

@@ -10,7 +10,7 @@
         android:dependency="enabled"
         android:title="Location">
 
-        <com.tokko.cameandwent.cameandwent.LocationPreference
+        <com.tokko.cameandwent.cameandwent.settings.LocationPreference
             android:dependency="enabled"
             android:title="Manage locations"
             android:summary="Manages your locations" />
@@ -34,12 +34,12 @@
             android:defaultValue="false"
             android:dependency="breaks" />
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="average_break_start"
             android:title="Average lunch start"
             android:dependency="breaks_enabled" />
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="average_break_duration"
             android:title="Average lunch duration"
             android:dependency="breaks_enabled" />
@@ -113,7 +113,7 @@
             android:summaryOn="Weekly reminders are enabled"
             android:key="weekly_reminders"/>
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="weekly_reminder_time"
             android:dependency="weekly_reminders"
             android:title="Reminder time"/>
@@ -153,7 +153,7 @@
             android:summaryOn="Reminder will notify at this time on last work day of month"
             android:key="monthly_reminders"/>
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="monthly_reminder_time"
             android:dependency="monthly_reminders"
             android:title="Reminder time"/>
@@ -180,7 +180,7 @@
             android:title="Enabled"
             android:key="countdown"
             android:defaultValue="false"/>
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:title="Daily work duration"
             android:key="daily_work_duration"
             android:dependency="countdown" />

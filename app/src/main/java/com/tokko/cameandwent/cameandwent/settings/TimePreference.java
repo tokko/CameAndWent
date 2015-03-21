@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.settings;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
