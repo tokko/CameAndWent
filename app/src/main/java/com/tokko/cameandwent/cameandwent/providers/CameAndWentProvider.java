@@ -490,53 +490,61 @@ public class CameAndWentProvider extends ContentProvider {
             if(BuildConfig.DEBUG) return;
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
             Cursor c = null;
-            for(int version = oldVersion; version <= newVersion; version++){
-                switch (version){
-                    case 16:
-                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + DATE + " INTEGER NOT NULL DEFAULT 0");
-                        break;
-                    case 19:
-                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + ISBREAK + " INTEGER NOT NULL DEFAULT 0");
-                        break;
-                    case 32:
-                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
-                    case 33:
-                        c = db.rawQuery("SELECT * FROM cameandwent", null);
-                        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
-                            ContentValues cv = new ContentValues();
-                            cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getLong(c.getColumnIndex(CAME))));
-                            db.update("cameandwent", cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
-                        }
-                        c.close();
-                        break;
-                    case 34:
-                        db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
-                    case 36:
-                    case 37:
-                    case 35:
-                        c = db.rawQuery("SELECT * FROM cameandwent", null);
-                        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
-                            ContentValues cv = new ContentValues();
-                            cv.put(MONTH_OF_YEAR, TimeConverter.extractMonth(c.getLong(c.getColumnIndex(CAME))));
-                            db.update(TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
-                        }
-                        c.close();
-                        break;
-                    case 38:
-                        db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATIONS);
-                        break;
-                    case 45:
-                        db.execSQL(CREATE_LOG);
-                        db.execSQL(CREATE_TIME_TABLE);
-                        //recreateViews(db);
-                        migrateData(db);
-                        break;
-                    case 49:
-                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE + "(" + DATE + ") ON DELETE CASCADE");
-                        break;
+            db.beginTransaction();
+            try {
+                for (int version = oldVersion; version <= newVersion; version++) {
+                    switch (version) {
+                        case 16:
+                            db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + DATE + " INTEGER NOT NULL DEFAULT 0");
+                            break;
+                        case 19:
+                            db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + ISBREAK + " INTEGER NOT NULL DEFAULT 0");
+                            break;
+                        case 32:
+                            db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                        case 33:
+                            c = db.rawQuery("SELECT * FROM cameandwent", null);
+                            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                                ContentValues cv = new ContentValues();
+                                cv.put(WEEK_OF_YEAR, TimeConverter.extractWeek(c.getLong(c.getColumnIndex(CAME))));
+                                db.update("cameandwent", cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
+                            }
+                            c.close();
+                            break;
+                        case 34:
+                            db.execSQL("ALTER TABLE cameandwent ADD COLUMN " + MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0");
+                        case 36:
+                        case 37:
+                        case 35:
+                            c = db.rawQuery("SELECT * FROM cameandwent", null);
+                            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                                ContentValues cv = new ContentValues();
+                                cv.put(MONTH_OF_YEAR, TimeConverter.extractMonth(c.getLong(c.getColumnIndex(CAME))));
+                                db.update(TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
+                            }
+                            c.close();
+                            break;
+                        case 38:
+                            db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATIONS);
+                            break;
+                        case 45:
+                            db.execSQL(CREATE_LOG);
+                            db.execSQL(CREATE_TIME_TABLE);
+                            //recreateViews(db);
+                            migrateData(db);
+                            break;
+                        case 49:
+                            db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE + "(" + DATE + ") ON DELETE CASCADE");
+                            break;
+                    }
                 }
+                if (c != null) c.close();
+            }catch (Exception e){
+                db.endTransaction();
+                throw new IllegalStateException("SQL database not upgraded properly");
             }
-            if(c != null) c.close();
+            db.setTransactionSuccessful();
+            db.endTransaction();
             onCreate(db);
         }
     }
