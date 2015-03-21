@@ -4,7 +4,7 @@
     <CheckBoxPreference
         android:key="enabled"
         android:title="Enabled"
-        android:defaultValue="true" />
+        android:defaultValue="false" />
 
     <PreferenceCategory
         android:dependency="enabled"
@@ -52,7 +52,7 @@
         android:defaultValue="true" >
         
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="Sound mode"
             android:dependency="audio"
             android:summaryOff="Sound mode will be unaltered"
@@ -84,7 +84,7 @@
         <CheckBoxPreference
             android:key="notifications_enabled"
             android:title="Notify"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
         <CheckBoxPreference
             android:dependency="notifications_enabled"
             android:key="notifications_sound"
@@ -107,7 +107,7 @@
 
         <CheckBoxPreference
             android:dependency="weekly_reminders_container"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="Weekly Reminder"
             android:summaryOff="Weekly reminders are disabled"
             android:summaryOn="Weekly reminders are enabled"
@@ -147,7 +147,7 @@
 
         <CheckBoxPreference
             android:dependency="monthly_reminders_container"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="Monthly Reminder"
             android:summaryOff="monthly reminders are disabled"
             android:summaryOn="Reminder will notify at this time on last work day of month"
