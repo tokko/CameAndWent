@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
-import android.widget.RemoteViews;
+import android.support.v4.app.NotificationCompat;
 
 import com.tokko.cameandwent.cameandwent.ClockManager;
 import com.tokko.cameandwent.cameandwent.R;
@@ -30,15 +30,15 @@ public class GpsLocationReceiver extends BroadcastReceiver {
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if(!statusOfGPS){
                 if(clockedIn){
-                    Notification.Builder nb = new Notification.Builder(context);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), 1, new Intent(ACTION_CLOCKOUT), PendingIntent.FLAG_UPDATE_CURRENT);
+                    NotificationCompat.Builder nb = new NotificationCompat.Builder(context);
                     nb.setContentTitle("Clock in?");
                     nb.setContentText("GPS switched off, clock out?");
                     nb.setSmallIcon(R.drawable.ic_launcher);
                     nb.setAutoCancel(true);
-                    RemoteViews rvs = new RemoteViews(context.getPackageName(), R.layout.notificationclockoutbutton);
-                    rvs.setOnClickPendingIntent(R.id.clockoutnotificationbutton, PendingIntent.getBroadcast(context.getApplicationContext(), 1, new Intent(ACTION_CLOCKOUT), PendingIntent.FLAG_UPDATE_CURRENT));
-                    nb.setContent(rvs);
-                    ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(10, nb.build());
+                    nb.addAction(R.drawable.ic_launcher, "Clockout", pendingIntent);
+                    Notification notification = nb.build();
+                    ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(10, notification);
                 }
             }
         }
