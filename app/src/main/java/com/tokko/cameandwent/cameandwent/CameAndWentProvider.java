@@ -18,6 +18,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class CameAndWentProvider extends ContentProvider {
@@ -296,22 +297,30 @@ public class CameAndWentProvider extends ContentProvider {
                     sdb.insert(TABLE_LOG_NAME, null, values);
                 }
                 if(id > -1) {
-                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
+                   notifyAllUris();
                 }
                 return ContentUris.withAppendedId(uri, id);
             case KEY_TAGS:
                 id = sdb.insert(TABLE_TAGS_NAME, null, values);
                 if(id > -1){
-                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_TAGS, null);
+                    notifyAllUris();
                 }
                 return ContentUris.withAppendedId(uri, id);
             default:
                 throw new IllegalArgumentException("Unknown URI");
+        }
+    }
+
+    private void notifyAllUris() {
+        Field[] fields = this.getClass().getFields();
+        try {
+            for (Field field : fields) {
+                if (field.getName().startsWith("URI_")) {
+                    getContext().getContentResolver().notifyChange((Uri) field.get(this), null);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
@@ -331,20 +340,15 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_LOG_ENTRIES:
                 deleted = sdb.delete(TABLE_LOG_NAME, selection, selectionArgs);
                 if(deleted > 0){
-                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
+                    notifyAllUris();
+
                 }
                 return deleted;
             case KEY_TAGS:
                 deleted = sdb.delete(TABLE_TAGS_NAME, selection, selectionArgs);
                 if(deleted > 0){
-                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
-                    getContext().getContentResolver().notifyChange(URI_TAGS, null);
+                    notifyAllUris();
+
                 }
                 return deleted;
             default:
@@ -360,10 +364,8 @@ public class CameAndWentProvider extends ContentProvider {
             case KEY_WENT:
                  updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
-                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
+                    notifyAllUris();
+
                 }
                 return updated;
             case KEY_LOG_ENTRIES:
@@ -384,20 +386,15 @@ public class CameAndWentProvider extends ContentProvider {
                     sdb.insert(TIME_TABLE, null, timeTableValues);
                 updated = sdb.update(TABLE_LOG_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
-                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
+                    notifyAllUris();
+
                 }
                 return updated;
             case KEY_TAGS:
                 updated = sdb.update(TABLE_TAGS_NAME, values, selection, selectionArgs);
                 if(updated > 0) {
-                    getContext().getContentResolver().notifyChange(URI_LOG_ENTRIES, null);
-                    getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
-                    getContext().getContentResolver().notifyChange(URI_WEEKS, null);
-                    getContext().getContentResolver().notifyChange(URI_MONTHS, null);
-                    getContext().getContentResolver().notifyChange(URI_TAGS, null);
+                    notifyAllUris();
+
                 }
                 return updated;
             default:
@@ -532,7 +529,7 @@ public class CameAndWentProvider extends ContentProvider {
                         migrateData(db);
                         break;
                     case 49:
-                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE +"(" + DATE + ") ON DELETE CASCADE");
+                        db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE + "(" + DATE + ") ON DELETE CASCADE");
                         break;
                 }
             }
