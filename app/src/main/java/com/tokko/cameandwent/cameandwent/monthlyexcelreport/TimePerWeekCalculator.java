@@ -1,6 +1,8 @@
 package com.tokko.cameandwent.cameandwent.monthlyexcelreport;
 
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
 
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
@@ -20,19 +22,25 @@ import jxl.write.WriteException;
 
 public class TimePerWeekCalculator {
 
-    public static WritableWorkbook calculateData(HashMap<String, Integer> data) throws IOException, WriteException {
-        WritableWorkbook workbook = Workbook.createWorkbook(new File("output.xls"));
-        WritableSheet sheet = workbook.createSheet("First Sheet", 0);
-        int col = 0;
-        int row = 0;
-        for(String s : data.keySet()){
-            Label label = new Label(col, row, s);
-            sheet.addCell(label);
+    public static Uri BuildExcel(HashMap<String, Integer> data, String title) throws IOException, WriteException {
+        final File file = new File(Environment.getExternalStorageDirectory(), title);
+        BuildExcel(data, file);
+        return Uri.fromFile(file);
+    }
+    public static WritableWorkbook BuildExcel(HashMap<String, Integer> data, File file) throws IOException, WriteException {
+            WritableWorkbook workbook = Workbook.createWorkbook(file);
+            WritableSheet sheet = workbook.createSheet("First Sheet", 0);
+            int col = 0;
+            int row = 0;
+            for(String s : data.keySet()){
+                Label label = new Label(col, row, s);
+                sheet.addCell(label);
 
-            Number number = new Number(col++, row+1, data.get(s));
-            sheet.addCell(number);
-        }
-        return workbook;
+                Number number = new Number(col++, row+1, data.get(s));
+                sheet.addCell(number);
+            }
+            workbook.write();
+            return workbook;
     }
 
     public static String CreateTitle(long date, String name){
