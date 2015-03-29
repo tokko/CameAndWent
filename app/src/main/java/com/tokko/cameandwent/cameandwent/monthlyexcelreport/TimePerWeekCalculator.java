@@ -7,6 +7,10 @@ import android.os.Environment;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.DurationFieldType;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -43,6 +47,11 @@ public class TimePerWeekCalculator {
             return workbook;
     }
 
+    public static boolean isLastWorkDayOfMonth(DateTime dt){
+        while((dt = dt.withFieldAdded(DurationFieldType.days(), 1)).getDayOfMonth() != 1)
+            if(dt.getDayOfWeek() != DateTimeConstants.SATURDAY && dt.getDayOfWeek() != DateTimeConstants.SUNDAY) return false;
+        return true;
+    }
 
     public static String CreateTitle(long date, String name){
         return String.format("Konsultrapport%s-%s.xls", new SimpleDateFormat("yyyyMMdd").format(new Date(date)), name);

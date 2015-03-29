@@ -2,8 +2,10 @@ package com.tokko.cameandwent.cameandwent;
 
 import com.tokko.cameandwent.cameandwent.monthlyexcelreport.TimePerWeekCalculator;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import java.io.File;
@@ -36,6 +38,19 @@ public class TimePerWeekCalculatorTests extends TestCase {
             }
         } catch (IOException | WriteException ignored) {
         }
+    }
+
+    @Test
+    public void isLastWorkDayOfMonth(){
+        DateTime dt = new DateTime().withDate(2015, 2, 27);
+        Assert.assertTrue(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
+
+        dt = new DateTime().withDate(2015, 2, 26);
+        Assert.assertFalse(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
+        dt = new DateTime().withDate(2015, 2, 28);
+        Assert.assertFalse(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
+        dt = new DateTime().withDate(2015, 2, 25);
+        Assert.assertFalse(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
 
     }
 }
