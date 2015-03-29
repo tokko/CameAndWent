@@ -43,6 +43,7 @@ public class TimePerWeekCalculator {
             return workbook;
     }
 
+
     public static String CreateTitle(long date, String name){
         return String.format("Konsultrapport%s-%s.xls", new SimpleDateFormat("yyyyMMdd").format(new Date(date)), name);
     }
