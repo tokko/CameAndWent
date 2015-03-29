@@ -49,6 +49,10 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String TAG = "tag";
     public static final String LONGITUDE = "longitude";
     public static final String LATITUDE = "latitude";
+    public static final String RECIPIENT = "recipient";
+    public static final String NAME = "name";
+    public static final String REMINDER = "reminder";
+    public static final String TITLE_PREFIX = "titleprefix";
 
     public static final String DATE = "date";
     public static final String DURATION = "duration";
@@ -407,7 +411,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 60;
+        private static final int DATABASE_VERSION = 61;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
@@ -427,6 +431,10 @@ public class CameAndWentProvider extends ContentProvider {
         private static final String CREATE_TAGS = "CREATE TABLE IF NOT EXISTS " + TABLE_TAGS_NAME + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 TAG + " TEXT UNIQUE ON CONFLICT IGNORE, " +
+                RECIPIENT + " TEXT NOT NULL DEFAULT 'placeholder@placeholder.placeholder', " +
+                NAME + " TEXT NOT NULL DEFAULT 'placeholder', " +
+                REMINDER + " INTEGER NOT NULL DEFAULT 0," +
+                TITLE_PREFIX + " TEXT NOT NULL DEFAULT 'placeholder', " +
                 LATITUDE + " INTEGER NOT NULL DEFAULT -1, " +
                 LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
 
@@ -535,6 +543,12 @@ public class CameAndWentProvider extends ContentProvider {
                             break;
                         case 49:
                             db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE + "(" + DATE + ") ON DELETE CASCADE");
+                            break;
+                        case 60:
+                            db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + RECIPIENT + " TEXT NOT NULL DEFAULT 'placeholder@placeholder.placeholder'");
+                            db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + NAME + " TEXT NOT NULL DEFAULT 'placeholder' ");
+                            db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + REMINDER + " INTEGER NOT NULL DEFAULT 0 ");
+                            db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + TITLE_PREFIX + " TEXT NOT NULL DEFAULT 'placeholder' ");
                             break;
                     }
                 }

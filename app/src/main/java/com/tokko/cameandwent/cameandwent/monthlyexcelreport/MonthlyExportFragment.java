@@ -12,8 +12,6 @@ import android.webkit.MimeTypeMap;
 
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
-import org.apache.maven.artifact.ant.shaded.FileUtils;
-
 import java.io.File;
 import java.util.List;
 
@@ -67,7 +65,8 @@ public class MonthlyExportFragment extends RoboFragment implements LoaderManager
 
     public String getMimeType(String filename)
     {
-        String extension = FileUtils.getExtension(filename);
+        String[] s = filename.split(".");
+        String extension = s[s.length-1];
         if (extension.length() > 0)
         {
             String webkitMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.substring(1));

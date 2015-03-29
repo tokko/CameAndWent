@@ -10,6 +10,7 @@ import android.net.Uri;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.joda.time.DateTime;
@@ -311,7 +312,17 @@ public class CameAndWentProviderTests extends TestCase{
         assertEquals(3, c.getCount());
         c.close();
     }
-	
+
+    @Test
+    public void monthlyExportFields_hasDefaultValues(){
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, null, null, null);
+        for (Assert.assertTrue(c.moveToFirst()); !c.isAfterLast(); c.moveToNext()){
+            Assert.assertEquals("placeholder", c.getString(c.getColumnIndex(CameAndWentProvider.NAME)));
+            Assert.assertEquals("placeholder@placeholder.placeholder", c.getString(c.getColumnIndex(CameAndWentProvider.RECIPIENT)));
+            Assert.assertEquals(0, c.getInt(c.getColumnIndex(CameAndWentProvider.REMINDER)));
+        }
+    }
+
 	@Test
 	public void snapup_durationsAreProperlySnappedUp(){
 		ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext()).edit().putBoolean("use_snapup", true).apply();
@@ -330,7 +341,7 @@ public class CameAndWentProviderTests extends TestCase{
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, null, null, null);
         assertNotNull(c);
         assertEquals(5, c.getCount());
-        assertEquals(4, c.getColumnNames().length);
+        assertEquals(8, c.getColumnNames().length);
         assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
@@ -350,7 +361,7 @@ public class CameAndWentProviderTests extends TestCase{
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.TAG), new String[]{"TAG2"}, null);
         assertNotNull(c);
         assertEquals(1, c.getCount());
-        assertEquals(4, c.getColumnNames().length);
+        assertEquals(8, c.getColumnNames().length);
         assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
