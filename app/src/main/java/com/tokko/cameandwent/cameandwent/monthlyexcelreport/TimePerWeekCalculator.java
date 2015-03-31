@@ -48,9 +48,10 @@ public class TimePerWeekCalculator {
     }
 
     public static boolean isLastWorkDayOfMonth(DateTime dt){
-        while((dt = dt.withFieldAdded(DurationFieldType.days(), 1)).getDayOfMonth() != 1)
-            if(dt.getDayOfWeek() != DateTimeConstants.SATURDAY && dt.getDayOfWeek() != DateTimeConstants.SUNDAY) return false;
-        return true;
+        int day = dt.getDayOfMonth();
+        dt = dt.dayOfMonth().withMaximumValue();
+        while(dt.getDayOfWeek() == DateTimeConstants.SUNDAY || dt.getDayOfWeek() == DateTimeConstants.SATURDAY) dt = dt.withFieldAdded(DurationFieldType.days(), -1);
+        return day == dt.getDayOfMonth();
     }
 
     public static String CreateTitle(long date, String name){

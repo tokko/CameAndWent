@@ -41,7 +41,7 @@ public class TimePerWeekCalculatorTests extends TestCase {
     }
 
     @Test
-    public void isLastWorkDayOfMonth(){
+    public void testIsLastWorkDayOfMonth(){
         DateTime dt = new DateTime().withDate(2015, 2, 27);
         Assert.assertTrue(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
 
@@ -50,6 +50,10 @@ public class TimePerWeekCalculatorTests extends TestCase {
         dt = new DateTime().withDate(2015, 2, 28);
         Assert.assertFalse(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
         dt = new DateTime().withDate(2015, 2, 25);
+        Assert.assertFalse(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
+        dt = new DateTime().withDate(2015, 3, 1);
+        Assert.assertFalse(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
+        dt = new DateTime().withDate(2015, 3, 2);
         Assert.assertFalse(TimePerWeekCalculator.isLastWorkDayOfMonth(dt));
 
     }

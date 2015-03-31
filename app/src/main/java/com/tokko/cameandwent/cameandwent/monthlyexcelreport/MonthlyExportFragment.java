@@ -1,19 +1,11 @@
 package com.tokko.cameandwent.cameandwent.monthlyexcelreport;
 
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.webkit.MimeTypeMap;
 
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
-
-import java.io.File;
-import java.util.List;
 
 import roboguice.fragment.RoboFragment;
 
@@ -50,31 +42,6 @@ public class MonthlyExportFragment extends RoboFragment implements LoaderManager
         outState.putInt(EXTRA_MONTH, month);
     }
 
-    public Intent getDefaultViewIntent(Uri uri)
-    {
-        PackageManager pm = getActivity().getPackageManager();
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        // Let's probe the intent exactly in the same way as the VIEW action
-        String name=(new File(uri.getPath())).getName();
-        intent.setDataAndType(uri, this.getMimeType(name));
-        final List<ResolveInfo> lri = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        if(lri.size() > 0)
-            return intent;
-        return null;
-    }
-
-    public String getMimeType(String filename)
-    {
-        String[] s = filename.split(".");
-        String extension = s[s.length-1];
-        if (extension.length() > 0)
-        {
-            String webkitMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.substring(1));
-            if (webkitMimeType != null)
-                return webkitMimeType;
-        }
-        return "*/*";
-    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
