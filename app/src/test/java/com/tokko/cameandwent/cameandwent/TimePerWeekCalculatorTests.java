@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -28,7 +28,9 @@ public class TimePerWeekCalculatorTests extends TestCase {
         data.put("4", 4);
         data.put("5", 5);
         try {
-            WritableWorkbook book = TimePerWeekCalculator.BuildExcel(data, new File(""));
+            ByteArrayOutputStream boos = new ByteArrayOutputStream();
+            WritableWorkbook book = TimePerWeekCalculator.BuildExcel(data, boos);
+           // Workbook workbook = Workbook.getWorkbook(new ByteArrayInputStream(boos.toByteArray()));
             Sheet sheet = book.getSheet(0);
             int col = 0;
             for(String s : data.keySet()){
@@ -36,7 +38,9 @@ public class TimePerWeekCalculatorTests extends TestCase {
                 assertEquals(s, column[0].getContents());
                 assertEquals(data.get(s), Integer.valueOf(column[1].getContents()));
             }
-        } catch (IOException | WriteException ignored) {
+        } catch (IOException | WriteException e) {
+            e.printStackTrace();
+            fail();
         }
     }
 

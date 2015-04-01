@@ -16,6 +16,7 @@ import com.tokko.cameandwent.cameandwent.backup.BackupAgent;
 import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
 import com.tokko.cameandwent.cameandwent.log.LogEntryEditorFragment;
 import com.tokko.cameandwent.cameandwent.log.LogFragment;
+import com.tokko.cameandwent.cameandwent.monthlyexcelreport.TimePerWeekCalculator;
 import com.tokko.cameandwent.cameandwent.settings.SettingsActivity;
 import com.tokko.cameandwent.cameandwent.summaries.SummaryFragment;
 
@@ -137,6 +138,10 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
         }
         if(id == R.id.tag_everything){
             SetTagFragment.newInstance().show(getSupportFragmentManager(), "t");
+            return true;
+        }
+        if(id == R.id.preview){
+            sendBroadcast(new Intent(TimePerWeekCalculator.ACTION_PREVIEW).putExtra(TimePerWeekCalculator.EXTRA_TAG, 2));
             return true;
         }
         return super.onOptionsItemSelected(item);

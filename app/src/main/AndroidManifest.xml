@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".CameAndWentApplication"
@@ -40,6 +41,11 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".monthlyexcelreport.TimePerWeekCalculator" android:enabled="true">
+            <intent-filter>
+                <action android:name="ACTION_PREVIEW" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".receivers.GeofenceReceiver"
             android:enabled="true" >

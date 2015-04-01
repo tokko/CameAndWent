@@ -13,4 +13,7 @@
         android:title="Restore data"/>
     <item android:id="@+id/tag_everything"
         android:title="Tag everything"/>
+    <item android:id="@+id/preview"
+        android:title="Preview"
+        android:showAsAction="always"/>
 </menu>
