@@ -32,6 +32,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".automaticbreaks.AutomaticBreakManager"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="ACTION_AUTOMATIC_BREAK"/>
+            </intent-filter>
+        </receiver>
         <receiver android:name=".notifications.CountDownManager" >
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_OFF" />

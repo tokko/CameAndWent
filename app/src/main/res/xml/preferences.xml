@@ -28,7 +28,7 @@
         android:key="breaks"
         android:dependency="enabled">
 
-        <SwitchPreference
+        <CheckBoxPreference
             android:key="breaks_enabled"
             android:title="Automatic lunch"
             android:defaultValue="false"

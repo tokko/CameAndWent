@@ -110,14 +110,16 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String MIGRATE_METHOD = "migrate";
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
-        if(method.equals(SEED_METHOD)){
-            seed();
-        }
-        else if(method.equals(RECREATE_METHOD)){
-            recreateDurationsView();
-        }
-        else if(method.equals(MIGRATE_METHOD)){
-            migrateData(db.getWritableDatabase());
+        switch (method) {
+            case SEED_METHOD:
+                seed();
+                break;
+            case RECREATE_METHOD:
+                recreateDurationsView();
+                break;
+            case MIGRATE_METHOD:
+                migrateData(db.getWritableDatabase());
+                break;
         }
         return super.call(method, arg, extras);
     }
@@ -285,26 +287,18 @@ public class CameAndWentProvider extends ContentProvider {
                 sdb.insert(TIME_TABLE, null, timeTableValues);
                 values.put(DATE, date);
                 long id = sdb.insert(TABLE_LOG_NAME, null, values);
-                long tagId = values.containsKey(TAG) ? values.getAsLong(TAG) : -1;
-                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-                int numberOfEventsToday = query(URI_LOG_ENTRIES, null, String.format("%s=?", DATE), new String[]{String.valueOf(date)}, null, null).getCount();
-                boolean breaksEnabled = sp.getBoolean("breaks_enabled", false);
-                if(breaksEnabled && numberOfEventsToday == 1){
-                    values.clear();
-                    values.put(CAME, TimeConverter.hourAndMinuteToMillis(came, sp.getString("average_break_start", "0:0")));
-                    values.put(WENT, values.getAsLong(CAME) + TimeConverter.timeIntervalAsLong(sp.getString("average_break_duration", "0:0")));
-                    values.put(DATE, date);
-                    values.put(ISBREAK, 1);
-                    if(tagId > -1)
-                        values.put(TAG, tagId);
-                    sdb.insert(TABLE_LOG_NAME, null, values);
-                }
                 if(id > -1) {
                    notifyAllUris();
                 }
                 return ContentUris.withAppendedId(uri, id);
             case KEY_TAGS:
                 id = sdb.insert(TABLE_TAGS_NAME, null, values);
+                if(id > -1){
+                    notifyAllUris();
+                }
+                return ContentUris.withAppendedId(uri, id);
+            case KEY_LOG_ENTRIES:
+                id = sdb.insert(TABLE_LOG_NAME, null, values);
                 if(id > -1){
                     notifyAllUris();
                 }

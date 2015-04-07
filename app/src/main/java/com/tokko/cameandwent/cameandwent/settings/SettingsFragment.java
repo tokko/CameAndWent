@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 
 import com.tokko.cameandwent.cameandwent.ClockManager;
 import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
@@ -34,6 +35,7 @@ public class SettingsFragment extends PreferenceFragment {
             new CountDownManager(getActivity()).stopCountDown();
         getActivity().getContentResolver().call(CameAndWentProvider.URI_MONTHS, CameAndWentProvider.RECREATE_METHOD, null, null);
         new BackupManager(getActivity()).dataChanged();
+        AutomaticBreakManager.scheduleAutomaticBreaks(getActivity());
         super.onStop();
     }
 }
