@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.MainActivity;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
@@ -82,6 +83,7 @@ public class CountDownManager extends BroadcastReceiver{
 
     private void updateNotification(Context context){
         if(!context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false)) return;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         if(!defaultPreferences.getBoolean("countdown", false)){
             getNotificationManager(context).cancel(NOTIFICATION_ID);
@@ -91,6 +93,7 @@ public class CountDownManager extends BroadcastReceiver{
         notificationBuilder.setContentTitle("Workday countdown");
         notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
         notificationBuilder.setOngoing(true);
+        notificationBuilder.setContentIntent(pendingIntent);
         int duration = (int) TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
         int currentDuration = (int) getCurrentDuration(context);
         int remainder = duration - currentDuration;
