@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,7 +22,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowAlarmManager;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowPreferenceManager;
@@ -31,25 +34,26 @@ import java.util.List;
 @Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class AutomaticBreakManagerTests {
+    private Context context;
 
     @Before
     public void setup(){
-        Context context = RuntimeEnvironment.application.getApplicationContext();
+        context = RuntimeEnvironment.application.getApplicationContext();
         SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().clear()
                 .putBoolean("breaks_enabled", true)
                 .putBoolean("enabled", true)
-                .putString("average_break_start", "8:0")
+                .putString("average_break_start", "12:0")
                 .putString("average_break_duration", "0:30")
                 .apply();
 
-        final DateTime currentTime = TimeConverter.getCurrentTime().withDate(2010, 2, 4).withTime(8, 0, 0, 0);
+        TimeConverter.CURRENT_TIME = TimeConverter.getCurrentTime().withDate(2010, 2, 4).withTime(8, 0, 0, 0).getMillis();
         ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, new CameAndWentProvider() {
 
             @Override
             public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
                 MatrixCursor mc = new MatrixCursor(new String[]{ID, CAME, WENT, ISBREAK, DATE});
-                mc.addRow(new Object[]{1, currentTime.getMillis(), 0, 0, TimeConverter.extractDate(currentTime.getMillis())});
+                mc.addRow(new Object[]{1, TimeConverter.CURRENT_TIME, 0, 0, TimeConverter.extractDate(TimeConverter.CURRENT_TIME)});
                 return mc;
             }
 
@@ -87,5 +91,14 @@ public class AutomaticBreakManagerTests {
         boolean firstAss = shadowApplication.hasReceiverForIntent(intent);
         List<BroadcastReceiver> receiversForIntent = shadowApplication.getReceiversForIntent(intent);
         Assert.assertTrue(firstAss && 1 == receiversForIntent.size());
+    }
+
+    @Test
+    public void alarmIsScheduledAtCorrectTime(){
+        AutomaticBreakManager.scheduleAutomaticBreaks(context);
+        AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
+        ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
+        Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis(), nextScheduledAlarm.triggerAtTime);
     }
 }
