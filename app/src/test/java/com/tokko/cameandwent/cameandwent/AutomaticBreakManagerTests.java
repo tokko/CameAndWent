@@ -112,6 +112,7 @@ public class AutomaticBreakManagerTests {
         ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertEquals(DateTimeConstants.MILLIS_PER_DAY, nextScheduledAlarm.interval);
     }
+
     @Test
     public void alarmIsNotScheduledWhenDisabled(){
         sharedPreferences.edit().remove("breaks_enabled").apply();
@@ -120,5 +121,19 @@ public class AutomaticBreakManagerTests {
         ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
         List<ShadowAlarmManager.ScheduledAlarm> nextScheduledAlarm = shadowAlarmManager.getScheduledAlarms();
         Assert.assertTrue(nextScheduledAlarm.isEmpty());
+    }
+
+    @Test
+    public void alarmIsCanceledWhenDisabled(){
+        AutomaticBreakManager.scheduleAutomaticBreaks(context);
+        AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
+        ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
+        Assert.assertNotNull(nextScheduledAlarm);
+        sharedPreferences.edit().remove("breaks_enabled").apply();
+
+        AutomaticBreakManager.scheduleAutomaticBreaks(context);
+        nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
+        Assert.assertNull(nextScheduledAlarm);
     }
 }
