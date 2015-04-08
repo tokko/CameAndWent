@@ -66,7 +66,22 @@ public class AutomaticBreakManagerTests {
     }
 
     @Test
-    public void receiverForAutomaticBreakReistered(){
+    public void receiverRegistered(){
+        List<ShadowApplication.Wrapper> registeredReceivers = ShadowApplication.getInstance().getRegisteredReceivers();
+
+        Assert.assertFalse(registeredReceivers.isEmpty());
+
+        boolean receiverFound = false;
+        for (ShadowApplication.Wrapper wrapper : registeredReceivers) {
+            if (!receiverFound)
+                receiverFound = AutomaticBreakManager.class.getSimpleName().equals(
+                        wrapper.broadcastReceiver.getClass().getSimpleName());
+        }
+        Assert.assertTrue(receiverFound);
+    }
+
+    @Test
+    public void receiverForAutomaticBreakRegistered(){
         ShadowApplication shadowApplication = ShadowApplication.getInstance();
         Intent intent = new Intent(AutomaticBreakManager.ACTION_AUTOMATIC_BREAK);
         boolean firstAss = shadowApplication.hasReceiverForIntent(intent);
