@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -38,7 +39,7 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 import java.util.List;
 
 //@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
-@Config(constants = BuildConfig.class, manifest = "app/src/main/AndroidManifest.xml")
+@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class CountDownManagerTest {
     private final DateTime currentTime = new DateTime().withTime(13, 0, 0, 0).withDate(2010, 4, 20);
@@ -57,8 +58,9 @@ public class CountDownManagerTest {
                 .putBoolean("enabled", true)
                 .putString("daily_work_duration", "8:0")
                 .apply();
+        String auth = CameAndWentProvider.AUTHORITY;
+        ShadowContentResolver.registerProvider(auth, new CameAndWentProvider(){
 
-        ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, new CameAndWentProvider(){
             @Override
             public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
                 MatrixCursor mc = new MatrixCursor(new String[]{ID, CAME, WENT, ISBREAK, DATE});

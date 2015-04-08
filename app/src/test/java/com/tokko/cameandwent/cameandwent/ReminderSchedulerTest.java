@@ -37,7 +37,7 @@ import roboguice.RoboGuice;
 
 
 //@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
-@Config(constants = BuildConfig.class)
+@Config(emulateSdk = 21, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class ReminderSchedulerTest {
     private DateTime weeklyAlarmTime;
