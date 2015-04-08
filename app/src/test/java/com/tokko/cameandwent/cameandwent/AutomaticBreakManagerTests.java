@@ -55,13 +55,18 @@ public class AutomaticBreakManagerTests {
 
             @Override
             public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-                MatrixCursor mc = new MatrixCursor(new String[]{ID, CAME, WENT, ISBREAK, DATE});
-                mc.addRow(new Object[]{1, TimeConverter.CURRENT_TIME, 0, 0, TimeConverter.extractDate(TimeConverter.CURRENT_TIME)});
+                MatrixCursor mc = new MatrixCursor(new String[]{ID, CAME, WENT, ISBREAK, DATE, TAG});
+                mc.addRow(new Object[]{1, TimeConverter.CURRENT_TIME, 0, 0, TimeConverter.extractDate(TimeConverter.CURRENT_TIME), 1});
                 return mc;
             }
 
             @Override
             public Uri insert(Uri uri, ContentValues values) {
+                Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis(), values.getAsLong(CAME).longValue());
+                Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 30, 0, 0).getMillis(), values.getAsLong(WENT).longValue());
+                Assert.assertEquals(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()), values.getAsLong(DATE).longValue());
+                Assert.assertEquals(1, values.getAsInteger(ISBREAK).intValue());
+                Assert.assertEquals(1, values.getAsInteger(TAG).intValue());
                 return uri;
             }
 
@@ -146,5 +151,10 @@ public class AutomaticBreakManagerTests {
         AutomaticBreakManager.scheduleAutomaticBreaks(context);
         nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertNull(nextScheduledAlarm);
+    }
+
+    @Test
+    public void breakIsInserted(){
+        new AutomaticBreakManager().onReceive(context, null);
     }
 }
