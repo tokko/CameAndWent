@@ -18,6 +18,7 @@ import junit.framework.Assert;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.DurationFieldType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,6 +103,16 @@ public class AutomaticBreakManagerTests {
         ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
         ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis(), nextScheduledAlarm.triggerAtTime);
+    }
+
+    @Test
+    public void alarmIsScheduledAtCorrectTime_WhenCurrentTimeIsAfterBreakTime(){
+        TimeConverter.CURRENT_TIME = TimeConverter.getCurrentTime().withTime(13, 0 ,0 ,0).getMillis();
+        AutomaticBreakManager.scheduleAutomaticBreaks(context);
+        AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
+        ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
+        Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).withFieldAdded(DurationFieldType.days(), 1).getMillis(), nextScheduledAlarm.triggerAtTime);
     }
 
     @Test
