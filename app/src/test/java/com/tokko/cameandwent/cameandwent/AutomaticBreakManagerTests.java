@@ -157,4 +157,24 @@ public class AutomaticBreakManagerTests {
     public void breakIsInserted(){
         new AutomaticBreakManager().onReceive(context, null);
     }
+
+    @Test
+    public void breakNotInsertedWhenNotClockedIn(){
+        final boolean[] called = {false};
+        ShadowContentResolver.registerProvider(CameAndWentProvider.AUTHORITY, new CameAndWentProvider() {
+            @Override
+            public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+                MatrixCursor mc = new MatrixCursor(new String[]{ID, CAME, WENT, ISBREAK, DATE, TAG});
+                mc.addRow(new Object[]{1, TimeConverter.CURRENT_TIME, TimeConverter.CURRENT_TIME, 0, TimeConverter.extractDate(TimeConverter.CURRENT_TIME), 1});
+                return mc;
+            }
+
+            @Override
+            public Uri insert(Uri uri, ContentValues values) {
+                called[0] = true;
+                return super.insert(uri, values);
+            }
+        });
+        Assert.assertFalse(called[0]);
+    }
 }
