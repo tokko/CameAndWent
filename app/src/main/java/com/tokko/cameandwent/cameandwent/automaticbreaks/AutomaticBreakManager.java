@@ -63,5 +63,6 @@ public class AutomaticBreakManager extends BroadcastReceiver {
             cv.put(CameAndWentProvider.TAG, c.getInt(c.getColumnIndex(CameAndWentProvider.TAG)));
             context.getContentResolver().insert(CameAndWentProvider.URI_LOG_ENTRIES, cv);
         }
+        c.close();
     }
 }
