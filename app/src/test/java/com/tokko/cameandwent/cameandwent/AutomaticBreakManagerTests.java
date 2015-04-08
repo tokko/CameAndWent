@@ -36,11 +36,12 @@ import java.util.List;
 @RunWith(RobolectricTestRunner.class)
 public class AutomaticBreakManagerTests {
     private Context context;
+    SharedPreferences sharedPreferences;
 
     @Before
     public void setup(){
         context = RuntimeEnvironment.application.getApplicationContext();
-        SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().clear()
                 .putBoolean("breaks_enabled", true)
                 .putBoolean("enabled", true)
@@ -110,5 +111,14 @@ public class AutomaticBreakManagerTests {
         ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
         ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertEquals(DateTimeConstants.MILLIS_PER_DAY, nextScheduledAlarm.interval);
+    }
+    @Test
+    public void alarmIsNotScheduledWhenDisabled(){
+        sharedPreferences.edit().remove("breaks_enabled").apply();
+        AutomaticBreakManager.scheduleAutomaticBreaks(context);
+        AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
+        List<ShadowAlarmManager.ScheduledAlarm> nextScheduledAlarm = shadowAlarmManager.getScheduledAlarms();
+        Assert.assertTrue(nextScheduledAlarm.isEmpty());
     }
 }
