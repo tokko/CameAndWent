@@ -17,6 +17,7 @@ import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 import junit.framework.Assert;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -100,5 +101,14 @@ public class AutomaticBreakManagerTests {
         ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
         ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis(), nextScheduledAlarm.triggerAtTime);
+    }
+
+    @Test
+    public void alarmIsScheduledHasCorrectInterval(){
+        AutomaticBreakManager.scheduleAutomaticBreaks(context);
+        AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
+        ShadowAlarmManager.ScheduledAlarm nextScheduledAlarm = shadowAlarmManager.getNextScheduledAlarm();
+        Assert.assertEquals(DateTimeConstants.MILLIS_PER_DAY, nextScheduledAlarm.interval);
     }
 }
