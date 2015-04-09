@@ -91,7 +91,7 @@ public class CountDownManager extends BroadcastReceiver{
         }
         Notification.Builder notificationBuilder = new Notification.Builder(context);
         notificationBuilder.setContentTitle("Workday countdown");
-        notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+        notificationBuilder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
         notificationBuilder.setOngoing(true);
         notificationBuilder.setContentIntent(pendingIntent);
         int duration = (int) TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
