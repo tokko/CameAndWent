@@ -67,6 +67,7 @@ public class CountDownManager extends BroadcastReceiver{
 
     public long startCountDown(){
         if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("countdown", false)) return -1;
+        if(!context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false)) return -1;
         long currentTime = TimeConverter.getCurrentTime().getMillis();
         registerObservers(context);
         updateNotification(context);
