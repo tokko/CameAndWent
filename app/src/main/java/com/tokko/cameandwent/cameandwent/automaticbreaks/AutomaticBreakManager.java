@@ -60,7 +60,7 @@ public class AutomaticBreakManager extends BroadcastReceiver {
             cv.put(CameAndWentProvider.WENT, startTime + breakDuration);
             cv.put(CameAndWentProvider.ISBREAK, 1);
             cv.put(CameAndWentProvider.DATE, TimeConverter.extractDate(startTime));
-            cv.put(CameAndWentProvider.TAG, c.getInt(c.getColumnIndex(CameAndWentProvider.TAG)));
+            cv.put(CameAndWentProvider.TAG, c.getLong(c.getColumnIndex(CameAndWentProvider.TAG)));
             context.getContentResolver().insert(CameAndWentProvider.URI_LOG_ENTRIES, cv);
         }
         c.close();
