@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
+import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
@@ -22,6 +23,7 @@ public class CameAndWentApplication extends Application {
         AutomaticBreakManager.scheduleAutomaticBreaks(this);
         new ReminderScheduler(this).scheduleWeeklyReminder();
         new ReminderScheduler(this).scheduleMonthlyReminder();
+        new CountDownManager(this).startCountDown();
         sendBroadcast(new Intent(getApplicationContext(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override

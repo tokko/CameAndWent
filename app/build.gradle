@@ -15,8 +15,8 @@ android {
             applicationId "com.tokko.cameandwent.cameandwent"
             minSdkVersion 18
             targetSdkVersion 22
-            versionCode 18
-            versionName "1.11"
+            versionCode 20
+            versionName "1.13"
             testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         }
     buildTypes {
@@ -33,48 +33,17 @@ android {
             minifyEnabled false
         }
     }
-    packagingOptions {
-        exclude 'LICENSE.txt'
-    }
 }
-//apply plugin: 'android-unit-test'
-
 dependencies {
     repositories {
         mavenCentral()
     }
 
     compile "joda-time:joda-time:2.3"
-    // Espresso
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.0')
-    androidTestCompile('com.android.support.test:testing-support-lib:0.1')
-// Robolectric
     testCompile 'junit:junit:4.12'
-    testCompile 'org.hamcrest:hamcrest-core:1.1'
-    testCompile 'org.hamcrest:hamcrest-library:1.1'
-    testCompile 'org.hamcrest:hamcrest-integration:1.1'
-    testCompile 'org.mockito:mockito-core:1.10.0'
 
     // TODO: requires special build of robolectric right now. working on this...
-    testCompile('org.robolectric:robolectric:3.0-rc2') {
-        /*
-        exclude module: 'classworlds'
-        exclude module: 'commons-logging'
-        exclude module: 'httpclient'
-        exclude module: 'maven-artifact'
-        exclude module: 'maven-artifact-manager'
-        exclude module: 'maven-error-diagnostics'
-        exclude module: 'maven-model'
-        exclude module: 'maven-project'
-        exclude module: 'maven-settings'
-        exclude module: 'plexus-container-default'
-        exclude module: 'plexus-interpolation'
-        exclude module: 'plexus-utils'
-        exclude module: 'wagon-file'
-        exclude module: 'wagon-http-lightweight'
-        exclude module: 'wagon-provider-api'
-        */
-    }
+    testCompile('org.robolectric:robolectric:3.0-rc2')
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.google.android.gms:play-services:7.0.0'

@@ -20,7 +20,7 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 
 public class AutomaticBreakManager extends BroadcastReceiver {
-    private static final String ACTION_AUTOMATIC_BREAK = "ACTION_AUTOMATIC_BREAK";
+    public static final String ACTION_AUTOMATIC_BREAK = "ACTION_AUTOMATIC_BREAK";
 
     public static void scheduleAutomaticBreaks(Context context){
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), 0, new Intent(ACTION_AUTOMATIC_BREAK), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -60,9 +60,9 @@ public class AutomaticBreakManager extends BroadcastReceiver {
             cv.put(CameAndWentProvider.WENT, startTime + breakDuration);
             cv.put(CameAndWentProvider.ISBREAK, 1);
             cv.put(CameAndWentProvider.DATE, TimeConverter.extractDate(startTime));
-            cv.put(CameAndWentProvider.TAG, c.getInt(c.getColumnIndex(CameAndWentProvider.TAG)));
-            Uri uri = context.getContentResolver().insert(CameAndWentProvider.URI_LOG_ENTRIES, cv);
-            long id = ContentUris.parseId(uri);
+            cv.put(CameAndWentProvider.TAG, c.getLong(c.getColumnIndex(CameAndWentProvider.TAG)));
+            context.getContentResolver().insert(CameAndWentProvider.URI_LOG_ENTRIES, cv);
         }
+        c.close();
     }
 }
