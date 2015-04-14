@@ -52,9 +52,7 @@ public class ClockManager {
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.CAME, time);
             cv.put(CameAndWentProvider.TAG, tagId);
-            Uri uri  = context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
-            long id = ContentUris.parseId(uri);
-            Log.d("ClockManager", "newid=" + id);
+            context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
             if (defaultPrefs.getBoolean("soundmode", false)) {
                 defaultPrefs.edit().putInt(PREV_SOUNDMODE_KEY, am.getRingerMode()).apply();
                 boolean vibrate = defaultPrefs.getBoolean("vibrate", false);

@@ -39,7 +39,7 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 import java.util.List;
 
 //@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
-@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "app/src/main/AndroidManifest.xml")
+@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class CountDownManagerTest {
     private final DateTime currentTime = new DateTime().withTime(13, 0, 0, 0).withDate(2010, 4, 20);
