@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
@@ -45,9 +46,9 @@ public class AutomaticBreakManager extends BroadcastReceiver {
         if(!pref.getBoolean("breaks_enabled", false)) {
             return;
         }
-        Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_LOG_ENTRIES, null, String.format("%s=0", CameAndWentProvider.WENT), null, null);
+        Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRY_FOR_EDIT, null, String.format("%s=0", CameAndWentProvider.WENT), null, null);
         if(c.moveToFirst()){
-            if(c.getCount() != 1) throw new IllegalStateException("Only one checkin at a time plx.");
+            if(c.getCount() != 1) throw new IllegalStateException("Only one checkin at a time plx. " + c.getCount());
             long came = c.getLong(c.getColumnIndex(CameAndWentProvider.CAME));
             if(came > TimeConverter.getCurrentTime().getMillis()) throw new IllegalStateException("Break before current clockin, wtf?");
             String[] breakStart = pref.getString("average_break_start", "0:0").split(":");
@@ -55,12 +56,15 @@ public class AutomaticBreakManager extends BroadcastReceiver {
             int startHour = Integer.valueOf(breakStart[0]);
             int startMinute = Integer.valueOf(breakStart[1]);
             long startTime = TimeConverter.getCurrentTime().withTime(startHour, startMinute, 0, 0).getMillis();
+            long tagId = c.getLong(c.getColumnIndex(CameAndWentProvider.TAG));
+            long id = c.getLong(c.getColumnIndex(CameAndWentProvider.ID));
+            Log.d("AutomaticBreakManager", "id=" + id);
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.CAME, startTime);
             cv.put(CameAndWentProvider.WENT, startTime + breakDuration);
             cv.put(CameAndWentProvider.ISBREAK, 1);
             cv.put(CameAndWentProvider.DATE, TimeConverter.extractDate(startTime));
-            cv.put(CameAndWentProvider.TAG, c.getLong(c.getColumnIndex(CameAndWentProvider.TAG)));
+            cv.put(CameAndWentProvider.TAG, tagId);
             context.getContentResolver().insert(CameAndWentProvider.URI_LOG_ENTRIES, cv);
         }
         c.close();

@@ -12,12 +12,14 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
 import com.tokko.cameandwent.cameandwent.backup.BackupAgent;
 import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
 import com.tokko.cameandwent.cameandwent.log.LogEntryEditorFragment;
 import com.tokko.cameandwent.cameandwent.log.LogFragment;
 import com.tokko.cameandwent.cameandwent.settings.SettingsActivity;
 import com.tokko.cameandwent.cameandwent.summaries.SummaryFragment;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -136,7 +138,8 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
             return true;
         }
         if(id == R.id.tag_everything){
-            SetTagFragment.newInstance().show(getSupportFragmentManager(), "t");
+            new ClockManager(this).clockIn(TimeConverter.getCurrentTime().getMillis(), 1);
+            sendBroadcast(new Intent(this, AutomaticBreakManager.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

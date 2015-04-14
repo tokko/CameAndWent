@@ -3,13 +3,16 @@ package com.tokko.cameandwent.cameandwent;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
@@ -42,14 +45,16 @@ public class ClockManager {
 
     }
 
-    public void clockIn(long time, long id) {
+    public void clockIn(long time, long tagId) {
         if(!defaultPrefs.getBoolean("enabled", false)) return;
         if(!this.sp.getBoolean(PREF_CLOCKED_IN, false)) {
             this.sp.edit().putBoolean(PREF_CLOCKED_IN, true).apply();
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.CAME, time);
-            cv.put(CameAndWentProvider.TAG, id);
-            context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+            cv.put(CameAndWentProvider.TAG, tagId);
+            Uri uri  = context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+            long id = ContentUris.parseId(uri);
+            Log.d("ClockManager", "newid=" + id);
             if (defaultPrefs.getBoolean("soundmode", false)) {
                 defaultPrefs.edit().putInt(PREV_SOUNDMODE_KEY, am.getRingerMode()).apply();
                 boolean vibrate = defaultPrefs.getBoolean("vibrate", false);

@@ -33,12 +33,12 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.util.List;
 
-@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "app/src/main/AndroidManifest.xml")
+@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class AutomaticBreakManagerTests {
     private Context context;
     SharedPreferences sharedPreferences;
-
+    private final boolean[] called = new boolean[1];
     @Before
     public void setup(){
         context = RuntimeEnvironment.application.getApplicationContext();
@@ -62,6 +62,7 @@ public class AutomaticBreakManagerTests {
 
             @Override
             public Uri insert(Uri uri, ContentValues values) {
+                called[0] = true;
                 Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 0, 0, 0).getMillis(), values.getAsLong(CAME).longValue());
                 Assert.assertEquals(TimeConverter.getCurrentTime().withTime(12, 30, 0, 0).getMillis(), values.getAsLong(WENT).longValue());
                 Assert.assertEquals(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()), values.getAsLong(DATE).longValue());
@@ -156,6 +157,7 @@ public class AutomaticBreakManagerTests {
     @Test
     public void breakIsInserted(){
         new AutomaticBreakManager().onReceive(context, null);
+        Assert.assertTrue(called[0]);
     }
 
     @Test
