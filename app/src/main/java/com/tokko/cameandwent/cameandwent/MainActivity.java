@@ -17,6 +17,7 @@ import com.tokko.cameandwent.cameandwent.backup.BackupAgent;
 import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
 import com.tokko.cameandwent.cameandwent.log.LogEntryEditorFragment;
 import com.tokko.cameandwent.cameandwent.log.LogFragment;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.settings.SettingsActivity;
 import com.tokko.cameandwent.cameandwent.summaries.SummaryFragment;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
@@ -37,6 +38,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         logFragment = new LogFragment();
+        getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.CLEAN_METHOD, null, null);
     }
 
 
