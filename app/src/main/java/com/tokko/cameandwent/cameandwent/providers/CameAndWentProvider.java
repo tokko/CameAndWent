@@ -108,6 +108,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String SEED_METHOD = "seed";
     public static final String RECREATE_METHOD = "recreate";
     public static final String MIGRATE_METHOD = "migrate";
+    public static final String CLEAN_METHOD = "clean";
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         switch (method) {
@@ -120,8 +121,15 @@ public class CameAndWentProvider extends ContentProvider {
             case MIGRATE_METHOD:
                 migrateData(db.getWritableDatabase());
                 break;
+             case CLEAN_METHOD:
+                clean();
+                break;
         }
         return super.call(method, arg, extras);
+    }
+
+    public void clean(){
+        db.getWritableDatabase().delete(TABLE_LOG_NAME, String.format("(%s-%s)<?", WENT, CAME), new String[]{String.valueOf(DateTimeConstants.MILLIS_PER_MINUTE)});
     }
 
     public void migrateData(SQLiteDatabase db){

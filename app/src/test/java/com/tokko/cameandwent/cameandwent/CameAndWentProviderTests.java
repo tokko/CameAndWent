@@ -458,4 +458,24 @@ public class CameAndWentProviderTests {
         Assert.assertTrue(c.moveToFirst());
         Assert.assertEquals(1, c.getInt(c.getColumnIndex(CameAndWentProvider.ID)));
     }
+
+    @Test
+    public void clean_RemovesDurationsShorterThanOneMinute(){
+        ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.CAME, TimeConverter.CURRENT_TIME);
+        cv.put(CameAndWentProvider.WENT, TimeConverter.CURRENT_TIME + DateTimeConstants.MILLIS_PER_MINUTE - 1);
+        cv.put(CameAndWentProvider.TAG, 1);
+        int pre = mContentResolver.query(CameAndWentProvider.URI_LOG_ENTRIES, null, null, null, null).getCount();
+        mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
+        mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
+        mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
+        mContentResolver.insert(CameAndWentProvider.URI_CAME, cv);
+        int post = mContentResolver.query(CameAndWentProvider.URI_LOG_ENTRIES, null, null, null, null).getCount();
+        Assert.assertEquals(pre + 4, post);
+        mProvider.clean();
+        Cursor c = mContentResolver.query(CameAndWentProvider.URI_LOG_ENTRIES, null, null, null, null);
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
+            Assert.assertFalse(c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)) - c.getLong(c.getColumnIndex(CameAndWentProvider.CAME)) < DateTimeConstants.MILLIS_PER_MINUTE);
+        c.close();
+    }
 }
