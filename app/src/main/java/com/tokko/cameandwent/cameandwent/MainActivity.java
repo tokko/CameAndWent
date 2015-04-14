@@ -38,7 +38,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         logFragment = new LogFragment();
-        getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.CLEAN_METHOD, null, null);
+        //getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.CLEAN_METHOD, null, null);
     }
 
 
