@@ -139,11 +139,6 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
             b.show();
             return true;
         }
-        if(id == R.id.tag_everything){
-            new ClockManager(this).clockIn(TimeConverter.getCurrentTime().getMillis(), 1);
-            sendBroadcast(new Intent(this, AutomaticBreakManager.class));
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 

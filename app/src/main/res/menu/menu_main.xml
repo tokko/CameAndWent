@@ -11,6 +11,4 @@
     <item android:id="@+id/restore_data"
         android:visible="false"
         android:title="Restore data"/>
-    <item android:id="@+id/tag_everything"
-        android:title="Tag everything"/>
 </menu>
