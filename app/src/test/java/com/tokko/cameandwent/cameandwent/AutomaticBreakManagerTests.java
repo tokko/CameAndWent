@@ -33,7 +33,7 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.util.List;
 
-@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
+@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "app/src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class AutomaticBreakManagerTests {
     private Context context;
