@@ -132,7 +132,7 @@ public class CameAndWentProvider extends ContentProvider {
         //db.getWritableDatabase().delete(TABLE_LOG_NAME, String.format("(%s-%s)<?", WENT, CAME), new String[]{String.valueOf(DateTimeConstants.MILLIS_PER_MINUTE)});
         SQLiteDatabase sdb = db.getWritableDatabase();
         sdb.beginTransaction();
-        Cursor c = query(CameAndWentProvider.URI_LOG_ENTRIES, null, null, null, null);
+        Cursor c = query(CameAndWentProvider.URI_LOG_ENTRIES, null, String.format("%s=?", WENT), new String[]{"0"}, null);
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
             if(c.getLong(c.getColumnIndex(CameAndWentProvider.WENT)) - c.getLong(c.getColumnIndex(CameAndWentProvider.CAME)) < DateTimeConstants.MILLIS_PER_MINUTE)
                 sdb.delete(TABLE_LOG_NAME, String.format("%s=?", ID), new String[]{String.valueOf(c.getLong(c.getColumnIndex(ID)))});
