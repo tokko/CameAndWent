@@ -11,10 +11,10 @@
     <application
         android:name=".CameAndWentApplication"
         android:allowBackup="true"
+        android:backupAgent=".backup.BackupAgent"
         android:icon="@drawable/ic_launcher"
-        android:backupAgent=".BackupAgent"
-        android:restoreAnyVersion="true"
         android:label="@string/app_name"
+        android:restoreAnyVersion="true"
         android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
         <activity
             android:name=".MainActivity"
@@ -26,21 +26,29 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".BootReceiver" >
+        <receiver android:name=".receivers.BootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".CountDownManager">
+        <receiver android:name=".automaticbreaks.AutomaticBreakManager"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="ACTION_AUTOMATIC_BREAK"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".notifications.CountDownManager" >
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_OFF" />
                 <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="com.tokko.cameandwent.ACTION_COUNTDOWN_TICK" />
             </intent-filter>
         </receiver>
+
         <receiver
-            android:name=".GeofenceReceiver"
+            android:name=".receivers.GeofenceReceiver"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="GEOFENCE_ACTION" />
@@ -50,8 +58,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
         <receiver
-            android:name=".ReminderScheduler"
+            android:name=".notifications.ReminderScheduler"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="ACTION_WEEKLY_REMINDER" />
@@ -62,7 +71,7 @@
         </receiver>
 
         <provider
-            android:name=".CameAndWentProvider"
+            android:name=".providers.CameAndWentProvider"
             android:authorities="${applicationId}.CameAndWentProvider"
             android:exported="false" />
 
@@ -70,11 +79,34 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/fucktardicus"
             tools:replace="android:value" />
-        <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIwMcd_G_ZG1CmD51BQbSjD3iYwHvj7bXSAw9dJQ" />
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAIwMcd_G_ZG1CmD51BQbSjD3iYwHvj7bXSAw9dJQ" />
+
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+        <activity
+            android:name=".locationtags.LocationTagActivity"
+            android:parentActivityName=".locationtags.LocationTagActivity" >
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".locationtags.LocationTagActivity" />
+        </activity>
+
+        <receiver
+            android:name=".manualclockin.GpsLocationReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
+                <action android:name="com.tokko.cameandwent.ACTION_CLOCKOUT_FROM_NOTIFICATION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

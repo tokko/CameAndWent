@@ -1,10 +1,12 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.receivers;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -18,6 +20,10 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+
+import java.util.List;
 
 
 public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
@@ -50,10 +56,18 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             ClockManager cm = new ClockManager(context);
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Log.d("recvr", "entered");
-                cm.clockIn();
+                List<Geofence> triggerList = event.getTriggeringGeofences();
+                for (Geofence fence : triggerList){
+                    cm.clockIn(Integer.valueOf(fence.getRequestId().split("/")[1]));
+                }
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 Log.d("recvr", "exited");
+                if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("clockoutquestion", false)){
+                    LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+                    if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                        return;
+                }
                 cm.clockOut();
             }
         }
@@ -65,26 +79,34 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         enabled = sp.getBoolean("enabled", false);
         String radiuS = sp.getString("radius", null);
-     	String[] location = sp.getString("origin", "").split(";");
-		if (enabled && radiuS != null && location.length == 2) {
-            float radii = Float.parseFloat(radiuS);
-            Geofence.Builder builder = new Geofence.Builder();
-            builder.setCircularRegion(Float.parseFloat(location[0]), Float.parseFloat(location[1]), radii);
-            builder.setRequestId("com.tokko.cameandwent");
-            builder.setExpirationDuration(Geofence.NEVER_EXPIRE);
-            builder.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
-            Geofence fence = builder.build();
-            GeofencingRequest.Builder requestBuilder = new GeofencingRequest.Builder();
-            requestBuilder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-            requestBuilder.addGeofence(fence);
-            request = requestBuilder.build();
-            googleApiClient = new GoogleApiClient.Builder(context)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
-            googleApiClient.connect();
+     	//String[] location = sp.getString("origin", "").split(";");
+        if (!enabled || radiuS == null) return;
+        Cursor c  = context.getContentResolver().query(CameAndWentProvider.URI_TAGS, null, null, null, null);
+        for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+           long id = c.getLong(c.getColumnIndex(CameAndWentProvider.ID));
+           double longitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE));
+           double latitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE));
+           if(longitude != -1 && latitude != -1) {
+                float radii = Float.parseFloat(radiuS);
+                Geofence.Builder builder = new Geofence.Builder();
+                builder.setCircularRegion(latitude, longitude, radii);
+                builder.setRequestId("com.tokko.cameandwent/"+id);
+                builder.setExpirationDuration(Geofence.NEVER_EXPIRE);
+                builder.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
+                Geofence fence = builder.build();
+                GeofencingRequest.Builder requestBuilder = new GeofencingRequest.Builder();
+                requestBuilder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+                requestBuilder.addGeofence(fence);
+                request = requestBuilder.build();
+                googleApiClient = new GoogleApiClient.Builder(context)
+                        .addApi(LocationServices.API)
+                        .addConnectionCallbacks(this)
+                        .addOnConnectionFailedListener(this)
+                        .build();
+                googleApiClient.connect();
+            }
         }
+        c.close();
     }
 
     @Override

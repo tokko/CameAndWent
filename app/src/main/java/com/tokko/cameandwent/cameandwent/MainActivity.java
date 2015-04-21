@@ -12,6 +12,16 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
+import com.tokko.cameandwent.cameandwent.backup.BackupAgent;
+import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
+import com.tokko.cameandwent.cameandwent.log.LogEntryEditorFragment;
+import com.tokko.cameandwent.cameandwent.log.LogFragment;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.settings.SettingsActivity;
+import com.tokko.cameandwent.cameandwent.summaries.SummaryFragment;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,13 +31,14 @@ import roboguice.activity.RoboFragmentActivity;
 public class MainActivity extends RoboFragmentActivity implements LogFragment.LogFragmentHost{
     public static final String ACTION_WEEKLY_SUMMARY = "ACTION_WEEKLY_SUMMARY";
     public static final String ACTION_MONTHLY_SUMMARY = "ACTION_MONTHLY_SUMMARY";
-    private static final String HAS_SHOWN_SETTINGS = "hasshownsettings";
+    private static final String HAS_SHOWN_SETTINGS = "hasshownsettings_2";
     private LogFragment logFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         logFragment = new LogFragment();
+        getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.CLEAN_METHOD, null, null);
     }
 
 
@@ -35,6 +46,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     protected void onStart() {
         super.onStart();
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, logFragment).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("origin").commit();
         if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HAS_SHOWN_SETTINGS, false)) {
             showSettings();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(HAS_SHOWN_SETTINGS, true).commit();
@@ -125,6 +137,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
                 });
             }
             b.show();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

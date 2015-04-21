@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.log;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,11 +17,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
+
+import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -85,7 +92,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
                 adb.setPositiveButton("I am sure!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, null, null);
+                        getActivity().getContentResolver().delete(CameAndWentProvider.URI_LOG_ENTRIES, null, null);
                         dialog.dismiss();
                     }
                 });
@@ -100,25 +107,6 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             case R.id.add_entry:
                 LogEntryEditorFragment.newInstance().show(getFragmentManager(), "");
                 return true;
-            case R.id.migrate:
-                adb = new AlertDialog.Builder(getActivity());
-                adb.setTitle("Migrate data");
-                adb.setMessage("Use extreme caution! Only do this if your old data is missing, preferably consult Tokko first.");
-                adb.setPositiveButton("#yolo", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_GET_MONTHS, CameAndWentProvider.MIGRATE_METHOD, null, null);
-                        dialog.dismiss();
-                    }
-                });
-                adb.setNegativeButton("I am too scared :(", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                adb.show();
-                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -132,13 +120,13 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if(id == -1) {
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_DURATIONS);
+            cl.setUri(CameAndWentProvider.URI_DURATIONS_PER_DAY);
             cl.setSortOrder(CameAndWentProvider.DATE + " ASC");
             return cl;
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
+            cl.setUri(CameAndWentProvider.URI_LOG_ENTRIES);
             cl.setSelection(String.format("%s=?", CameAndWentProvider.DATE));
             cl.setSelectionArgs(new String[]{String.valueOf(args.getLong(CameAndWentProvider.DATE))});
             cl.setSortOrder(CameAndWentProvider.CAME + " ASC");
@@ -174,13 +162,19 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
         switch (v.getId()){
             case R.id.clock_button:
                 ToggleButton b = (ToggleButton) v;
-                if(b.isChecked())
-                    cm.clockIn();
+                if(b.isChecked()){
+                    SetTagFragment.newInstance("Choose Tag").setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            cm.clockIn(id);
+                        }
+                    }).show(getFragmentManager(), "a");
+                }
                 else
                     cm.clockOut();
                 break;
             case R.id.logentry_deletebutton:
-                getActivity().getContentResolver().delete(CameAndWentProvider.URI_DELETE_LOG_ENTRY, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
+                getActivity().getContentResolver().delete(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.ID + "=?", new String[]{String.valueOf((long) v.getTag())});
                 break;
             case R.id.logentry_editButton:
                 long fakkingId = (long) v.getTag();
@@ -213,9 +207,14 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
     }
 
     @Override
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+    public void onTimeSet(TimePicker view, final int hourOfDay, final int minute) {
         if(!tb.isChecked()){
-            cm.clockIn(TimeConverter.hourAndMinuteToMillis(hourOfDay, minute));
+            SetTagFragment.newInstance("Choose Tag").setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    cm.clockIn(TimeConverter.hourAndMinuteToMillis(hourOfDay, minute), id);
+                }
+            }).show(getFragmentManager(), "e");
             tb.setChecked(true);
         }
         else{
@@ -241,7 +240,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             Bundle b = new Bundle();
             long date = groupCursor.getLong(groupCursor.getColumnIndex(CameAndWentProvider.DATE));
             b.putLong(CameAndWentProvider.DATE, date);
-            return context.getContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
+            return context.getContentResolver().query(CameAndWentProvider.URI_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(date)}, CameAndWentProvider.CAME + " ASC");
         }
 
         @Override
@@ -274,6 +273,7 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             String wentS = time.format(new Date(wentTime));
             boolean isbreak = cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1;
             String duration = TimeConverter.formatInterval(wentTime - cameTime);
+            String tag = cursor.getString(cursor.getColumnIndex(CameAndWentProvider.TAG));
             if(wentTime-cameTime < 0) {
                 wentS = "Currently at work";
                 duration = "Currently unavailable";
@@ -281,6 +281,9 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
             ((TextView)view.findViewById(R.id.log_details_came)).setText("Came: " + time.format(new Date(cameTime)));
             ((TextView)view.findViewById(R.id.log_details_went)).setText("Went: " + wentS);
             ((TextView)view.findViewById(R.id.log_details_isbreak)).setText((isbreak ? "Break" : "Work") +": " + duration);
+            TextView tagView = (TextView)view.findViewById(R.id.log_details_tag);
+            tagView.setVisibility(tag != null ? View.VISIBLE : View.GONE);
+            tagView.setText("Tag: " + tag);
 
             View v1 = view.findViewById(R.id.logentry_deletebutton);
             v1.setOnClickListener(childClickListener);

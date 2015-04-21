@@ -1,9 +1,11 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.receivers;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import android.widget.Toast;
+
+import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
 
 public class BootReceiver extends WakefulBroadcastReceiver {
 

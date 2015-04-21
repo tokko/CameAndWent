@@ -3,6 +3,14 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="horizontal"
@@ -20,6 +28,10 @@
             android:text="Break"
             android:layout_height="wrap_content" />
         </LinearLayout>
+    <Spinner
+        android:id="@+id/logentryeditor_TagSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
@@ -54,6 +66,9 @@
         </LinearLayout>
 
     </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="horizontal"
@@ -74,5 +89,5 @@
             android:id="@+id/okButton"
             style="?android:buttonBarButtonStyle"
             android:layout_height="wrap_content" />
-        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

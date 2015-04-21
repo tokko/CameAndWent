@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.util;
 
 import com.google.inject.Singleton;
 

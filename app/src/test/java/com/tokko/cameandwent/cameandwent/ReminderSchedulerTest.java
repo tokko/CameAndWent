@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
 import junit.framework.Assert;
 
 import org.joda.time.DateTime;
@@ -19,6 +22,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlarmManager;
 import org.robolectric.shadows.ShadowApplication;
@@ -31,7 +36,8 @@ import java.util.List;
 import roboguice.RoboGuice;
 
 
-@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
+//@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
+@Config(emulateSdk = 21, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class ReminderSchedulerTest {
     private DateTime weeklyAlarmTime;
@@ -52,9 +58,9 @@ public class ReminderSchedulerTest {
                 .withFieldAdded(DurationFieldType.hours(), 3);
 
         TimeConverter.CURRENT_TIME = currentTime.getMillis();
-        alarmManager = (AlarmManager) Robolectric.application.getSystemService(Context.ALARM_SERVICE);
-        shadowAlarmManager = Robolectric.shadowOf(alarmManager);
-        SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(Robolectric.application.getApplicationContext());
+        alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
+        shadowAlarmManager = Shadows.shadowOf(alarmManager);
+        SharedPreferences sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application.getApplicationContext());
         sharedPreferences.edit()
                 .putBoolean("enabled", true)
                 .putBoolean("weekly_reminders", true)
@@ -84,19 +90,19 @@ public class ReminderSchedulerTest {
     @Test
     public void scheduleWeeklyReminder_SchedulesAlarm(){
         Assert.assertNull(shadowAlarmManager.getNextScheduledAlarm());
-        new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleWeeklyReminder();
+        new ReminderScheduler(RuntimeEnvironment.application.getApplicationContext()).scheduleWeeklyReminder();
         Assert.assertNotNull(shadowAlarmManager.getNextScheduledAlarm());
     }
 
 
     @Test
     public void scheduleWeeklyReminder_SchedulesAlarm_AtCorrectTime(){
-        assertAlarm_AtCorrectTime(new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleWeeklyReminder(), weeklyAlarmTime);
+        assertAlarm_AtCorrectTime(new ReminderScheduler(RuntimeEnvironment.application.getApplicationContext()).scheduleWeeklyReminder(), weeklyAlarmTime);
     }
 
     @Test
     public void scheduleWeeklyReminder_broadcastReceiverRegistered() {
-        List<ShadowApplication.Wrapper> registeredReceivers = Robolectric.getShadowApplication().getRegisteredReceivers();
+        List<ShadowApplication.Wrapper> registeredReceivers = ShadowApplication.getInstance().getRegisteredReceivers();
 
         Assert.assertFalse(registeredReceivers.isEmpty());
 
@@ -112,23 +118,23 @@ public class ReminderSchedulerTest {
 
     @Test
     public void scheduleWeeklyReminder_hasReceiverForIntent(){
-        ShadowApplication shadowApplication = Robolectric.getShadowApplication();
+        ShadowApplication shadowApplication = ShadowApplication.getInstance();
         Assert.assertTrue(shadowApplication.hasReceiverForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER)));
         List<BroadcastReceiver> receiversForIntent = shadowApplication.getReceiversForIntent(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
         Assert.assertEquals("Expected one broadcast receiver", 1, receiversForIntent.size());
     }
     @Test
     public void scheduleWeeklyReminder_OnReceive_NotifiesUser(){
-        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) RuntimeEnvironment.application.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Robolectric.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
+        RuntimeEnvironment.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
 
-        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+        ShadowNotificationManager manager = Shadows.shadowOf(notificationManager);
         Assert.assertEquals("Expected one notification", 1, manager.size());
 
         Notification notification = manager.getNotification(ReminderScheduler.weeklyReminderNotificationId);
         Assert.assertNotNull(notification);
-        ShadowNotification shadowNotification = Robolectric.shadowOf(notification);
+        ShadowNotification shadowNotification = Shadows.shadowOf(notification);
         Assert.assertNotNull("Expected shadow notification object", shadowNotification);
         Assert.assertEquals("Time to submit time report!", shadowNotification.getContentTitle());
 
@@ -136,7 +142,7 @@ public class ReminderSchedulerTest {
 
     @Test
     public void scheduleWeeklyReminder_OnReceive_SchedulesNewAlarm(){
-        Robolectric.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
+        RuntimeEnvironment.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_WEEKLY_REMINDER));
         assertAlarm_AtCorrectTime(weeklyAlarmTime);
     }
 
@@ -144,13 +150,13 @@ public class ReminderSchedulerTest {
     @Test
     public void scheduleMonthlyReminder_SchedulesAlarm(){
         Assert.assertNull(shadowAlarmManager.getNextScheduledAlarm());
-        new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleMonthlyReminder();
+        new ReminderScheduler(RuntimeEnvironment.application.getApplicationContext()).scheduleMonthlyReminder();
         Assert.assertNotNull(shadowAlarmManager.getNextScheduledAlarm());
     }
 
     @Test
     public void scheduleMonthlyReminder_SchedulesAlarm_AtCorrectTime(){
-        assertAlarm_AtCorrectTime(new ReminderScheduler(Robolectric.application.getApplicationContext()).scheduleMonthlyReminder(), monthlyAlarmTime);
+        assertAlarm_AtCorrectTime(new ReminderScheduler(RuntimeEnvironment.application.getApplicationContext()).scheduleMonthlyReminder(), monthlyAlarmTime);
     }
 
     private void assertAlarm_AtCorrectTime(DateTime alarmTime, int i){
@@ -172,23 +178,23 @@ public class ReminderSchedulerTest {
     
     @Test
     public void scheduleMonthlyReminder_hasReceiverForIntent(){
-        ShadowApplication shadowApplication = Robolectric.getShadowApplication();
+        ShadowApplication shadowApplication = ShadowApplication.getInstance();
         Assert.assertTrue(shadowApplication.hasReceiverForIntent(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER)));
         List<BroadcastReceiver> receiversForIntent = shadowApplication.getReceiversForIntent(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER));
         Assert.assertEquals("Expected one broadcast receiver", 1, receiversForIntent.size());
     }
     @Test
     public void scheduleMonthlyReminder_OnReceive_NotifiesUser(){
-        NotificationManager notificationManager = (NotificationManager) Robolectric.application.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) RuntimeEnvironment.application.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Robolectric.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER));
+        RuntimeEnvironment.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER));
 
-        ShadowNotificationManager manager = Robolectric.shadowOf(notificationManager);
+        ShadowNotificationManager manager = Shadows.shadowOf(notificationManager);
         Assert.assertEquals("Expected one notification", 1, manager.size());
 
         Notification notification = manager.getNotification(ReminderScheduler.monthlyReminderNotificationId);
         Assert.assertNotNull(notification);
-        ShadowNotification shadowNotification = Robolectric.shadowOf(notification);
+        ShadowNotification shadowNotification = Shadows.shadowOf(notification);
         Assert.assertNotNull("Expected shadow notification object", shadowNotification);
         Assert.assertEquals("Time to finalize monthly report!", shadowNotification.getContentTitle());
 
@@ -196,7 +202,7 @@ public class ReminderSchedulerTest {
 
     @Test
     public void scheduleMonthlyReminder_OnReceive_SchedulesNewAlarm(){
-        Robolectric.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER));
+        RuntimeEnvironment.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER));
         assertAlarm_AtCorrectTime(monthlyAlarmTime, 1);
     }
 }

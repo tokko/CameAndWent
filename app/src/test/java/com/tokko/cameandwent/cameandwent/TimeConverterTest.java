@@ -1,5 +1,7 @@
 package com.tokko.cameandwent.cameandwent;
 
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
 import junit.framework.TestCase;
 
 import org.joda.time.DateTime;
@@ -25,7 +27,7 @@ public class TimeConverterTest extends TestCase {
         c.set(Calendar.SECOND, 0);
         String hour = String.valueOf(c.get(Calendar.HOUR_OF_DAY));
         String minute = String.valueOf(c.get(Calendar.MINUTE));
-        long time = TimeConverter.hourAndMinuteToMillis(c.getTimeInMillis(), hour + ":"+minute);
+        long time = TimeConverter.hourAndMinuteToMillis(c.getTimeInMillis(), hour + ":" + minute);
         assertEquals(c.getTimeInMillis(), time);
     }
 

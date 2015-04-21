@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.notifications;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -13,6 +13,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+
+import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.MainActivity;
+import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import org.joda.time.DateTimeConstants;
 
@@ -50,7 +56,7 @@ public class CountDownManager extends BroadcastReceiver{
     private void registerObservers(Context context) {
         AlarmManager am = (AlarmManager) context.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         am.setInexactRepeating(AlarmManager.RTC, TimeConverter.getCurrentTime().getMillis(), DateTimeConstants.MILLIS_PER_MINUTE, countDownPendingIntent);
-        context.getApplicationContext().getContentResolver().registerContentObserver(CameAndWentProvider.URI_GET_DURATIONS, false, obs);
+        context.getApplicationContext().getContentResolver().registerContentObserver(CameAndWentProvider.URI_DURATIONS, false, obs);
     }
 
     private void unregisterObservers(Context context) {
@@ -61,6 +67,7 @@ public class CountDownManager extends BroadcastReceiver{
 
     public long startCountDown(){
         if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("countdown", false)) return -1;
+        if(!context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false)) return -1;
         long currentTime = TimeConverter.getCurrentTime().getMillis();
         registerObservers(context);
         updateNotification(context);
@@ -77,6 +84,7 @@ public class CountDownManager extends BroadcastReceiver{
 
     private void updateNotification(Context context){
         if(!context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false)) return;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         if(!defaultPreferences.getBoolean("countdown", false)){
             getNotificationManager(context).cancel(NOTIFICATION_ID);
@@ -84,8 +92,9 @@ public class CountDownManager extends BroadcastReceiver{
         }
         Notification.Builder notificationBuilder = new Notification.Builder(context);
         notificationBuilder.setContentTitle("Workday countdown");
-        notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+        notificationBuilder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
         notificationBuilder.setOngoing(true);
+        notificationBuilder.setContentIntent(pendingIntent);
         int duration = (int) TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
         int currentDuration = (int) getCurrentDuration(context);
         int remainder = duration - currentDuration;
@@ -95,7 +104,7 @@ public class CountDownManager extends BroadcastReceiver{
     }
 
     private long getCurrentDuration(Context context){
-        Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))}, null, null);
+        Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_LOG_ENTRIES, null, String.format("%s=?", CameAndWentProvider.DATE), new String[]{String.valueOf(TimeConverter.extractDate(TimeConverter.getCurrentTime().getMillis()))}, null, null);
         long time = 0;
         for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             long went = c.getLong(c.getColumnIndex(CameAndWentProvider.WENT));

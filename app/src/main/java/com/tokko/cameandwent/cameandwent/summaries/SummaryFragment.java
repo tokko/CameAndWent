@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.summaries;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -9,9 +9,17 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.CursorAdapter;
 import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import org.joda.time.DateTimeConstants;
 
@@ -20,13 +28,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import roboguice.fragment.RoboDialogFragment;
+import roboguice.inject.InjectView;
 
-public class SummaryFragment extends RoboDialogFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class SummaryFragment extends RoboDialogFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemSelectedListener {
     private static final String EXTRA_MONTHLY = "extra_monthly";
+    private static final String ARG_TAG = "arg_tag";
     private SummaryCursorAdapter adapter;
-    private ExpandableListView expandableListView;
+    @InjectView(android.R.id.list) private ExpandableListView expandableListView;
+    @InjectView(R.id.summaryFragmentTagSpinner) private Spinner tagSpinner;
     private boolean monthly;
-
+    private CursorAdapter spinnerAdapter;
+    private String tag;
 
     public static SummaryFragment newInstance() {
         SummaryFragment fragment = new SummaryFragment();
@@ -54,6 +66,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         else if(getArguments() != null){
             monthly = getArguments().getBoolean(EXTRA_MONTHLY, false);
         }
+        spinnerAdapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_spinner_dropdown_item, null, new String[]{CameAndWentProvider.TAG}, new int[]{android.R.id.text1}, 0);
     }
 
     @Override
@@ -65,8 +78,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        expandableListView = new ExpandableListView(getActivity());
-        return expandableListView;
+        return inflater.inflate(R.layout.summaryfragment, null);
     }
 
     @Override
@@ -78,6 +90,9 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         }
         else {
             getDialog().setTitle("Monthly summary");
+            tagSpinner.setVisibility(View.VISIBLE);
+            tagSpinner.setAdapter(spinnerAdapter);
+            tagSpinner.setOnItemSelectedListener(this);
             adapter = new MonthlySummaryAdapter(getActivity());
         }
         expandableListView.setAdapter(adapter);
@@ -88,6 +103,8 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     public void onStart() {
         super.onStart();
         getLoaderManager().initLoader(-1, null, this);
+        if(monthly)
+            getLoaderManager().initLoader(-2, null, this);
     }
 
     @Override
@@ -101,40 +118,66 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         if(!monthly) {
             if(id == -1) {
                 CursorLoader cl = new CursorLoader(getActivity());
-                cl.setUri(CameAndWentProvider.URI_GET_WEEKS);
+                cl.setUri(CameAndWentProvider.URI_WEEKS);
+
                 return cl;
             }
             else{
                 CursorLoader cl = new CursorLoader(getActivity());
-                cl.setUri(CameAndWentProvider.URI_GET_LOG_ENTRIES);
-                cl.setSelection(String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR));
-                cl.setSelectionArgs(new String[]{String.valueOf(id)});
+                cl.setUri(CameAndWentProvider.URI_MONTHS);
                 return cl;
             }
         }
         else{
             CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_GET_MONTHS);
-            return cl;
+            switch (id){
+                case -2:
+                    cl.setUri(CameAndWentProvider.URI_TAGS);
+                    return cl;
+                default:
+                    cl.setUri(CameAndWentProvider.URI_MONTHS);
+                    return cl;
+
+            }
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if(loader.getId() != -1)
+        if(loader.getId() >= 0)
             adapter.setChildrenCursor(loader.getId(), data);
-        else
+        else if(loader.getId() == -1)
             adapter.setGroupCursor(data);
+        else if(loader.getId() == -2)
+            spinnerAdapter.swapCursor(data);
         if(expandableListView.getCount() > 0)
-            expandableListView.expandGroup(expandableListView.getCount()-1);
+            expandableListView.expandGroup(expandableListView.getCount() - 1);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        if(loader.getId() != -1)
+        if(loader.getId() > 0)
             adapter.setChildrenCursor(loader.getId(), null);
-        else
+        else if(loader.getId() == -1)
             adapter.setGroupCursor(null);
+        else if(loader.getId() == -2)
+            spinnerAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Cursor c = spinnerAdapter.getCursor();
+        int pos = c.getPosition();
+        c.moveToPosition(position);
+        tag = c.getString(c.getColumnIndex(CameAndWentProvider.TAG));
+        c.moveToPosition(pos);
+        getLoaderManager().destroyLoader(-1);
+        getLoaderManager().initLoader(-1, null, this);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     private class SummaryCursorAdapter extends CursorTreeAdapter{
@@ -149,8 +192,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
             int week = groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
-            Cursor c = context.getContentResolver().query(CameAndWentProvider.URI_GET_DURATIONS, null, String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR), new String[]{String.valueOf(week)}, null);
-            return c;
+            return context.getContentResolver().query(CameAndWentProvider.URI_DURATIONS, null, String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR), new String[]{String.valueOf(week)}, null);
         }
 
         @Override
@@ -175,7 +217,9 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             String durationS = new DecimalFormat("#.0").format(duration) + "h";
             if(duration < 0)
                 durationS = "Currently at work";
-            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS);
+            String tag = cursor.getString(cursor.getColumnIndex(CameAndWentProvider.TAG));
+            tag = tag != null ? ("\nTag: " + tag):null;
+            ((TextView)view.findViewById(android.R.id.text1)).setText(date + "\n" + durationS + (tag != null ? tag : ""));
         }
     }
 
@@ -187,17 +231,14 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
 
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
-                        /*
-
-            CursorLoader cl = new CursorLoader(getActivity());
-            cl.setUri(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY);
-            DateTime dt = new DateTime();
-            dt = dt.withTime(0, 0, 0, 0);
-            dt = dt.withDayOfMonth(1);
-            cl.setSelectionArgs(new String[]{String.valueOf(TimeConverter.extractDate(dt.getMillis()))});
-            */
             if(groupCursor.getCount() <= 0) return null;
-            return getActivity().getContentResolver().query(CameAndWentProvider.URI_GET_MONTHLY_SUMMARY, null, String.format("%s=?", CameAndWentProvider.MONTH_OF_YEAR), new String[]{String.valueOf(groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)))}, null);
+            String selection = String.format("%s=?", CameAndWentProvider.MONTH_OF_YEAR);
+            String[]selectionArgs = new String[]{String.valueOf(groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)))};
+            if(tag != null){
+                selection += String.format(" AND %s=?", CameAndWentProvider.TAG);
+                selectionArgs = new String[]{selectionArgs[0], tag};
+            }
+            return getActivity().getContentResolver().query(CameAndWentProvider.URI_MONTHLY_SUMMARY, null, selection, selectionArgs, CameAndWentProvider.WEEK_OF_YEAR);
         }
 
         @Override

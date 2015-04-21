@@ -4,17 +4,16 @@
     <CheckBoxPreference
         android:key="enabled"
         android:title="Enabled"
-        android:defaultValue="true" />
+        android:defaultValue="false" />
 
     <PreferenceCategory
         android:dependency="enabled"
         android:title="Location">
 
-        <com.tokko.cameandwent.cameandwent.LocationPreference
+        <com.tokko.cameandwent.cameandwent.settings.LocationPreference
             android:dependency="enabled"
-            android:title="Set location"
-            android:summary="Sets the current location as origin"
-            android:key="origin" />
+            android:title="Manage locations"
+            android:summary="Manages your locations" />
 
         <EditTextPreference
             android:dependency="enabled"
@@ -29,18 +28,18 @@
         android:key="breaks"
         android:dependency="enabled">
 
-        <SwitchPreference
+        <CheckBoxPreference
             android:key="breaks_enabled"
             android:title="Automatic lunch"
             android:defaultValue="false"
             android:dependency="breaks" />
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="average_break_start"
             android:title="Average lunch start"
             android:dependency="breaks_enabled" />
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="average_break_duration"
             android:title="Average lunch duration"
             android:dependency="breaks_enabled" />
@@ -53,7 +52,7 @@
         android:defaultValue="true" >
         
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="Sound mode"
             android:dependency="audio"
             android:summaryOff="Sound mode will be unaltered"
@@ -85,7 +84,7 @@
         <CheckBoxPreference
             android:key="notifications_enabled"
             android:title="Notify"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
         <CheckBoxPreference
             android:dependency="notifications_enabled"
             android:key="notifications_sound"
@@ -108,13 +107,13 @@
 
         <CheckBoxPreference
             android:dependency="weekly_reminders_container"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="Weekly Reminder"
             android:summaryOff="Weekly reminders are disabled"
             android:summaryOn="Weekly reminders are enabled"
             android:key="weekly_reminders"/>
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="weekly_reminder_time"
             android:dependency="weekly_reminders"
             android:title="Reminder time"/>
@@ -148,13 +147,13 @@
 
         <CheckBoxPreference
             android:dependency="monthly_reminders_container"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:title="Monthly Reminder"
             android:summaryOff="monthly reminders are disabled"
             android:summaryOn="Reminder will notify at this time on last work day of month"
             android:key="monthly_reminders"/>
 
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:key="monthly_reminder_time"
             android:dependency="monthly_reminders"
             android:title="Reminder time"/>
@@ -181,7 +180,7 @@
             android:title="Enabled"
             android:key="countdown"
             android:defaultValue="false"/>
-        <com.tokko.cameandwent.cameandwent.TimePreference
+        <com.tokko.cameandwent.cameandwent.settings.TimePreference
             android:title="Daily work duration"
             android:key="daily_work_duration"
             android:dependency="countdown" />
@@ -193,4 +192,10 @@
         android:title="Consult rounding"
         android:summary="Round daily duration up to closest half-hour"
         android:key="use_snapup" />
+    <CheckBoxPreference
+        android:dependency="enabled"
+        android:defaultValue="false"
+        android:title="GPS disabled safeguard"
+        android:summary="If clocked in and GPS provider is disabled a notification will ask if you want to clock out"
+        android:key="clockoutquestion" />
 </PreferenceScreen>

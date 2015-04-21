@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.settings;
 
 import android.app.backup.BackupManager;
 import android.content.Context;
@@ -6,6 +6,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+
+import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
+import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
+import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
 
 public class SettingsFragment extends PreferenceFragment {
     public SettingsFragment() {
@@ -25,8 +33,9 @@ public class SettingsFragment extends PreferenceFragment {
             new CountDownManager(getActivity()).startCountDown();
         if(!PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("countdown", false))
             new CountDownManager(getActivity()).stopCountDown();
-        getActivity().getContentResolver().call(CameAndWentProvider.URI_GET_GET_MONTHS, CameAndWentProvider.RECRETE_METHOD, null, null);
+        getActivity().getContentResolver().call(CameAndWentProvider.URI_MONTHS, CameAndWentProvider.RECREATE_METHOD, null, null);
         new BackupManager(getActivity()).dataChanged();
+        AutomaticBreakManager.scheduleAutomaticBreaks(getActivity());
         super.onStop();
     }
 }

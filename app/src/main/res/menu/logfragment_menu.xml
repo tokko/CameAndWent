@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 <item android:id="@+id/clear_log" android:title="Clear log" android:visible="false" />
-<item android:id="@+id/migrate" android:title="Migrate data" android:visible="false" />
 <item android:id="@+id/add_entry" android:title="Add entry" android:showAsAction="ifRoom" />
 </menu>
