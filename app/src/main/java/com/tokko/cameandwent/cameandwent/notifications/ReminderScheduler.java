@@ -107,7 +107,7 @@ public class ReminderScheduler extends BroadcastReceiver{
         else
             nb.setVibrate(new long[]{0});
         nb.setContentTitle("Time to submit time report!");
-        nb.setSmallIcon(R.drawable.ic_launcher);
+        nb.setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
         if(defaultPrefs.getBoolean("weekly_reminder_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_WEEKLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));
@@ -123,7 +123,7 @@ public class ReminderScheduler extends BroadcastReceiver{
         else
             nb.setVibrate(new long[]{0});
         nb.setContentTitle("Time to finalize monthly report!");
-        nb.setSmallIcon(R.drawable.ic_launcher);
+        nb.setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
         if(defaultPrefs.getBoolean("monthly_reminder_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_MONTHLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));

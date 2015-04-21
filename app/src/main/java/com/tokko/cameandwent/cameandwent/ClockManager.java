@@ -90,7 +90,7 @@ public class ClockManager {
             nb.setVibrate(new long[]{0});
         nb.setContentTitle(s);
         nb.setAutoCancel(true);
-        nb.setSmallIcon(R.drawable.ic_launcher);
+        nb.setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
         if(defaultPrefs.getBoolean("notifications_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT));
