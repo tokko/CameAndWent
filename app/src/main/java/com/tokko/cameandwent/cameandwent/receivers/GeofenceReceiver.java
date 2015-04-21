@@ -68,6 +68,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
                 }
                 cm.clockOut();
             }
+            //TODO: remove geofences for deleted locations, perhaps by broadcastreceiver?
         }
       // else
         //    throw new IllegalStateException("Unknown action for service: " + intent.getAction());
