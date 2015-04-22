@@ -228,7 +228,7 @@ public class CountDownManagerTest {
         for(int i = 0; i<hoursLeft*DateTimeConstants.MINUTES_PER_HOUR; i++){
             int remainder = hoursLeft * DateTimeConstants.MILLIS_PER_HOUR - i*DateTimeConstants.MILLIS_PER_MINUTE;
             context.sendBroadcast(new Intent(CountDownManager.ACTION_COUNTDOWN_TICK));
-            String progressString = String.format("Time remaining: %s", TimeConverter.formatInterval((long) remainder));
+            String progressString = String.format("Time remaining: %s", TimeConverter.formatInterval((long) -remainder));
 
             Assert.assertEquals("Expected one notification", 1, manager.size());
 
