@@ -26,14 +26,13 @@ import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import java.util.List;
 
 
-public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
+public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     public static final String ACTION = "GEOFENCE_ACTION";
     public static final String ACTIVATE_GEOFENCE = "ACTIVATE_GEOFENCE";
     public static final String DEACTIVATE_GEOFENCE = "DEACTIVATE_GEOFENCE";
 
     private GoogleApiClient googleApiClient;
     private GeofencingRequest request;
-    private boolean enabled;
     private Context context;
 
 
@@ -76,7 +75,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
 
     public void registerGeofences() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        enabled = sp.getBoolean("enabled", false);
+        boolean enabled = sp.getBoolean("enabled", false);
      	//String[] location = sp.getString("origin", "").split(";");
         if (!enabled) return;
         googleApiClient = new GoogleApiClient.Builder(context)
@@ -112,7 +111,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
                     requestBuilder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
                     requestBuilder.addGeofence(fence);
                     request = requestBuilder.build();
-                    if(enabled)
+                    if(sp.getBoolean("enabled", false))
                         LocationServices.GeofencingApi.addGeofences(googleApiClient, request, pendingIntent);
                     else
                         LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
@@ -132,18 +131,4 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
-
-    @Override
-    public void onResult(Status status) {
-        if(status.isSuccess())
-            Toast.makeText(context, "Geofence added", Toast.LENGTH_SHORT).show();
-        if(!status.isSuccess())
-            Toast.makeText(context, "Geofence add failed", Toast.LENGTH_SHORT).show();
-        if(status.isCanceled())
-            Toast.makeText(context, "Geofence add canceled", Toast.LENGTH_SHORT).show();
-        if(status.isInterrupted())
-            Toast.makeText(context, "Geofence add interrupted", Toast.LENGTH_SHORT).show();
-
-    }
-
 }
