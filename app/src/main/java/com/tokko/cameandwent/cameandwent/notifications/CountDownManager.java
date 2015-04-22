@@ -99,7 +99,7 @@ public class CountDownManager extends BroadcastReceiver{
         int currentDuration = (int) getCurrentDuration(context);
         int remainder = duration - currentDuration;
         notificationBuilder.setProgress(duration, currentDuration, false);
-        notificationBuilder.setContentText(String.format("Time remaining: %s", TimeConverter.formatInterval((long)remainder)));
+        notificationBuilder.setContentText(String.format("Time remaining: %s", TimeConverter.formatInterval((long)-remainder)));
         getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
