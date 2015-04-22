@@ -30,6 +30,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     public static final String ACTION = "GEOFENCE_ACTION";
     public static final String ACTIVATE_GEOFENCE = "ACTIVATE_GEOFENCE";
     public static final String DEACTIVATE_GEOFENCE = "DEACTIVATE_GEOFENCE";
+    public static final String EXTRA_ID = "EXTRA_ID";
 
     private GoogleApiClient googleApiClient;
     private GeofencingRequest request;
@@ -43,7 +44,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             registerGeofences();
         }
         else if(intent.getAction().equals(DEACTIVATE_GEOFENCE)){
-            registerGeofences();
+            deregisterGeofence(intent.getLongExtra(EXTRA_ID, -1));
         }
         else{// if(intent.getAction().equals(ACTION)) {
             if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("enabled", true)) return;
@@ -74,16 +75,31 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     }
 
     public void registerGeofences() {
+        registerGeofences(this);
+    }
+
+    public void registerGeofences(GoogleApiClient.ConnectionCallbacks callbacks) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         boolean enabled = sp.getBoolean("enabled", false);
      	//String[] location = sp.getString("origin", "").split(";");
         if (!enabled) return;
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
+                .addConnectionCallbacks(callbacks)
                 .addOnConnectionFailedListener(this)
                 .build();
         googleApiClient.connect();
+    }
+
+    public void deregisterGeofence(final long id){
+        registerGeofences(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(Bundle bundle) {
+                LocationServices.GeofencingApi.removeGeofences(googleApiClient, getPendingIntent(id));
+            }
+            @Override
+            public void onConnectionSuspended(int i) {}
+        });
     }
 
     @Override
@@ -94,7 +110,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             Cursor c  = context.getContentResolver().query(CameAndWentProvider.URI_TAGS, null, null, null, null);
             for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
                 long id = c.getLong(c.getColumnIndex(CameAndWentProvider.ID));
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, GeofenceReceiver.class).setAction(ACTION + id), PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingIntent = getPendingIntent(id);
                 LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
 
                 double longitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE));
@@ -120,6 +136,10 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             c.close();
         }
         googleApiClient.disconnect();
+    }
+
+    private PendingIntent getPendingIntent(long id) {
+        return PendingIntent.getBroadcast(context, 0, new Intent(context, GeofenceReceiver.class).setAction(ACTION + id), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.tokko.cameandwent.cameandwent.locationtags;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
 
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
@@ -152,6 +154,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
                 break;
             case R.id.locationtageditor_DeleteButton:
                 getActivity().getContentResolver().delete(CameAndWentProvider.URI_TAGS, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+                getActivity().sendBroadcast(new Intent(GeofenceReceiver.DEACTIVATE_GEOFENCE).putExtra(GeofenceReceiver.EXTRA_ID, id));
                 dismiss();
                 break;
         }
