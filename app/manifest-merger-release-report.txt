@@ -71,7 +71,7 @@ action#android.intent.action.BOOT_COMPLETED
 ADDED from AndroidManifest.xml:29:17
 	android:name
 		ADDED from AndroidManifest.xml:29:25
-receiver#com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver
+receiver#com.tokko.cameandwent.cameandwent.receivers.GeofenceService
 ADDED from AndroidManifest.xml:33:9
 	android:enabled
 		ADDED from AndroidManifest.xml:34:13

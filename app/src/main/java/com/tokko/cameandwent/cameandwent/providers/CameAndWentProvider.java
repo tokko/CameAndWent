@@ -171,6 +171,7 @@ public class CameAndWentProvider extends ContentProvider {
         seed(db.getWritableDatabase());
     }
     public void seed(SQLiteDatabase sdb){
+        if(!BuildConfig.FLAVOR.equals("mock")) return;
         Log.d("Provider", "Seeding");
         DateTime dtNow = new DateTime();
 

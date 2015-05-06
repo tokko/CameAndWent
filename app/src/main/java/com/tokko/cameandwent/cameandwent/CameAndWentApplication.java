@@ -12,7 +12,7 @@ import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
-import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
+import com.tokko.cameandwent.cameandwent.receivers.GeofenceService;
 
 public class CameAndWentApplication extends Application {
 
@@ -24,7 +24,7 @@ public class CameAndWentApplication extends Application {
         new ReminderScheduler(this).scheduleWeeklyReminder();
         new ReminderScheduler(this).scheduleMonthlyReminder();
         new CountDownManager(this).startCountDown();
-        sendBroadcast(new Intent(getApplicationContext(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
+        startService(new Intent(getApplicationContext(), GeofenceService.class).setAction(GeofenceService.ACTIVATE_GEOFENCE));
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -40,7 +40,7 @@ public class CameAndWentApplication extends Application {
         };
         getContentResolver().registerContentObserver(CameAndWentProvider.URI_DURATIONS, true, obs);
         getContentResolver().registerContentObserver(CameAndWentProvider.URI_LOG_ENTRIES, true, obs);
-        if(BuildConfig.DEBUG){
+        if(BuildConfig.FLAVOR.equals("mock")){
             getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.SEED_METHOD, null, null);
         }
     }

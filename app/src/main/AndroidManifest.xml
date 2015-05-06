@@ -47,8 +47,8 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".receivers.GeofenceReceiver"
+        <service
+            android:name=".receivers.GeofenceService"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="GEOFENCE_ACTION" />
@@ -57,7 +57,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </receiver>
+        </service>
 
         <receiver
             android:name=".notifications.ReminderScheduler"
