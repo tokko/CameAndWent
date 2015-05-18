@@ -171,14 +171,12 @@ public class CameAndWentProvider extends ContentProvider {
         seed(db.getWritableDatabase());
     }
     public void seed(SQLiteDatabase sdb){
-        if(!BuildConfig.FLAVOR.equals("mock")) return;
         Log.d("Provider", "Seeding");
         DateTime dtNow = new DateTime();
 
-        DateTime dt = getSeedDateTime();
         ArrayList<ContentValues> logEntries = new ArrayList<>();
         ArrayList<ContentValues> timeTables = new ArrayList<>();
-        for(; dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
+        for(DateTime dt = getSeedDateTime(); dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
             if(dt.getDayOfWeek() == DateTimeConstants.SATURDAY || dt.getDayOfWeek() == DateTimeConstants.SUNDAY) continue;
             ContentValues cv = new ContentValues();
             cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
