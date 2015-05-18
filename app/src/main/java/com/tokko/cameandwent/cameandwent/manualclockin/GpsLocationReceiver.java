@@ -10,7 +10,7 @@ import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
-import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.R;
 
 public class GpsLocationReceiver extends BroadcastReceiver {

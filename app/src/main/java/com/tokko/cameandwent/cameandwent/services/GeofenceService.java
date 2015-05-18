@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,7 +18,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 
 import java.util.List;
@@ -46,10 +47,10 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
         }
         else{// if(intent.getAction().equals(ACTION)) {
             if(!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("enabled", true)) return;
-            GeofencingEvent event = GeofencingEvent.fromIntent(intent);
+            final GeofencingEvent event = GeofencingEvent.fromIntent(intent);
             Log.d("recvr", "Intent fired");
             int transition = event.getGeofenceTransition();
-            ClockManager cm = new ClockManager(getApplicationContext());
+            final ClockManager cm = new ClockManager(getApplicationContext());
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Log.d("recvr", "entered");
                 List<Geofence> triggerList = event.getTriggeringGeofences();
@@ -64,7 +65,28 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
                     if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER))
                         return;
                 }
-                cm.clockOut();
+
+                registerGeofences(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle bundle) {
+                        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                        int radius = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("radius", ""));
+                        List<Geofence> triggerList = event.getTriggeringGeofences();
+                        int id = Integer.valueOf(triggerList.get(0).getRequestId().split("/")[1]);
+                        Cursor c = GeofenceService.this.getContentResolver().query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null, null);
+                        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                            float[] res = new float[0];
+                            Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE)), c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE)), res);
+                            if (radius <= res[0])
+                                cm.clockOut();
+                        }
+                        c.close();
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                    }
+                });
             }
             //TODO: remove geofences for deleted locations, perhaps by broadcastreceiver?
         }
