@@ -20,7 +20,11 @@ import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class CountDownManager extends BroadcastReceiver{
     public static final String ACTION_COUNTDOWN_TICK = "com.tokko.cameandwent.ACTION_COUNTDOWN_TICK";
@@ -98,8 +102,13 @@ public class CountDownManager extends BroadcastReceiver{
         int duration = (int) TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
         int currentDuration = (int) getCurrentDuration(context);
         int remainder = duration - currentDuration;
+        long timeToLeave = TimeConverter.getCurrentTime().getMillis() + remainder;
+        DateTime dt = new DateTime(timeToLeave);
+        String timeToLeaveString = "You may leave by: " + new SimpleDateFormat("HH:mm").format(new Date(timeToLeave));
+        if(remainder <= 0)
+            timeToLeaveString = "You may leave now";
         notificationBuilder.setProgress(duration, currentDuration, false);
-        notificationBuilder.setContentText(String.format("Time remaining: %s", TimeConverter.formatInterval((long)-remainder)));
+        notificationBuilder.setContentText(String.format("Time remaining: %s\n%s", TimeConverter.formatInterval((long) -remainder), timeToLeaveString));
         getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
