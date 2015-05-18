@@ -48,7 +48,7 @@
         </receiver>
 
         <service
-            android:name=".receivers.GeofenceService"
+            android:name=".services.GeofenceService"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="GEOFENCE_ACTION" />

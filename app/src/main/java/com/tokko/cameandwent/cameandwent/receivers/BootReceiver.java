@@ -6,6 +6,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import android.widget.Toast;
 
 import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
+import com.tokko.cameandwent.cameandwent.services.GeofenceService;
 
 public class BootReceiver extends WakefulBroadcastReceiver {
 

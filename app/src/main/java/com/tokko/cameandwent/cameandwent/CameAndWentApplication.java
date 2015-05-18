@@ -12,7 +12,7 @@ import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
-import com.tokko.cameandwent.cameandwent.receivers.GeofenceService;
+import com.tokko.cameandwent.cameandwent.services.GeofenceService;
 
 public class CameAndWentApplication extends Application {
 

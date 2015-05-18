@@ -1,4 +1,4 @@
-package com.tokko.cameandwent.cameandwent.receivers;
+package com.tokko.cameandwent.cameandwent.services;
 
 import android.app.IntentService;
 import android.app.PendingIntent;

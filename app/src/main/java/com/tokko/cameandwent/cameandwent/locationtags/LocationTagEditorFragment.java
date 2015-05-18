@@ -19,7 +19,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
-import com.tokko.cameandwent.cameandwent.receivers.GeofenceService;
+import com.tokko.cameandwent.cameandwent.services.GeofenceService;
 
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
