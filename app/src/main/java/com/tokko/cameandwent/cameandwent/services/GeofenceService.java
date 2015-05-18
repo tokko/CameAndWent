@@ -77,7 +77,7 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                             float[] res = new float[0];
                             Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE)), c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE)), res);
-                            if (radius <= res[0])
+                            if (radius >= res[0])
                                 cm.clockOut();
                         }
                         c.close();
