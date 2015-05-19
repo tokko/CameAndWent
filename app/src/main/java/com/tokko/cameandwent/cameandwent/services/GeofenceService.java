@@ -99,15 +99,21 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
     }
 
     public void registerGeofences() {
-        registerGeofences(this);
+        registerGeofences(this, this);
     }
 
+    public void registerGeofences(Context context) {
+        registerGeofences(context, this);
+    }
     public void registerGeofences(GoogleApiClient.ConnectionCallbacks callbacks) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        registerGeofences(this, callbacks);
+    }
+    public void registerGeofences(Context context, GoogleApiClient.ConnectionCallbacks callbacks) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
         boolean enabled = sp.getBoolean("enabled", false);
      	//String[] location = sp.getString("origin", "").split(";");
         if (!enabled) return;
-        googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+        googleApiClient = new GoogleApiClient.Builder(context.getApplicationContext())
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(callbacks)
                 .addOnConnectionFailedListener(this)
