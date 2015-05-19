@@ -75,8 +75,12 @@ public class GeofenceService extends IntentService implements GoogleApiClient.Co
                         int id = Integer.valueOf(triggerList.get(0).getRequestId().split("/")[1]);
                         Cursor c = GeofenceService.this.getContentResolver().query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null, null);
                         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                            float[] res = new float[0];
-                            Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE)), c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE)), res);
+                            float[] res = new float[1];
+                            double toLatitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE));
+                            double toLongitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE));
+                            double fromLatitude = lastLocation.getLatitude();
+                            double fromLongitude = lastLocation.getLongitude();
+                            Location.distanceBetween(fromLatitude, fromLongitude, toLatitude, toLongitude, res);
                             if (radius <= res[0])
                                 cm.clockOut();
                         }
