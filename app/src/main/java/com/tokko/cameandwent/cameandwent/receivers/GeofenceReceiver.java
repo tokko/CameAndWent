@@ -26,7 +26,7 @@ import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import java.util.List;
 
 
-public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
+public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     public static final String ACTION = "GEOFENCE_ACTION";
     public static final String ACTIVATE_GEOFENCE = "ACTIVATE_GEOFENCE";
     public static final String DEACTIVATE_GEOFENCE = "DEACTIVATE_GEOFENCE";
@@ -125,19 +125,6 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onResult(Status status) {
-        if(status.isSuccess())
-            Toast.makeText(context, "Geofence added", Toast.LENGTH_SHORT).show();
-        if(!status.isSuccess())
-            Toast.makeText(context, "Geofence add failed", Toast.LENGTH_SHORT).show();
-        if(status.isCanceled())
-            Toast.makeText(context, "Geofence add canceled", Toast.LENGTH_SHORT).show();
-        if(status.isInterrupted())
-            Toast.makeText(context, "Geofence add interrupted", Toast.LENGTH_SHORT).show();
 
     }
 
