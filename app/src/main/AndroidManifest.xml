@@ -49,6 +49,7 @@
 
         <receiver
             android:name=".receivers.GeofenceReceiver"
+            android:permission="android.permission.ACCESS_FINE_LOCATION"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="GEOFENCE_ACTION" />
@@ -61,6 +62,7 @@
 
         <receiver
             android:name=".notifications.ReminderScheduler"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="ACTION_WEEKLY_REMINDER" />
