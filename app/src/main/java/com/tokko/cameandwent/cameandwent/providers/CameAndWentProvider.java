@@ -174,10 +174,9 @@ public class CameAndWentProvider extends ContentProvider {
         Log.d("Provider", "Seeding");
         DateTime dtNow = new DateTime();
 
-        DateTime dt = getSeedDateTime();
         ArrayList<ContentValues> logEntries = new ArrayList<>();
         ArrayList<ContentValues> timeTables = new ArrayList<>();
-        for(; dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
+        for(DateTime dt = getSeedDateTime(); dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
             if(dt.getDayOfWeek() == DateTimeConstants.SATURDAY || dt.getDayOfWeek() == DateTimeConstants.SUNDAY) continue;
             ContentValues cv = new ContentValues();
             cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
@@ -417,7 +416,7 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 60;
+        private static final int DATABASE_VERSION = 61;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +

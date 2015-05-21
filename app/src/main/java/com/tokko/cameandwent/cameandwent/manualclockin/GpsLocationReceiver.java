@@ -10,8 +10,9 @@ import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
-import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.services.GeofenceService;
 
 public class GpsLocationReceiver extends BroadcastReceiver {
     private static final String ACTION_CLOCKOUT = "com.tokko.cameandwent.ACTION_CLOCKOUT_FROM_NOTIFICATION";
@@ -23,6 +24,7 @@ public class GpsLocationReceiver extends BroadcastReceiver {
         if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("clockoutquestion", false)) return;
 
         if(intent.getAction().equals("android.location.PROVIDERS_CHANGED")){
+            new GeofenceService().registerGeofences(context);
             if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("enabled", false)) return;
             boolean clockedIn = context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false);
 
