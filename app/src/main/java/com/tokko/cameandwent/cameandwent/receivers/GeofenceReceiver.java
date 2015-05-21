@@ -79,7 +79,6 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         enabled = sp.getBoolean("enabled", false);
         String radiuS = sp.getString("radius", null);
-     	//String[] location = sp.getString("origin", "").split(";");
         if (!enabled || radiuS == null) return;
         Cursor c  = context.getContentResolver().query(CameAndWentProvider.URI_TAGS, null, null, null, null);
         for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
