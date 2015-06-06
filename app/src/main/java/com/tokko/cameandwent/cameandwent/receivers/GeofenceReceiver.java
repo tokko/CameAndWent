@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent.receivers;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,14 +15,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
+import org.joda.time.DurationFieldType;
 
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     public static final String ACTION = "GEOFENCE_ACTION";
     public static final String ACTIVATE_GEOFENCE = "ACTIVATE_GEOFENCE";
     public static final String DEACTIVATE_GEOFENCE = "DEACTIVATE_GEOFENCE";
+    public static final String DELAYED_DEACTIVATION = "DELAYED_DEACTIVATION";
 
     private PendingIntent pendingIntent;
     private GoogleApiClient googleApiClient;
@@ -42,6 +45,10 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
     public void onReceive(Context context, Intent intent) {
         this.context = context;
         pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, GeofenceReceiver.class).setAction(ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(DELAYED_DEACTIVATION);
+        PendingIntent delayedClockoutIntent = PendingIntent.getBroadcast(context, 0, i, 0);
+        ClockManager cm = new ClockManager(context);
         if(intent.getAction().equals(ACTIVATE_GEOFENCE)){
             registerGeofence();
         }
@@ -53,26 +60,35 @@ public class GeofenceReceiver extends BroadcastReceiver implements GoogleApiClie
             GeofencingEvent event = GeofencingEvent.fromIntent(intent);
             Log.d("recvr", "Intent fired");
             int transition = event.getGeofenceTransition();
-            ClockManager cm = new ClockManager(context);
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Log.d("recvr", "entered");
+                am.cancel(delayedClockoutIntent);
                 List<Geofence> triggerList = event.getTriggeringGeofences();
                 for (Geofence fence : triggerList){
                     cm.clockIn(Integer.valueOf(fence.getRequestId().split("/")[1]));
                 }
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                Log.d("recvr", "exited");
-                if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("clockoutquestion", false)){
-                    LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-                    if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                        return;
-                }
-                cm.clockOut();
+                if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("delayed_clockout", true))
+                    clockout(context, cm);
+                else
+                    am.set(AlarmManager.RTC_WAKEUP, TimeConverter.getCurrentTime().withFieldAdded(DurationFieldType.minutes(), 5).getMillis(), delayedClockoutIntent);
             }
         }
+        else if(intent.getAction().equals(DELAYED_DEACTIVATION))
+            clockout(context, cm);
         else
             throw new IllegalStateException("Unknown action for service: " + intent.getAction());
+    }
+
+    private void clockout(Context context, ClockManager cm) {
+        Log.d("recvr", "exited");
+        if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("clockoutquestion", false)){
+            LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                return;
+        }
+        cm.clockOut();
     }
 
     public void registerGeofence() {
