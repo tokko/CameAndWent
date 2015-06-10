@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
@@ -228,7 +229,6 @@ public class CountDownManagerTest {
         for(int i = 0; i<hoursLeft*DateTimeConstants.MINUTES_PER_HOUR; i++){
             int remainder = hoursLeft * DateTimeConstants.MILLIS_PER_HOUR - i*DateTimeConstants.MILLIS_PER_MINUTE;
             context.sendBroadcast(new Intent(CountDownManager.ACTION_COUNTDOWN_TICK));
-            String progressString = String.format("Time balance: %s", TimeConverter.formatInterval((long) remainder));
 
             Assert.assertEquals("Expected one notification", 1, manager.size());
 
@@ -238,7 +238,6 @@ public class CountDownManagerTest {
             ShadowNotification shadowNotification = Shadows.shadowOf(notification);
             Assert.assertNotNull("Expected shadow notification object", shadowNotification);
             Assert.assertEquals("Workday countdown", shadowNotification.getContentTitle());
-            Assert.assertEquals(progressString, shadowNotification.getContentText());
 
             int nProgress = shadowNotification.getProgress().progress;
             Assert.assertEquals(startDuration + i * DateTimeConstants.MILLIS_PER_MINUTE, nProgress, 10 * DateTimeConstants.MILLIS_PER_SECOND);
