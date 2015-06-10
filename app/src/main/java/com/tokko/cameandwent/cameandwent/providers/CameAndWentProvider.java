@@ -463,7 +463,7 @@ public class CameAndWentProvider extends ContentProvider {
         @Override
         public void onOpen(SQLiteDatabase db) {
             super.onOpen(db);
-            if(BuildConfig.DEBUG){
+            if(BuildConfig.BUILD_TYPE.equals("mock")){
                 db.execSQL("DROP VIEW IF EXISTS " + VIEW_DURATIONS);
                 db.execSQL("DROP VIEW IF EXISTS " + VIEW_LOG);
                 db.execSQL("DROP VIEW IF EXISTS " + VIEW_TIME_TABLE_DURATIONS);

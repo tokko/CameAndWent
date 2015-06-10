@@ -48,8 +48,8 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".receivers.GeofenceReceiver"
+        <service
+            android:name=".services.GeofenceService"
             android:permission="android.permission.ACCESS_FINE_LOCATION"
             android:enabled="true" >
             <intent-filter>
@@ -60,7 +60,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </receiver>
+        </service>
 
         <receiver
             android:name=".notifications.ReminderScheduler"
