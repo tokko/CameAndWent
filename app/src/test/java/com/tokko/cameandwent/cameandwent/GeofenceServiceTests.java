@@ -33,6 +33,7 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import roboguice.RoboGuice;
 
@@ -48,6 +49,7 @@ public class GeofenceServiceTests {
     private GeofenceServiceMock service;
         private ClockManager mockClockManager;
     private Intent exitIntent;
+    private Intent enterIntent;
 
     @Before
     public void setup(){
@@ -65,8 +67,8 @@ public class GeofenceServiceTests {
         service = new GeofenceServiceMock();
         RoboGuice.injectMembers(RuntimeEnvironment.application, service);
         String transitionKey = "com.google.android.location.intent.extra.transition";
-        int transition = Geofence.GEOFENCE_TRANSITION_EXIT;
-        exitIntent = new Intent(RuntimeEnvironment.application.getApplicationContext(), GeofenceService.class).setAction(GeofenceService.ACTION).putExtra(transitionKey, transition);
+        exitIntent = new Intent(RuntimeEnvironment.application.getApplicationContext(), GeofenceService.class).setAction(GeofenceService.ACTION).putExtra(transitionKey, Geofence.GEOFENCE_TRANSITION_EXIT);
+        enterIntent = new Intent(RuntimeEnvironment.application.getApplicationContext(), GeofenceService.class).setAction(GeofenceService.ACTION).putExtra(transitionKey, Geofence.GEOFENCE_TRANSITION_ENTER);
     }
 
     @Test
@@ -83,13 +85,25 @@ public class GeofenceServiceTests {
         service.onHandleIntent(exitIntent);
         verify(mockClockManager, never()).clockOut();
 
-        AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
-        ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
-        ShadowAlarmManager.ScheduledAlarm nextAlarm = shadowAlarmManager.getScheduledAlarms().get(0);
+        ShadowAlarmManager.ScheduledAlarm nextAlarm = getScheduledAlarms().get(0);
         Assert.assertEquals(TimeConverter.CURRENT_TIME + 5* DateTimeConstants.MILLIS_PER_MINUTE, nextAlarm.triggerAtTime);
         Assert.assertEquals(0, nextAlarm.interval);
         ShadowPendingIntent spi = Shadows.shadowOf(nextAlarm.operation);
         Assert.assertEquals(GeofenceService.DELAYED_DEACTIVATION, spi.getSavedIntent().getAction());
+    }
+
+    private List<ShadowAlarmManager.ScheduledAlarm> getScheduledAlarms() {
+        AlarmManager alarmManager = (AlarmManager) RuntimeEnvironment.application.getSystemService(Context.ALARM_SERVICE);
+        ShadowAlarmManager shadowAlarmManager = Shadows.shadowOf(alarmManager);
+        return shadowAlarmManager.getScheduledAlarms();
+    }
+
+    @Test
+    public void delayedClockout_ClockInCancelsAlarm(){
+        delayedClockout_AlarmIsScheduled();
+        service.onHandleIntent(enterIntent);
+        List<ShadowAlarmManager.ScheduledAlarm> scheduledAlarms = getScheduledAlarms();
+        Assert.assertEquals(0, scheduledAlarms.size());
     }
 
     private class GeofenceServiceMock extends GeofenceService{

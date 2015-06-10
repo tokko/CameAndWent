@@ -61,12 +61,11 @@ public class GeofenceService extends RoboIntentService implements GoogleApiClien
         else{// if(intent.getAction().equals(ACTION)) {
             if(!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("enabled", true)) return;
             final GeofencingEvent event = GeofencingEvent.fromIntent(intent);
-            Log.d("recvr", "Intent fired");
             int transition = event.getGeofenceTransition();
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                Log.d("recvr", "entered");
-                List<Geofence> triggerList = event.getTriggeringGeofences();
                 am.cancel(delayedClockoutIntent);
+                List<Geofence> triggerList = event.getTriggeringGeofences();
+                if(triggerList == null) return;
                 for (Geofence fence : triggerList){
                     cm.clockIn(Integer.valueOf(fence.getRequestId().split("/")[1]));
                 }
