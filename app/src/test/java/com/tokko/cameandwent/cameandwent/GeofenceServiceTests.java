@@ -54,7 +54,7 @@ public class GeofenceServiceTests {
     @Before
     public void setup(){
         sharedPreferences = ShadowPreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application.getApplicationContext());
-        sharedPreferences.edit()
+        sharedPreferences.edit().clear()
                 .putBoolean("enabled", true)
                 .apply();
         mockClockManager = mock(ClockManager.class);
@@ -104,6 +104,13 @@ public class GeofenceServiceTests {
         service.onHandleIntent(enterIntent);
         List<ShadowAlarmManager.ScheduledAlarm> scheduledAlarms = getScheduledAlarms();
         Assert.assertEquals(0, scheduledAlarms.size());
+    }
+
+    @Test
+    public void delayedAction_Clocksout(){
+        Intent delayedIntent = new Intent(GeofenceService.DELAYED_DEACTIVATION);
+        service.onHandleIntent(delayedIntent);
+        verify(mockClockManager).clockOut();
     }
 
     private class GeofenceServiceMock extends GeofenceService{
