@@ -109,7 +109,7 @@ public class CountDownManager extends BroadcastReceiver{
         if(leave.isBeforeNow())
             leaveS = "now";
         else
-            leaveS = new SimpleDateFormat("hh:MM").format(new Date(leave.getMillis()));
+            leaveS = new SimpleDateFormat("HH:mm").format(new Date(leave.getMillis()));
         notificationBuilder.setProgress(duration, currentDuration, false);
         notificationBuilder.setContentText(String.format("Time balance: %s\nYou may leave %s", TimeConverter.formatInterval((long)remainder), "by: " + leaveS));
         getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
