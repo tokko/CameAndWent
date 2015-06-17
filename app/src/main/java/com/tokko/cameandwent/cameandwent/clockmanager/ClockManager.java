@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.inject.Inject;
 import com.tokko.cameandwent.cameandwent.MainActivity;
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
@@ -29,6 +30,7 @@ public class ClockManager {
     private SharedPreferences sp;
     private CountDownManager countDownManager;
 
+    @Inject
     public ClockManager(Context context) {
         this.context = context;
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);

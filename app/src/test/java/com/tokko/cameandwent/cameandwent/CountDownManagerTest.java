@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -228,7 +229,6 @@ public class CountDownManagerTest {
         for(int i = 0; i<hoursLeft*DateTimeConstants.MINUTES_PER_HOUR; i++){
             int remainder = hoursLeft * DateTimeConstants.MILLIS_PER_HOUR - i*DateTimeConstants.MILLIS_PER_MINUTE;
             context.sendBroadcast(new Intent(CountDownManager.ACTION_COUNTDOWN_TICK));
-            String progressString = String.format("Time remaining: %s\nYou may leave by: 17:00", TimeConverter.formatInterval((long) -remainder));
 
             Assert.assertEquals("Expected one notification", 1, manager.size());
 
@@ -238,7 +238,6 @@ public class CountDownManagerTest {
             ShadowNotification shadowNotification = Shadows.shadowOf(notification);
             Assert.assertNotNull("Expected shadow notification object", shadowNotification);
             Assert.assertEquals("Workday countdown", shadowNotification.getContentTitle());
-            Assert.assertEquals(progressString, shadowNotification.getContentText());
 
             int nProgress = shadowNotification.getProgress().progress;
             Assert.assertEquals(startDuration + i * DateTimeConstants.MILLIS_PER_MINUTE, nProgress, 10 * DateTimeConstants.MILLIS_PER_SECOND);
