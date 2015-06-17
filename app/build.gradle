@@ -11,7 +11,7 @@ android {
         release {
             storeFile file("C:\\AndroidStudioProjects\\keystore.jks")
             storePassword props["storePass"]
-            keyAlias props["storeAlias"]
+            keyAlias props["releaseAlias"]
             keyPassword props["releasePass"]
         }
     }
