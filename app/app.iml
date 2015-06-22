@@ -8,49 +8,49 @@
     </facet>
     <facet type="android" name="Android">
       <configuration>
-        <option name="SELECTED_BUILD_VARIANT" value="release" />
+        <option name="SELECTED_BUILD_VARIANT" value="mock" />
         <option name="SELECTED_TEST_ARTIFACT" value="_unit_test_" />
-        <option name="ASSEMBLE_TASK_NAME" value="assembleRelease" />
-        <option name="COMPILE_JAVA_TASK_NAME" value="compileReleaseSources" />
-        <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleReleaseUnitTest" />
-        <option name="COMPILE_JAVA_TEST_TASK_NAME" value="compileReleaseUnitTestSources" />
+        <option name="ASSEMBLE_TASK_NAME" value="assembleMock" />
+        <option name="COMPILE_JAVA_TASK_NAME" value="compileMockSources" />
+        <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleMockUnitTest" />
+        <option name="COMPILE_JAVA_TEST_TASK_NAME" value="compileMockUnitTestSources" />
         <afterSyncTasks>
-          <task>generateReleaseSources</task>
+          <task>generateMockSources</task>
           <task>mockableAndroidJar</task>
         </afterSyncTasks>
         <option name="ALLOW_USER_CONFIGURATION" value="false" />
         <option name="MANIFEST_FILE_RELATIVE_PATH" value="/src/main/AndroidManifest.xml" />
         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
-        <option name="RES_FOLDERS_RELATIVE_PATH" value="file://$MODULE_DIR$/src/main/res" />
+        <option name="RES_FOLDERS_RELATIVE_PATH" value="file://$MODULE_DIR$/src/main/res;file://$MODULE_DIR$/src/mock/res" />
         <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/src/main/assets" />
       </configuration>
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/build/intermediates/classes/release" />
-    <output-test url="file://$MODULE_DIR$/build/intermediates/classes/test/release" />
+    <output url="file://$MODULE_DIR$/build/intermediates/classes/mock" />
+    <output-test url="file://$MODULE_DIR$/build/intermediates/classes/test/mock" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/release" isTestSource="false" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/aidl/release" isTestSource="false" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/release" isTestSource="false" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/release" isTestSource="false" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/release" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/generated/release" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/release/res" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/release/resources" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/release/assets" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/release/aidl" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/release/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/release/jni" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/release/rs" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/testRelease/res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/testRelease/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/testRelease/assets" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/testRelease/aidl" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/testRelease/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/testRelease/jni" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/testRelease/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/mock" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/aidl/mock" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/mock" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/mock" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/mock" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/generated/mock" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/mock/res" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/mock/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/mock/assets" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/mock/aidl" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/mock/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/mock/jni" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/mock/rs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/testMock/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/testMock/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/testMock/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/testMock/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/testMock/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/testMock/jni" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/testMock/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/assets" type="java-resource" />
@@ -140,8 +140,8 @@
     <orderEntry type="library" exported="" scope="TEST" name="mockito-core-1.10.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-plus-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="roboguice-3.0.1" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.12" level="project" />
     <orderEntry type="library" exported="" name="play-services-maps-7.5.0" level="project" />
   </component>

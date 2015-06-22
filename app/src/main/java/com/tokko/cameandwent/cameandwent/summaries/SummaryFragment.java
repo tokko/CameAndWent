@@ -181,7 +181,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     }
 
     private class SummaryCursorAdapter extends CursorTreeAdapter{
-        private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM");
+        private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM-EE");
         private Context context;
 
         public SummaryCursorAdapter(Context context) {
