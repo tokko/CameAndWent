@@ -207,6 +207,12 @@
             android:title="Delayed clockout"
             android:summary="Guards for false geofence exit transistions"
             android:key="delayed_clockout" />
+        <EditTextPreference
+            android:dependency="delayed_clockout"
+            android:defaultValue="5"
+            android:title="Minutes to delay clockout"
+            android:summary="Time between actual clockout and clockout in minutes"
+            android:key="delayed_clockout_time" />
     </PreferenceCategory>
 
 </PreferenceScreen>

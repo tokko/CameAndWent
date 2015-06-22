@@ -22,6 +22,7 @@ import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 
 import java.util.List;
@@ -72,10 +73,11 @@ public class GeofenceService extends RoboIntentService implements GoogleApiClien
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 boolean delayed = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("delayed_clockout", false);
+                int delayInMinutes = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("delayed_clockout_time", "5"));
                 if(!delayed)
                     clockout(getApplicationContext(), cm);
                 else
-                    am.setExact(AlarmManager.RTC_WAKEUP, TimeConverter.getCurrentTime().withFieldAdded(DurationFieldType.minutes(), 5).getMillis(), delayedClockoutIntent);
+                    am.setExact(AlarmManager.RTC_WAKEUP, TimeConverter.getCurrentTime().withFieldAdded(DurationFieldType.minutes(), delayInMinutes).getMillis(), delayedClockoutIntent);
             }
         }
     }
