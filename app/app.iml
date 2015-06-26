@@ -12,12 +12,9 @@
         <option name="SELECTED_TEST_ARTIFACT" value="_unit_test_" />
         <option name="ASSEMBLE_TASK_NAME" value="assembleMock" />
         <option name="COMPILE_JAVA_TASK_NAME" value="compileMockSources" />
+        <option name="SOURCE_GEN_TASK_NAME" value="generateMockSources" />
         <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleMockUnitTest" />
         <option name="COMPILE_JAVA_TEST_TASK_NAME" value="compileMockUnitTestSources" />
-        <afterSyncTasks>
-          <task>generateMockSources</task>
-          <task>mockableAndroidJar</task>
-        </afterSyncTasks>
         <option name="ALLOW_USER_CONFIGURATION" value="false" />
         <option name="MANIFEST_FILE_RELATIVE_PATH" value="/src/main/AndroidManifest.xml" />
         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
@@ -101,13 +98,13 @@
     <orderEntry type="library" exported="" name="commons-lang-2.4" level="project" />
     <orderEntry type="library" exported="" name="play-services-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-appinvite-7.5.0" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="commons-codec-1.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="icu4j-53.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="commons-codec-1.3" level="project" />
     <orderEntry type="library" exported="" name="support-v4-22.2.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-fitness-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-nearby-7.5.0" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="sqlite4java-0.282" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-tree-5.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="sqlite4java-0.282" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="shadows-core-3.0-rc2-21" level="project" />
     <orderEntry type="library" exported="" name="play-services-wearable-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-appstate-7.5.0" level="project" />
@@ -140,8 +137,8 @@
     <orderEntry type="library" exported="" scope="TEST" name="mockito-core-1.10.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-plus-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="roboguice-3.0.1" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="vtd-xml-2.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.12" level="project" />
     <orderEntry type="library" exported="" name="play-services-maps-7.5.0" level="project" />
   </component>

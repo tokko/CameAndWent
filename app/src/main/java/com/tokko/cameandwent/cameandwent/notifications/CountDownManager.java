@@ -101,7 +101,7 @@ public class CountDownManager extends BroadcastReceiver{
         notificationBuilder.setContentIntent(pendingIntent);
         int duration = (int) TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
         int currentDuration = (int) getCurrentDuration(context);
-        int remainder = duration - currentDuration;
+        int remainder = -(duration - currentDuration);
 
         long leaveBy = TimeConverter.getCurrentTime().getMillis() + remainder;
         DateTime leave = new DateTime(leaveBy);
