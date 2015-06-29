@@ -19,8 +19,8 @@ android {
             applicationId "com.tokko.cameandwent.cameandwent"
             minSdkVersion 19
             targetSdkVersion 22
-            versionCode 32
-            versionName "1.25"
+            versionCode 33
+            versionName "1.26"
             testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         }
     buildTypes {
