@@ -103,7 +103,7 @@ public class CountDownManager extends BroadcastReceiver{
         int currentDuration = (int) getCurrentDuration(context);
         int remainder = -(duration - currentDuration);
 
-        long leaveBy = TimeConverter.getCurrentTime().getMillis() + remainder;
+        long leaveBy = TimeConverter.getCurrentTime().getMillis() - remainder;
         DateTime leave = new DateTime(leaveBy);
         String leaveS;
         if(leave.isBeforeNow())
