@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 Properties props = new Properties()
-props.load(new FileInputStream("C:\\AndroidStudioProjects\\gradle.properties"))
+//props.load(new FileInputStream("C:\\AndroidStudioProjects\\gradle.properties"))
 //project.setProperty('props', props)
 
 android {
@@ -13,10 +13,12 @@ android {
 
     signingConfigs {
         release {
+            /*
             storeFile file("C:\\AndroidStudioProjects\\keystore.jks")
             storePassword props["storePass"]
             keyAlias props["releaseAlias"]
             keyPassword props["releasePass"]
+            */
         }
     }
         defaultConfig {
