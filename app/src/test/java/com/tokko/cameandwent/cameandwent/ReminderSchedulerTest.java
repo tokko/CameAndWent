@@ -204,5 +204,6 @@ public class ReminderSchedulerTest {
     public void scheduleMonthlyReminder_OnReceive_SchedulesNewAlarm(){
         RuntimeEnvironment.application.getApplicationContext().sendBroadcast(new Intent(ReminderScheduler.ACTION_MONTHLY_REMINDER).putExtra(ReminderScheduler.EXTRA_DELAY, 1L));
         assertAlarm_AtCorrectTime(monthlyAlarmTime, 1);
+        Assert.fail();
     }
 }
