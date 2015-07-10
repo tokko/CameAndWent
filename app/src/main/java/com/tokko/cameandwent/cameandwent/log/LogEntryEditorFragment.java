@@ -117,7 +117,8 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         }
         else
             id = getArguments().getLong(EXTRA_ID, -1);
-
+        if(id == -1)
+            isBulkCheckBox.setVisibility(View.VISIBLE);
     }
 
     @Override
