@@ -26,6 +26,7 @@ import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import org.joda.time.DateTime;
+import org.joda.time.DurationFieldType;
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
@@ -97,6 +98,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         dateButton.setOnClickListener(this);
         wentTimePicker.setIs24HourView(true);
         cameTimePicker.setIs24HourView(true);
+        selectEndDateButton.setOnClickListener(this);
         isBulkCheckBox.setOnCheckedChangeListener(this);
         DateTime dt = TimeConverter.getCurrentTime();
         dateButton.setText(dt.getYear() + "-" + dt.getMonthOfYear() + "-" + dt.getDayOfMonth());
@@ -221,23 +223,19 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
 
     @Override
     public void onClick(View v) {
+        DateTime dt;
         switch (v.getId()){
             case R.id.okButton:
-                final ContentValues cv = new ContentValues();
-                cv.put(CameAndWentProvider.ISBREAK, isBreakCheckBox.isChecked()?1:0);
-                cv.put(CameAndWentProvider.CAME, TimeConverter.parseDate(dateButton.getText().toString()).withTime(cameTimePicker.getCurrentHour(), cameTimePicker.getCurrentMinute(), 0, 0).getMillis());
-                cv.put(CameAndWentProvider.TAG, tagSpinner.getSelectedItemId());
-                if(wentContainer.getVisibility() == View.VISIBLE)
-                    cv.put(CameAndWentProvider.WENT, TimeConverter.parseDate(dateButton.getText().toString()).withTime(wentTimePicker.getCurrentHour(), wentTimePicker.getCurrentMinute(), 0, 0).getMillis());
-                if(id > -1)
-                    getActivity().getContentResolver().update(CameAndWentProvider.URI_LOG_ENTRIES, cv, CameAndWentProvider.ID + "=?", new String[]{String.valueOf(id)});
+                if(!isBulk) {
+                    singleOperation();
+                }
                 else
-                    getActivity().getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+                    bulkOperation();
             case R.id.cancelButton:
                 dismiss();
                 break;
             case R.id.date:
-                DateTime dt = TimeConverter.getCurrentTime();
+                dt = TimeConverter.getCurrentTime();
                 new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -245,7 +243,45 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                     }
                 }, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth()).show();
                 break;
+            case R.id.enddate:
+                dt = TimeConverter.getCurrentTime();
+                new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        selectEndDateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+                    }
+                }, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth()).show();
+                break;
         }
+    }
+
+    private void bulkOperation() {
+        DateTime date = TimeConverter.parseDate(dateButton.getText().toString());
+        DateTime endDate = TimeConverter.parseDate(selectEndDateButton.getText().toString());
+        long dailyDuration = TimeConverter.hoursAsLong(cameTimePicker.getCurrentHour()) + TimeConverter.minutesAsLong(cameTimePicker.getCurrentMinute());
+        date = date.withTime(8, 0, 0, 0);
+        DateTime endTime = date.plusMillis((int) dailyDuration);
+        for(; date.getDayOfYear() <= endDate.getDayOfYear(); date = date.withFieldAdded(DurationFieldType.days(), 1), endTime = endTime.withDayOfYear(date.getDayOfYear())){
+            ContentValues cv = new ContentValues();
+            cv.put(CameAndWentProvider.ISBREAK, 0);
+            cv.put(CameAndWentProvider.CAME, date.getMillis());
+            cv.put(CameAndWentProvider.WENT, endTime.getMillis());
+            cv.put(CameAndWentProvider.TAG, tagSpinner.getSelectedItemId());
+            getActivity().getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
+        }
+    }
+
+    private void singleOperation() {
+        final ContentValues cv = new ContentValues();
+        cv.put(CameAndWentProvider.ISBREAK, isBreakCheckBox.isChecked() ? 1 : 0);
+        cv.put(CameAndWentProvider.CAME, TimeConverter.parseDate(dateButton.getText().toString()).withTime(cameTimePicker.getCurrentHour(), cameTimePicker.getCurrentMinute(), 0, 0).getMillis());
+        cv.put(CameAndWentProvider.TAG, tagSpinner.getSelectedItemId());
+        if (wentContainer.getVisibility() == View.VISIBLE)
+            cv.put(CameAndWentProvider.WENT, TimeConverter.parseDate(dateButton.getText().toString()).withTime(wentTimePicker.getCurrentHour(), wentTimePicker.getCurrentMinute(), 0, 0).getMillis());
+        if (id > -1)
+            getActivity().getContentResolver().update(CameAndWentProvider.URI_LOG_ENTRIES, cv, CameAndWentProvider.ID + "=?", new String[]{String.valueOf(id)});
+        else
+            getActivity().getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
     }
 
     @Override
