@@ -5,17 +5,20 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.tokko.cameandwent.cameandwent.R;
@@ -23,6 +26,7 @@ import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import org.joda.time.DateTime;
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,7 +34,7 @@ import java.util.Date;
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
-public class LogEntryEditorFragment extends RoboDialogFragment implements View.OnClickListener, android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> {
+public class LogEntryEditorFragment extends RoboDialogFragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor>, CompoundButton.OnCheckedChangeListener {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private static final String EXTRA_ID = "extra_id";
     private static final String EXTRA_CAME = "extra_came";
@@ -46,10 +50,16 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
     @InjectView(R.id.log_edit_went_container) private LinearLayout wentContainer;
     @InjectView(R.id.date) private Button dateButton;
     @InjectView(R.id.logentryeditor_TagSpinner) private Spinner tagSpinner;
+    @InjectView(R.id.dailyduration_label) private TextView dailyDurationLabel;
+    @InjectView(R.id.start_date_label) private TextView startDateLabel;
+    @InjectView(R.id.end_date_label) private TextView endDateLabel;
+    @InjectView(R.id.enddate) private Button selectEndDateButton;
+    @InjectView(R.id.isBulkCheckBox) private CheckBox isBulkCheckBox;
 
     private CursorAdapter tagSpinnerAdapter;
     private long id;
     private long tagId = -1;
+    private boolean isBulk;
 
     public static LogEntryEditorFragment newInstance(long id){
         LogEntryEditorFragment f = new LogEntryEditorFragment();
@@ -87,6 +97,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         dateButton.setOnClickListener(this);
         wentTimePicker.setIs24HourView(true);
         cameTimePicker.setIs24HourView(true);
+        isBulkCheckBox.setOnCheckedChangeListener(this);
         DateTime dt = TimeConverter.getCurrentTime();
         dateButton.setText(dt.getYear() + "-" + dt.getMonthOfYear() + "-" + dt.getDayOfMonth());
 
@@ -234,5 +245,17 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                 }, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth()).show();
                 break;
         }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        isBulk = isChecked;
+        int visibility = isChecked ? View.VISIBLE : View.GONE;
+        dailyDurationLabel.setVisibility(visibility);
+        startDateLabel.setVisibility(visibility);
+        endDateLabel.setVisibility(visibility);
+        selectEndDateButton.setVisibility(visibility);
+        dailyDurationLabel.setText(isChecked ? "Daily duration:" : "Came:");
+        wentContainer.setVisibility(isChecked ? View.GONE : View.VISIBLE);
     }
 }
