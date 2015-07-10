@@ -240,18 +240,18 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                 new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        dateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+                        dateButton.setText(year + "-" + (monthOfYear+1) + "-" + dayOfMonth);
                     }
-                }, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth()).show();
+                }, dt.getYear(), dt.getMonthOfYear()-1, dt.getDayOfMonth()).show();
                 break;
             case R.id.enddate:
                 dt = TimeConverter.getCurrentTime();
                 new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        selectEndDateButton.setText(year + "-" + monthOfYear + "-" + dayOfMonth);
+                        selectEndDateButton.setText(year + "-" + (monthOfYear+1) + "-" + dayOfMonth);
                     }
-                }, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth()).show();
+                }, dt.getYear(), dt.getMonthOfYear()-1, dt.getDayOfMonth()).show();
                 break;
         }
     }
