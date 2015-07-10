@@ -26,6 +26,7 @@ import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 import org.w3c.dom.Text;
 
@@ -262,6 +263,7 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
         date = date.withTime(8, 0, 0, 0);
         DateTime endTime = date.plusMillis((int) dailyDuration);
         for(; date.getDayOfYear() <= endDate.getDayOfYear(); date = date.withFieldAdded(DurationFieldType.days(), 1), endTime = endTime.withDayOfYear(date.getDayOfYear())){
+            if(date.getDayOfWeek() == DateTimeConstants.SATURDAY ||date.getDayOfWeek() == DateTimeConstants.SUNDAY) continue;
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.ISBREAK, 0);
             cv.put(CameAndWentProvider.CAME, date.getMillis());
