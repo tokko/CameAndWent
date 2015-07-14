@@ -56,4 +56,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
+    compile 'org.jibx:jibx-tools:1.2.2'
 }
