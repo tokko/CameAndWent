@@ -1,17 +1,16 @@
-package peaccounting;
+package com.tokko.cameandwentpeaccounting.classes;
 
 /**
  * Schema fragment(s) for this class:
  * <pre>
- * &lt;xs:complexType xmlns:xs="http://www.w3.org/2001/XMLSchema"
- * name="client-invoice-template-reference">
+ * &lt;xs:complexType xmlns:xs="http://www.w3.org/2001/XMLSchema" name="event-reference">
  *   &lt;xs:sequence>
  *     &lt;xs:element type="xs:int" name="id"/>
  *   &lt;/xs:sequence>
  * &lt;/xs:complexType>
  * </pre>
  */
-public class ClientInvoiceTemplateReference{
+public class EventReference{
     private int id;
 
     /**

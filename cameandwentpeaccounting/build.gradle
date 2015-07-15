@@ -21,6 +21,10 @@ android {
             catch (FileNotFoundException ignored){}
         }
     }
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 22
+    }
     buildTypes {
         release {
             signingConfig signingConfigs.release
@@ -56,5 +60,10 @@ dependencies {
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
-    compile 'org.jibx:jibx-tools:1.2.2'
+    //compile 'javax.xml.bind:jaxb-api:2.2.12'
+    compile('org.simpleframework:simple-xml:2.7.+') {
+        exclude module: 'stax'
+        exclude module: 'stax-api'
+        exclude module: 'xpp3'
+    }
 }

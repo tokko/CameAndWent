@@ -1,4 +1,4 @@
-package peaccounting;
+package com.tokko.cameandwentpeaccounting.classes;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -100,8 +100,7 @@ public class PayrollRunCreate{
                 ArrayList<PayrollPayoutArticle>();
         private List<PayrollPayoutArticle> articlesSalaryList = new
                 ArrayList<PayrollPayoutArticle>();
-        private List<PayrollPayoutArticle> articlesProvisionList = new
-                ArrayList<PayrollPayoutArticle>();
+        private List<PayrollPayoutArticle> articlesProvisionList = new ArrayList<PayrollPayoutArticle>();
 
         /**
          * Get the 'user' element value.
