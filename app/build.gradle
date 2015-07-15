@@ -51,6 +51,14 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+apply plugin: 'me.tatarka.retrolambda'
+retrolambda {
+    oldJdk System.getenv("JAVA6_HOME") //TODO: necessary?
 }
 dependencies {
     repositories {
@@ -64,6 +72,14 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.google.android.gms:play-services:7.5.0'
+    //compile 'net.sourceforge.streamsupport:streamsupport:1.2.1'
+    compile 'com.annimon:stream:1.0.1'
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
+
+    compile('org.simpleframework:simple-xml:2.7.+') {
+        exclude module: 'stax'
+        exclude module: 'stax-api'
+        exclude module: 'xpp3'
+    }
 }

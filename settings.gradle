@@ -1,1 +1,1 @@
-include ':cameandwentpeaccounting', ':app'
+include ':app'
