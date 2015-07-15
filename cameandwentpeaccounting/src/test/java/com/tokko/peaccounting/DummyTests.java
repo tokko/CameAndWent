@@ -29,14 +29,6 @@ public class DummyTests{
             connection.setRequestProperty("X-Token", "Yps7G9VoayR3ess");
             try{
                 InputStream in = new BufferedInputStream(connection.getInputStream());
-                /*
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                byte b;
-                while((b = (byte) in.read()) > -1)
-                    byteArrayOutputStream.write(b);
-                String resp = new String(byteArrayOutputStream.toByteArray());
-                in.reset();
-                */
                 Object o = unmarshalMessage(in);
                 assertNotNull(o);
             }catch(Exception e){
