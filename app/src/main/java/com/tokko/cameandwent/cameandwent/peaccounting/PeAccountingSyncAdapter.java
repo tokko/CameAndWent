@@ -18,14 +18,6 @@ import com.tokko.cameandwent.cameandwent.peaccounting.classes.Project;
 import com.tokko.cameandwent.cameandwent.peaccounting.classes.Projects;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +25,6 @@ import static com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider.ID
 import static com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider.LOCAL_GUID;
 
 public class PeAccountingSyncAdapter extends AbstractThreadedSyncAdapter{
-    private static final String baseUrl = "http://my.accounting.pe/api/v1/";
     private static final String PEGUID = "964C4635-2F91-4578-B252-BE0C148A8272";
     private final ContentResolver contentResolver;
 
@@ -61,7 +52,7 @@ public class PeAccountingSyncAdapter extends AbstractThreadedSyncAdapter{
     private void syncProjects(ContentProviderClient provider){
         try{
             //noinspection ConstantConditions
-            List<Project> projects = get(Projects.class, "/company/%d/project", 269)
+            List<Project> projects = Networker.get(Projects.class, "/company/%d/project", 269)
                     .getProjectList();
             List<Integer> tagsIds = getTagIds(provider);
             List<Project> toUpdate = Stream.of(projects).filter(p -> tagsIds.contains(p.getId()))
@@ -91,29 +82,6 @@ public class PeAccountingSyncAdapter extends AbstractThreadedSyncAdapter{
         }
     }
 
-    private <T> T get(Class<T> clz, String queryString, Object... args){
-        String urlS = String.format(baseUrl + queryString, args);
-        try{
-            URL url = new URL(urlS);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("X-Token", "Yps7G9VoayR3ess");
-            InputStream in = null;
-            try{
-                in = new BufferedInputStream(connection.getInputStream());
-                Serializer serializer = new Persister();
-                return serializer.read(clz, in);
-            }catch(Exception e){
-                e.printStackTrace();
-            }finally{
-                if(in != null)
-                    in.close();
-                connection.disconnect();
-            }
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     private List<Integer> getTagIds(ContentProviderClient provider) throws RemoteException{
         Cursor tagCursor = provider.query(CameAndWentProvider.URI_TAGS, null, null, null, null);

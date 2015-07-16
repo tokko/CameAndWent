@@ -5,8 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 
+import com.tokko.cameandwent.cameandwent.peaccounting.classes.PayrollEvent;
+import com.tokko.cameandwent.cameandwent.peaccounting.classes.PayrollEventType;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
+
+import org.joda.time.DateTimeConstants;
+
+import java.math.BigDecimal;
+import java.sql.Date;
 
 public class PeAccountingOnClockOutReceiver extends BroadcastReceiver{
     public PeAccountingOnClockOutReceiver(){
@@ -33,6 +40,11 @@ public class PeAccountingOnClockOutReceiver extends BroadcastReceiver{
             long tagId = tags.getLong(tags.getColumnIndex(CameAndWentProvider.ID));
             tags.close();
             long duration = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
+            PayrollEvent payrollEvent = new PayrollEvent();
+            payrollEvent.setType(PayrollEventType.WORK_HOUR);
+            payrollEvent.setHours(new BigDecimal(duration / DateTimeConstants.MILLIS_PER_HOUR));
+            payrollEvent.setDate(new Date(date));
+            payrollEvent.setId((int) tagId);
 
         }
     }
