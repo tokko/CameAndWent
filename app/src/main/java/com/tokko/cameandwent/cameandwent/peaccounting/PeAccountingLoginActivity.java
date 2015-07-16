@@ -3,6 +3,7 @@ package com.tokko.cameandwent.cameandwent.peaccounting;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.View;
@@ -10,6 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+
+import org.joda.time.DateTimeConstants;
 
 import roboguice.inject.InjectView;
 
@@ -45,17 +49,12 @@ public class PeAccountingLoginActivity extends Activity implements View.OnClickL
         AccountManager accountManager =
                 (AccountManager) getApplicationContext().getSystemService(
                         ACCOUNT_SERVICE);
-        /*
-         * Add the account and account type, no password or user data
-         * If successful, return the Account object, otherwise report an error.
-         */
         if(accountManager.addAccountExplicitly(account, null, null)){
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
+            ContentResolver.addPeriodicSync(
+                    account,
+                    CameAndWentProvider.AUTHORITY,
+                    Bundle.EMPTY,
+                    DateTimeConstants.MILLIS_PER_DAY);
         }
         else{
             /*
