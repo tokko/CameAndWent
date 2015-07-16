@@ -1,10 +1,21 @@
 package com.tokko.cameandwent.cameandwent;
 
+import android.content.ContentProviderClient;
+import android.database.MatrixCursor;
+import android.net.Uri;
+import android.os.RemoteException;
+
+import com.tokko.cameandwent.cameandwent.peaccounting.PeAccountingSyncAdapter;
 import com.tokko.cameandwent.cameandwent.peaccounting.classes.PayrollEvent;
 import com.tokko.cameandwent.cameandwent.peaccounting.classes.PayrollEventType;
 import com.tokko.cameandwent.cameandwent.peaccounting.classes.Projects;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -17,7 +28,12 @@ import java.net.URL;
 import java.sql.Date;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 
+@RunWith(RobolectricTestRunner.class)
 public class PeTests{
     private static final String baseUrl = "http://my.accounting.pe/api/v1/";
 
@@ -29,8 +45,6 @@ public class PeTests{
         payrollEvent.setType(PayrollEventType.WORK_HOUR);
         Projects projects = get(Projects.class, "/company/%d/project", 269);
         assertNotNull(projects);
-
-
     }
 
     private <T> T get(Class<T> clz, String queryString, Object... args){
@@ -55,5 +69,16 @@ public class PeTests{
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Test
+    @Ignore("How do you?? I dont even :(")
+    public void sync() throws RemoteException{
+        PeAccountingSyncAdapter syncAdapter = new PeAccountingSyncAdapter(RuntimeEnvironment
+                                                                                  .application,
+                                                                          true);
+        ContentProviderClient provider = mock(ContentProviderClient.class);
+        given(provider.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).willReturn(new MatrixCursor(new String[]{}));
+        syncAdapter.onPerformSync(null, null, CameAndWentProvider.AUTHORITY, provider, null);
     }
 }
