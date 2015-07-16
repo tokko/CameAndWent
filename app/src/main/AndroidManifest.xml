@@ -8,8 +8,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <permission android:name="com.tokko.cameandwent.CAMEANDWENTPROVIDER"/>
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:name=".CameAndWentApplication"
@@ -35,10 +37,10 @@
                 <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name=".automaticbreaks.AutomaticBreakManager"
-                  android:enabled="true"
-                  android:exported="false">
+        <receiver
+            android:name=".automaticbreaks.AutomaticBreakManager"
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="ACTION_AUTOMATIC_BREAK"/>
             </intent-filter>
@@ -80,8 +82,8 @@
         <provider
             android:name=".providers.CameAndWentProvider"
             android:authorities="${applicationId}.CameAndWentProvider"
-            android:exported="true"
-            android:permission="com.tokko.cameandwent.CAMEANDWENTPROVIDER"/>
+            android:exported="false"
+            android:syncable="true"/>
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -98,7 +100,6 @@
         <activity
             android:name=".locationtags.LocationTagActivity"
             android:parentActivityName=".locationtags.LocationTagActivity" >
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".locationtags.LocationTagActivity" />
@@ -115,6 +116,32 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".peaccounting.AuthenticatorService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator"/>
+        </service>
+        <service
+            android:name=".peaccounting.SyncService"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter"/>
+        </service>
+
+        <activity android:name=".peaccounting.PeAccountingLoginActivity"/>
     </application>
 
 </manifest>

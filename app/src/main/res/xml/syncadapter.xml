@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sync-adapter
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountType="com.tokko.cameandwent.peaccounting"
+    android:allowParallelSyncs="false"
+    android:contentAuthority="${applicationId}.CameAndWentProvider"
+    android:isAlwaysSyncable="true"
+    android:supportsUploading="true"
+    android:userVisible="false"/>
