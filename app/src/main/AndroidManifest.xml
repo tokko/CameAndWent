@@ -136,12 +136,19 @@
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
+
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter"/>
         </service>
 
         <activity android:name=".peaccounting.PeAccountingLoginActivity"/>
+
+        <receiver
+            android:name=".peaccounting.PeAccountingOnClockOutReceiver"
+            android:enabled="true"
+            android:exported="false">
+        </receiver>
     </application>
 
 </manifest>
