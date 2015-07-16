@@ -46,6 +46,12 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     private double longitude = -1, latitude = -1;
     private String tag;
     private GoogleApiClient mGoogleApiClient;
+    private boolean isActive;
+    private String origin;
+
+    public static LocationTagEditorFragment newInstance(){
+        return newInstance(-1);
+    }
 
     public static LocationTagEditorFragment newInstance(long id) {
         LocationTagEditorFragment f = new LocationTagEditorFragment();
@@ -53,10 +59,6 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         b.putLong(EXTRA_ID, id);
         f.setArguments(b);
         return f;
-    }
-
-    public static LocationTagEditorFragment newInstance() {
-        return newInstance(-1);
     }
 
     @Override
@@ -77,12 +79,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.locationtageditorfragment, null);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
         cancelButton.setOnClickListener(this);
         okButton.setOnClickListener(this);
@@ -91,13 +88,33 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         populateUI();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putLong(EXTRA_ID, id);
-        outState.putDouble(EXTRA_LONGITUDE, longitude);
-        outState.putDouble(EXTRA_LATITUDE, latitude);
-        outState.putString(EXTRA_TAG_TITLE, tagTitleEditText.getText().toString());
+    private void populateUI(){
+        tagTitleEditText.setText(tag);
+        deleteButton.setEnabled(id != -1);
+        setCoordinates();
+        if(!origin.equals(CameAndWentProvider.LOCAL_GUID)) setExternalOriginMode();
+        else if(!isActive) lockEditor();
+    }
+
+    private void setCoordinates(){
+        if(longitude != -1 && latitude != -1){
+            longitudeTextView.setText(String.valueOf(longitude));
+            latitudeTextView.setText(String.valueOf(latitude));
+            coordinates.setVisibility(View.VISIBLE);
+            setLocationButton.setText("Reset Location");
+        }
+    }
+
+    private void setExternalOriginMode(){
+        tagTitleEditText.setEnabled(false);
+        deleteButton.setEnabled(false);
+    }
+
+    private void lockEditor(){
+        setLocationButton.setEnabled(false);
+        tagTitleEditText.setEnabled(false);
+        deleteButton.setEnabled(false);
+        okButton.setEnabled(false);
     }
 
     private void loadData(Bundle b){
@@ -118,22 +135,24 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         longitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE));
         latitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE));
         tag = c.getString(c.getColumnIndex(CameAndWentProvider.TAG));
+        isActive = c.getInt(c.getColumnIndex(CameAndWentProvider.ACTIVE)) == 1;
+        origin = c.getString(c.getColumnIndex(CameAndWentProvider.ORIGIN));
         c.close();
     }
 
-    private void populateUI() {
-        tagTitleEditText.setText(tag);
-        deleteButton.setEnabled(id != -1);
-        setCoordinates();
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
+    Bundle savedInstanceState){
+        return inflater.inflate(R.layout.locationtageditorfragment, null);
     }
 
-    private void setCoordinates() {
-        if(longitude != -1 && latitude != -1){
-            longitudeTextView.setText(String.valueOf(longitude));
-            latitudeTextView.setText(String.valueOf(latitude));
-            coordinates.setVisibility(View.VISIBLE);
-            setLocationButton.setText("Reset Location");
-        }
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        outState.putLong(EXTRA_ID, id);
+        outState.putDouble(EXTRA_LONGITUDE, longitude);
+        outState.putDouble(EXTRA_LATITUDE, latitude);
+        outState.putString(EXTRA_TAG_TITLE, tagTitleEditText.getText().toString());
     }
 
     @Override
