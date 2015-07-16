@@ -44,6 +44,9 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String RECREATE_METHOD = "recreate";
     public static final String MIGRATE_METHOD = "migrate";
     public static final String CLEAN_METHOD = "clean";
+    public static final String ACTIVE = "active";
+    public static final String ORIGIN = "origin";
+    public static final String LOCAL_GUID = "664777AF-473E-4FC3-9CA0-10BFF9C64BFC, ";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
     private static final String TABLE_LOG_NAME = "log";
     private static final String VIEW_DURATIONS = "durations";
@@ -185,19 +188,6 @@ public class CameAndWentProvider extends ContentProvider {
                 return ContentUris.withAppendedId(uri, id);
             default:
                 throw new IllegalArgumentException("Unknown URI");
-        }
-    }
-
-    private void notifyAllUris(){
-        Field[] fields = this.getClass().getFields();
-        try{
-            for(Field field : fields){
-                if(field.getName().startsWith("URI_")){
-                    getContext().getContentResolver().notifyChange((Uri) field.get(this), null);
-                }
-            }
-        }catch(IllegalAccessException e){
-            e.printStackTrace();
         }
     }
 
@@ -390,14 +380,6 @@ public class CameAndWentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(URI_DURATIONS, null);
     }
 
-    private long populateContentValuesWithTimeInfo(long came, ContentValues values) {
-        long date = TimeConverter.extractDate(came);
-        values.put(DATE, date);
-        values.put(WEEK_OF_YEAR, TimeConverter.extractWeek(came));
-        values.put(MONTH_OF_YEAR, TimeConverter.extractMonth(came));
-        return date;
-    }
-
     public static DateTime getSeedDateTime(){
         DateTime dt = TimeConverter.getCurrentTime();
         dt = dt.withTime(0, 0, 0, 0);
@@ -410,7 +392,8 @@ public class CameAndWentProvider extends ContentProvider {
         return buildSeedValues(dt, cameHour, wentHour, 0, tag);
     }
 
-    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour, int wentMinute, int tag){
+    private ContentValues buildSeedValues(DateTime dt, int cameHour, int wentHour, int
+            wentMinute, int tag){
         ContentValues cv = new ContentValues();
         dt = dt.withHourOfDay(cameHour);
         cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
@@ -419,6 +402,27 @@ public class CameAndWentProvider extends ContentProvider {
         cv.put(WENT, dt.getMillis());
         cv.put(TAG, tag);
         return cv;
+    }
+
+    private long populateContentValuesWithTimeInfo(long came, ContentValues values){
+        long date = TimeConverter.extractDate(came);
+        values.put(DATE, date);
+        values.put(WEEK_OF_YEAR, TimeConverter.extractWeek(came));
+        values.put(MONTH_OF_YEAR, TimeConverter.extractMonth(came));
+        return date;
+    }
+
+    private void notifyAllUris(){
+        Field[] fields = this.getClass().getFields();
+        try{
+            for(Field field : fields){
+                if(field.getName().startsWith("URI_")){
+                    getContext().getContentResolver().notifyChange((Uri) field.get(this), null);
+                }
+            }
+        }catch(IllegalAccessException e){
+            e.printStackTrace();
+        }
     }
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
@@ -443,6 +447,8 @@ public class CameAndWentProvider extends ContentProvider {
                 ID + " INTEGER PRIMARY KEY, " +
                 TAG + " TEXT UNIQUE ON CONFLICT IGNORE, " +
                 LATITUDE + " INTEGER NOT NULL DEFAULT -1, " +
+                                                  ACTIVE + " INTEGER NOT NULL DEFAULT 1, " +
+                                                  ORIGIN + " TEXT DEFAULT '" + LOCAL_GUID + "', " +
                 LONGITUDE + " INTEGER NOT NULL DEFAULT -1);";
 
         private static final String CREATE_TIME_TABLE_DURATION_JOIN_VIEW = "CREATE VIEW " + VIEW_TIME_TABLE_DURATIONS + " AS SELECT * FROM " + TIME_TABLE + " tt JOIN " + VIEW_DURATIONS +" vd USING(" + DATE + ") GROUP BY " + DATE + ", " + TAG;
@@ -550,7 +556,14 @@ public class CameAndWentProvider extends ContentProvider {
                             migrateData(db);
                             break;
                         case 49:
-                            db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE + "(" + DATE + ") ON DELETE CASCADE");
+                            db.execSQL("ALTER TABLE " + TABLE_LOG_NAME + " ADD COLUMN " + TAG + "" +
+                                       " INTEGER DEFAULT NULL REFERENCES " + TIME_TABLE + "(" +
+                                       DATE + ") ON DELETE CASCADE");
+                            break;
+                        case 61:
+                            db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + ACTIVE
+                                       + "INTEGER NOT NULL DEFAULT 1");
+                            db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + ORIGIN + " TEXT DEFAULT '" + LOCAL_GUID + "'");
                             break;
                     }
                 }

@@ -32,7 +32,7 @@ public class PeAccountingOnClockOutReceiver extends BroadcastReceiver{
             tags.moveToFirst();
             long tagId = tags.getLong(tags.getColumnIndex(CameAndWentProvider.ID));
             tags.close();
-
+            long duration = cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DURATION));
 
         }
     }

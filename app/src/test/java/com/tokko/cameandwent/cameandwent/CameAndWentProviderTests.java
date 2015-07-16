@@ -10,7 +10,6 @@ import android.net.Uri;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
@@ -47,7 +46,7 @@ public class CameAndWentProviderTests {
 
 
     @Test
-    @Ignore //TODO: is this test still valid?
+    @Ignore("is this test still valid?")
     public void testMonthlySummary_CorrectData(){
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_MONTHLY_SUMMARY, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
         Assert.assertEquals(CameAndWentProvider.WEEKS_BACK, c.getCount());
@@ -61,20 +60,6 @@ public class CameAndWentProviderTests {
         for (int week : weeks)
             Assert.assertFalse(weeks[week] > 1);
     }
-    @SafeVarargs
-    private final <T> boolean contains(T[] arr, T... elems){
-        for(T t : elems)
-            if(contains(arr, t)) return true;
-        return false;
-    }
-
-    private <T> boolean contains(T[] arr, T elem){
-        for(T t : arr)
-            if(t.equals(elem))
-                return true;
-        return false;
-    }
-
 
     @Test
     public void testCame(){
@@ -296,7 +281,7 @@ public class CameAndWentProviderTests {
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, null, null, null);
         Assert.assertNotNull(c);
         Assert.assertEquals(5, c.getCount());
-        Assert.assertEquals(4, c.getColumnNames().length);
+        Assert.assertEquals(6, c.getColumnNames().length);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
@@ -307,6 +292,9 @@ public class CameAndWentProviderTests {
             Assert.assertEquals(tag + suffix++, c.getString(c.getColumnIndex(CameAndWentProvider.TAG)));
             Assert.assertEquals(-1D, c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE)), 0);
             Assert.assertEquals(-1D, c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE)), 0);
+            Assert.assertEquals(CameAndWentProvider.LOCAL_GUID, c.getString(c.getColumnIndex
+                    (CameAndWentProvider.ORIGIN)));
+            Assert.assertEquals(1, c.getInt(c.getColumnIndex(CameAndWentProvider.ACTIVE)));
         }
         c.close();
     }
@@ -316,7 +304,7 @@ public class CameAndWentProviderTests {
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.TAG), new String[]{"TAG2"}, null);
         Assert.assertNotNull(c);
         Assert.assertEquals(1, c.getCount());
-        Assert.assertEquals(4, c.getColumnNames().length);
+        Assert.assertEquals(6, c.getColumnNames().length);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
