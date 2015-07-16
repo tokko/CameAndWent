@@ -30,9 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider.ID;
+import static com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider.LOCAL_GUID;
 
 public class PeAccountingSyncAdapter extends AbstractThreadedSyncAdapter{
     private static final String baseUrl = "http://my.accounting.pe/api/v1/";
+    private static final String PEGUID = "964C4635-2F91-4578-B252-BE0C148A8272";
     private final ContentResolver contentResolver;
 
     public PeAccountingSyncAdapter(Context context, boolean autoInitialize){
@@ -70,14 +72,15 @@ public class PeAccountingSyncAdapter extends AbstractThreadedSyncAdapter{
                     p -> ContentProviderOperation.newUpdate(CameAndWentProvider.URI_TAGS)
                                                  .withSelection("%s=?", new String[]{ID, String
                                                          .valueOf(p.getId())})
-                                                 .withValue(CameAndWentProvider.TAG, p.getName()
-                                                 /*TODO: update active*/
-                                                 ).build());
+                                                 .withValue(CameAndWentProvider.TAG, p.getName())
+                                                 .withValue(CameAndWentProvider.ACTIVE, p
+                                                         .isActive())
+                                                 .build());
             Stream<ContentProviderOperation> inserts = Stream.of(toAdd).map(p -> ContentProviderOperation.newInsert(CameAndWentProvider.URI_TAGS)
-                    .withValue(CameAndWentProvider.TAG, p.getName())
-                            //TODO: set external = true
-                            //TODO: set active
-                    .withValue(CameAndWentProvider.ID, p.getId()).build());
+                                                                                                         .withValue(CameAndWentProvider.TAG, p.getName())
+                                                                                                         .withValue(CameAndWentProvider.ACTIVE, p.isActive())
+                                                                                                         .withValue(CameAndWentProvider.ORIGIN, LOCAL_GUID)
+                                                                                                         .withValue(CameAndWentProvider.ID, p.getId()).build());
             ArrayList<ContentProviderOperation> ops = new ArrayList<>();
             ops.addAll(updates.collect(Collectors.toList()));
             ops.addAll(inserts.collect(Collectors.toList()));
