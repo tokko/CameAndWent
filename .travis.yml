@@ -9,7 +9,8 @@ android:
     - extra-google-m2repository
     - extra-android-m2repository
     - addon-google_apis-google-22
-
+jdk:
+- oraclejdk8
 before_script:
  - chmod +x gradlew
 
