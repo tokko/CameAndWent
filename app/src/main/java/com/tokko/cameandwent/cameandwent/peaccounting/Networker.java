@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -21,6 +22,7 @@ public class Networker{
                 connection.setRequestMethod("PUT");
                 connection.setDoInput(true);
                 connection.setDoOutput(true);
+                connection.setRequestProperty("ContentType", "application/xml");
                 writePayload(connection, putObject);
                 return readResponse(returnClass, connection);
             }
@@ -49,6 +51,10 @@ public class Networker{
             OutputStream outputStream = connection.getOutputStream();
             Serializer serializer = new Persister();
             serializer.write(putObject, outputStream);
+
+            StringWriter stringWriter = new StringWriter();
+            serializer.write(putObject, stringWriter);
+            String xml = stringWriter.toString();
             outputStream.flush();
         }catch(Exception e){
             e.printStackTrace();
