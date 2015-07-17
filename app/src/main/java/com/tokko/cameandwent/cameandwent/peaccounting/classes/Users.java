@@ -1,5 +1,8 @@
 package com.tokko.cameandwent.cameandwent.peaccounting.classes;
 
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Root;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +16,9 @@ import java.util.List;
  * &lt;/xs:complexType>
  * </pre>
  */
+@Root
 public class Users{
+    @ElementList(inline = true)
     private List<User> userList = new ArrayList<User>();
 
     /**

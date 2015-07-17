@@ -1,5 +1,7 @@
 package com.tokko.cameandwent.cameandwent.peaccounting.classes;
 
+import org.simpleframework.xml.Element;
+
 /**
  * Schema fragment(s) for this class:
  * <pre>
@@ -14,11 +16,17 @@ package com.tokko.cameandwent.cameandwent.peaccounting.classes;
  * &lt;/xs:complexType>
  * </pre>
  */
+@Element
 public class User{
+    @Element
     private int id;
+    @Element
     private String foreignId;
+    @Element
     private String name;
+    @Element
     private String email;
+    @Element
     private boolean active;
 
     /**

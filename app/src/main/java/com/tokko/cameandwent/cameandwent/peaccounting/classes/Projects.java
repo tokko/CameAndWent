@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Root
 public class Projects{
-    @ElementList(inline = true)
+    @ElementList(inline = true, required = false)
     private List<Project> projectList = new ArrayList<Project>();
 
     /**
