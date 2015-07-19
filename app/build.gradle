@@ -10,15 +10,10 @@ android {
 
     signingConfigs {
         release {
-            try {
-                Properties props = new Properties()
-                props.load(new FileInputStream("C:\\AndroidStudioProjects\\gradle.properties"))
-                storeFile file("C:\\AndroidStudioProjects\\keystore.jks")
-                storePassword props["storePass"]
-                keyAlias props["releaseAlias"]
-                keyPassword props["releasePass"]
-            }
-            catch (FileNotFoundException ignored){}
+            storeFile rootProject.file("keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASS")
+            keyAlias System.getenv("ALIAS_NAME")
+            keyPassword System.getenv("ALIAS_PASS")
         }
     }
         defaultConfig {
@@ -58,8 +53,9 @@ android {
     }
 }
 retrolambda {
-    oldJdk System.getenv("JAVA7_HOME")
-    jdk System.getenv("JAVA8_HOME")
+    include 'Test', 'Debug', 'Release'
+    oldJdk = System.getenv("JAVA7_HOME")
+    javaVersion = JavaVersion.VERSION_1_6
 }
 dependencies {
     repositories {
