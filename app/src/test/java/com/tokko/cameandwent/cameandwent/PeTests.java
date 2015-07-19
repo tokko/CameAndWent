@@ -38,10 +38,12 @@ import static org.mockito.Mockito.mock;
 @Config(emulateSdk = 21, constants = BuildConfig.class, manifest = Config.NONE)
 public class PeTests{
 
+    public static final int COMPANY_ID = 423;
+
     @Test
     @Ignore
     public void getProjects_HealthCheck(){
-        Projects projects = Networker.get(Projects.class, "/company/%d/project", 423);
+        Projects projects = Networker.get(Projects.class, "/company/%d/project", COMPANY_ID);
         assertNotNull(projects);
         assertEquals(6, projects.getProjectList().size());
     }
@@ -53,7 +55,8 @@ public class PeTests{
         //TODO: setid
 
         ClientProjectReference projectReference = new ClientProjectReference();
-        List<Project> projectList = Networker.get(Projects.class, "/company/%d/project", 269).getProjectList();
+        Projects projects = Networker.get(Projects.class, "/company/%d/project", COMPANY_ID);
+        List<Project> projectList = projects.getProjectList();
         projectReference.setId(projectList.get(0).getId());
 
         ActivityReference activityReference = Networker.get(ActivityReadables.class, "/company/296/activity").getActivityReadableList().get(0)
