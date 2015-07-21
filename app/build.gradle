@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.github.triplet.play'
+
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
@@ -10,19 +12,29 @@ android {
 
     signingConfigs {
         release {
-            storeFile rootProject.file("keystore.jks")
+            storeFile file("keystore.jks")
             storePassword System.getenv("KEYSTORE_PASS")
             keyAlias System.getenv("ALIAS_NAME")
             keyPassword System.getenv("ALIAS_PASS")
         }
     }
-        defaultConfig {
+    def Properties versionProps = new Properties()
+    def versionPropsFile = file('version.properties')
+    if(versionPropsFile.exists())
+        versionProps.load(new FileInputStream(versionPropsFile))
+    def code = (versionProps['VERSION_CODE'] ?: "34").toInteger() + 1
+    def buildNumber = (versionProps['BUILD_NUMBER'] ?: "0").toInteger() + 1
+    versionProps['VERSION_CODE'] = code.toString()
+    versionProps['BUILD_NUMBER'] = buildNumber.toString()
+    versionProps.store(versionPropsFile.newWriter(), null)
+
+    defaultConfig {
             applicationId "com.tokko.cameandwent.cameandwent"
             multiDexEnabled = true
             minSdkVersion 19
             targetSdkVersion 22
-            versionCode 34
-            versionName "1.27"
+            versionCode code
+            versionName "1.3."+buildNumber
             testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         }
     buildTypes {
@@ -52,6 +64,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
+
+play {
+    serviceAccountEmail = '92588905880-fdolvkj29p3l637u5fgaa3jke0vksd17@developer.gserviceaccount.com'
+    pk12File = file('key.p12')
+    //   uploadImages = true
+}
+
 retrolambda {
     include 'Test', 'Debug', 'Release'
     oldJdk = System.getenv("JAVA7_HOME")
