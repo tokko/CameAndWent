@@ -5,6 +5,7 @@ branches:
     - master
     - alpha
     - feature
+    - feature
 cache:
   directories:
     - $HOME/.gradle
