@@ -296,7 +296,7 @@ public class CameAndWentProviderTests {
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, null, null, null);
         Assert.assertNotNull(c);
         Assert.assertEquals(5, c.getCount());
-        Assert.assertEquals(4, c.getColumnNames().length);
+        Assert.assertEquals(8, c.getColumnNames().length);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
@@ -316,7 +316,7 @@ public class CameAndWentProviderTests {
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.TAG), new String[]{"TAG2"}, null);
         Assert.assertNotNull(c);
         Assert.assertEquals(1, c.getCount());
-        Assert.assertEquals(4, c.getColumnNames().length);
+        Assert.assertEquals(8, c.getColumnNames().length);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
