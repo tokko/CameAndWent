@@ -41,13 +41,11 @@ android {
             zipAlignEnabled true
         }
         debug {
-            applicationIdSuffix ".debug"
             debuggable true
             minifyEnabled false
             zipAlignEnabled false
         }
         mock {
-            applicationIdSuffix ".mock"
             debuggable true
             minifyEnabled false
             zipAlignEnabled false
@@ -60,7 +58,6 @@ play {
     pk12File = file('key.p12')
     //   uploadImages = true
 }
-
 task('increaseVersionCode') << {
     def manifestFile = file("src/main/AndroidManifest.xml")
     def pattern = Pattern.compile("versionCode=\"(\\d+)\"")
@@ -100,7 +97,7 @@ dependencies {
     compile 'joda-time:joda-time:2.3'
     testCompile 'junit:junit:4.12'
     // TODO: requires special build of robolectric right now. working on this...
-    testCompile 'org.robolectric:robolectric:3.0-rc2'
+    testCompile 'org.robolectric:robolectric:3.0'
     testCompile "org.mockito:mockito-core:1.10.0"
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.2.0'
@@ -108,5 +105,4 @@ dependencies {
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
     compile 'net.sourceforge.jexcelapi:jxl:2.6'
-
 }

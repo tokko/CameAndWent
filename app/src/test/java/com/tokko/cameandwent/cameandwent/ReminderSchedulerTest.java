@@ -20,8 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -36,9 +35,8 @@ import java.util.List;
 import roboguice.RoboGuice;
 
 
-//@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
-@Config(emulateSdk = 21, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
-@RunWith(RobolectricTestRunner.class)
+@Config(sdk = Constants.SDK_VERSION, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
+@RunWith(RobolectricGradleTestRunner.class)
 public class ReminderSchedulerTest {
     private DateTime weeklyAlarmTime;
     private DateTime monthlyAlarmTime;

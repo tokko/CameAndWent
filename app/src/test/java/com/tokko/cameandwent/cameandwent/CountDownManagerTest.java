@@ -4,7 +4,6 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +24,7 @@ import org.joda.time.DateTimeConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -39,9 +38,8 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.util.List;
 
-//@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
-@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
-@RunWith(RobolectricTestRunner.class)
+@Config(sdk = Constants.SDK_VERSION, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
+@RunWith(RobolectricGradleTestRunner.class)
 public class CountDownManagerTest {
     private final DateTime currentTime = new DateTime().withTime(13, 0, 0, 0).withDate(2010, 4, 20);
     private Context context;
