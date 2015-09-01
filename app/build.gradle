@@ -27,6 +27,7 @@ android {
             applicationId "com.tokko.cameandwent.cameandwent"
             minSdkVersion 19
             targetSdkVersion 22
+            multiDexEnabled = true
            // versionCode 34
            // versionName "1.27"
             testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

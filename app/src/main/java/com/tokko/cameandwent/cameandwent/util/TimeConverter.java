@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
@@ -108,5 +109,13 @@ public class TimeConverter {
         final long hr = TimeUnit.MILLISECONDS.toHours(l);
         final long min = TimeUnit.MILLISECONDS.toMinutes(l - TimeUnit.HOURS.toMillis(hr));
         return String.format(prefix+"%02d:%02d", hr, min);
+    }
+
+    public static DateTime getMondayOfWeek(DateTime date) {
+        return date.withDayOfWeek(DateTimeConstants.MONDAY);
+    }
+
+    public static DateTime getFridayOfWeek(DateTime date){
+        return date.withDayOfWeek(DateTimeConstants.FRIDAY);
     }
 }
