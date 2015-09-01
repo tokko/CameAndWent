@@ -9,8 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 
+import com.google.inject.Inject;
 import com.tokko.cameandwent.cameandwent.MainActivity;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
@@ -19,15 +21,20 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 
-public class ReminderScheduler extends BroadcastReceiver{
+import roboguice.RoboGuice;
+import roboguice.receiver.RoboBroadcastReceiver;
+
+public class ReminderScheduler extends BroadcastReceiver {
     public static final String ACTION_WEEKLY_REMINDER = "ACTION_WEEKLY_REMINDER";
     public static final String ACTION_MONTHLY_REMINDER = "ACTION_MONTHLY_REMINDER";
+    public static final String EXTRA_DELAY = "EXTRA_DELAY";
+    private static final long DEFAULT_DELAY = DateTimeConstants.MILLIS_PER_MINUTE;
+
     private SharedPreferences defaultPrefs;
     private NotificationManager nm;
     public static final int monthlyReminderNotificationId = 3;
     public static final int weeklyReminderNotificationId = 2;
     private Context context;
-
     public ReminderScheduler(){}
     public ReminderScheduler(Context context){
         this.context = context;
@@ -75,7 +82,7 @@ public class ReminderScheduler extends BroadcastReceiver{
                     .dayOfMonth().withMaximumValue();
             DateTime now = TimeConverter.getCurrentTime();
             while(dt.getDayOfWeek() == DateTimeConstants.SUNDAY || dt.getDayOfWeek() == DateTimeConstants.SATURDAY) dt = dt.withFieldAdded(DurationFieldType.days(), -1);
-            if(dt.isBefore(now)) return scheduleMonthlyReminder(context, now.withFieldAdded(DurationFieldType.months(), 1));
+            if(dt.isBefore(now) || dt.isEqualNow()) return scheduleMonthlyReminder(context, now.withFieldAdded(DurationFieldType.months(), 1));
             long time = dt.getMillis();
             am.set(AlarmManager.RTC, time, pi);
             return dt.getMillis();
@@ -107,7 +114,7 @@ public class ReminderScheduler extends BroadcastReceiver{
         else
             nb.setVibrate(new long[]{0});
         nb.setContentTitle("Time to submit time report!");
-        nb.setSmallIcon(R.drawable.ic_launcher);
+        nb.setSmallIcon(android.R.drawable.ic_menu_upload);
         if(defaultPrefs.getBoolean("weekly_reminder_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_WEEKLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));
@@ -123,7 +130,7 @@ public class ReminderScheduler extends BroadcastReceiver{
         else
             nb.setVibrate(new long[]{0});
         nb.setContentTitle("Time to finalize monthly report!");
-        nb.setSmallIcon(R.drawable.ic_launcher);
+        nb.setSmallIcon(android.R.drawable.ic_menu_upload);
         if(defaultPrefs.getBoolean("monthly_reminder_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_MONTHLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));
@@ -131,7 +138,7 @@ public class ReminderScheduler extends BroadcastReceiver{
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         if(intent.getAction().equals(ACTION_WEEKLY_REMINDER)){
             if(!defaultPrefs.getBoolean("weekly_reminders", false)) return;

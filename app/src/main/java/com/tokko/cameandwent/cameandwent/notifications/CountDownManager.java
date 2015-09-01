@@ -14,12 +14,17 @@ import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
-import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.MainActivity;
 import com.tokko.cameandwent.cameandwent.R;
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class CountDownManager extends BroadcastReceiver{
     public static final String ACTION_COUNTDOWN_TICK = "com.tokko.cameandwent.ACTION_COUNTDOWN_TICK";
@@ -66,6 +71,7 @@ public class CountDownManager extends BroadcastReceiver{
 
     public long startCountDown(){
         if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("countdown", false)) return -1;
+        if(!context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false)) return -1;
         long currentTime = TimeConverter.getCurrentTime().getMillis();
         registerObservers(context);
         updateNotification(context);
@@ -82,6 +88,7 @@ public class CountDownManager extends BroadcastReceiver{
 
     private void updateNotification(Context context){
         if(!context.getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false)) return;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         if(!defaultPreferences.getBoolean("countdown", false)){
             getNotificationManager(context).cancel(NOTIFICATION_ID);
@@ -89,13 +96,22 @@ public class CountDownManager extends BroadcastReceiver{
         }
         Notification.Builder notificationBuilder = new Notification.Builder(context);
         notificationBuilder.setContentTitle("Workday countdown");
-        notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+        notificationBuilder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
         notificationBuilder.setOngoing(true);
+        notificationBuilder.setContentIntent(pendingIntent);
         int duration = (int) TimeConverter.timeIntervalAsLong(defaultPreferences.getString("daily_work_duration", "0:0"));
         int currentDuration = (int) getCurrentDuration(context);
-        int remainder = duration - currentDuration;
+        int remainder = -(duration - currentDuration);
+
+        long leaveBy = TimeConverter.getCurrentTime().getMillis() - remainder;
+        DateTime leave = new DateTime(leaveBy);
+        String leaveS;
+        if(leave.isBeforeNow())
+            leaveS = "now";
+        else
+            leaveS = new SimpleDateFormat("HH:mm").format(new Date(leave.getMillis()));
         notificationBuilder.setProgress(duration, currentDuration, false);
-        notificationBuilder.setContentText(String.format("Time remaining: %s", TimeConverter.formatInterval((long)remainder)));
+        notificationBuilder.setContentText(String.format("Time balance: %s\nYou may leave %s", TimeConverter.formatInterval((long)remainder), "by: " + leaveS));
         getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 

@@ -15,7 +15,7 @@ public class LocationTagActivityTest extends ActivityInstrumentationTestCase2<Lo
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        getInstrumentation().getContext().getContentResolver().call(CameAndWentProvider.URI_GET_LOG_ENTRIES, CameAndWentProvider.SEED_METHOD, null, null);
+        getInstrumentation().getContext().getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.SEED_METHOD, null, null);
         getActivity();
     }
 

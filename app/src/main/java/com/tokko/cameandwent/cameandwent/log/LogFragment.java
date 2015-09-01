@@ -24,7 +24,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
-import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
@@ -106,25 +106,6 @@ public class LogFragment extends RoboListFragment implements LoaderManager.Loade
                 return true;
             case R.id.add_entry:
                 LogEntryEditorFragment.newInstance().show(getFragmentManager(), "");
-                return true;
-            case R.id.migrate:
-                adb = new AlertDialog.Builder(getActivity());
-                adb.setTitle("Migrate data");
-                adb.setMessage("Use extreme caution! Only do this if your old data is missing, preferably consult Tokko first.");
-                adb.setPositiveButton("#yolo", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getActivity().getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.MIGRATE_METHOD, null, null);
-                        dialog.dismiss();
-                    }
-                });
-                adb.setNegativeButton("I am too scared :(", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                adb.show();
                 return true;
         }
         return super.onOptionsItemSelected(item);

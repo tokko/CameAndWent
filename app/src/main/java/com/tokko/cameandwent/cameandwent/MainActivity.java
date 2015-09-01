@@ -12,13 +12,15 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
 import com.tokko.cameandwent.cameandwent.backup.BackupAgent;
 import com.tokko.cameandwent.cameandwent.locationtags.SetTagFragment;
 import com.tokko.cameandwent.cameandwent.log.LogEntryEditorFragment;
 import com.tokko.cameandwent.cameandwent.log.LogFragment;
-import com.tokko.cameandwent.cameandwent.monthlyexcelreport.TimePerWeekCalculator;
+import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.settings.SettingsActivity;
 import com.tokko.cameandwent.cameandwent.summaries.SummaryFragment;
+import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,6 +38,7 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         logFragment = new LogFragment();
+        getContentResolver().call(CameAndWentProvider.URI_LOG_ENTRIES, CameAndWentProvider.CLEAN_METHOD, null, null);
     }
 
 
@@ -134,14 +137,6 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
                 });
             }
             b.show();
-            return true;
-        }
-        if(id == R.id.tag_everything){
-            SetTagFragment.newInstance().show(getSupportFragmentManager(), "t");
-            return true;
-        }
-        if(id == R.id.preview){
-            sendBroadcast(new Intent(TimePerWeekCalculator.ACTION_PREVIEW).putExtra(TimePerWeekCalculator.EXTRA_TAG, 2));
             return true;
         }
         return super.onOptionsItemSelected(item);

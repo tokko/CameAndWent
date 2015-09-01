@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".CameAndWentApplication"
@@ -30,9 +29,17 @@
         <receiver android:name=".receivers.BootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".automaticbreaks.AutomaticBreakManager"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="ACTION_AUTOMATIC_BREAK"/>
+            </intent-filter>
+        </receiver>
         <receiver android:name=".notifications.CountDownManager" >
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_OFF" />
@@ -41,25 +48,23 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".monthlyexcelreport.TimePerWeekCalculator" android:enabled="true">
-            <intent-filter>
-                <action android:name="ACTION_PREVIEW" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".receivers.GeofenceReceiver"
+        <service
+            android:name=".services.GeofenceService"
+            android:permission="android.permission.ACCESS_FINE_LOCATION"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="GEOFENCE_ACTION" />
                 <action android:name="ACTIVATE_GEOFENCE" />
                 <action android:name="DEACTIVATE_GEOFENCE" />
+                <action android:name="DELAYED_DEACTIVATION" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </receiver>
+        </service>
 
         <receiver
             android:name=".notifications.ReminderScheduler"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="ACTION_WEEKLY_REMINDER" />

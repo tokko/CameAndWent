@@ -1,16 +1,21 @@
-package com.tokko.cameandwent.cameandwent;
+package com.tokko.cameandwent.cameandwent.clockmanager;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
+import com.google.inject.Inject;
+import com.tokko.cameandwent.cameandwent.MainActivity;
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
@@ -25,6 +30,7 @@ public class ClockManager {
     private SharedPreferences sp;
     private CountDownManager countDownManager;
 
+    @Inject
     public ClockManager(Context context) {
         this.context = context;
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -42,13 +48,13 @@ public class ClockManager {
 
     }
 
-    public void clockIn(long time, long id) {
+    public void clockIn(long time, long tagId) {
         if(!defaultPrefs.getBoolean("enabled", false)) return;
         if(!this.sp.getBoolean(PREF_CLOCKED_IN, false)) {
             this.sp.edit().putBoolean(PREF_CLOCKED_IN, true).apply();
             ContentValues cv = new ContentValues();
             cv.put(CameAndWentProvider.CAME, time);
-            cv.put(CameAndWentProvider.TAG, id);
+            cv.put(CameAndWentProvider.TAG, tagId);
             context.getContentResolver().insert(CameAndWentProvider.URI_CAME, cv);
             if (defaultPrefs.getBoolean("soundmode", false)) {
                 defaultPrefs.edit().putInt(PREV_SOUNDMODE_KEY, am.getRingerMode()).apply();
@@ -87,7 +93,7 @@ public class ClockManager {
             nb.setVibrate(new long[]{0});
         nb.setContentTitle(s);
         nb.setAutoCancel(true);
-        nb.setSmallIcon(R.drawable.ic_launcher);
+        nb.setSmallIcon(android.R.drawable.ic_lock_idle_alarm);
         if(defaultPrefs.getBoolean("notifications_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT));

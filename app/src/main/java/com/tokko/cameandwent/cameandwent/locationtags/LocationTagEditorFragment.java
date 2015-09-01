@@ -1,6 +1,7 @@
 package com.tokko.cameandwent.cameandwent.locationtags;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
@@ -17,9 +18,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
+import com.tokko.cameandwent.cameandwent.services.GeofenceService;
 
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
@@ -195,6 +199,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
                 break;
             case R.id.locationtageditor_DeleteButton:
                 getActivity().getContentResolver().delete(CameAndWentProvider.URI_TAGS, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
+                getActivity().sendBroadcast(new Intent(GeofenceService.DEACTIVATE_GEOFENCE).putExtra(GeofenceService.EXTRA_ID, id));
                 dismiss();
                 break;
         }
@@ -202,14 +207,28 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
 
     @Override
     public void onConnected(Bundle bundle) {
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
-            Toast.makeText(getActivity(), String.format("Longitude: %f\nLatitude %f", mLastLocation.getLongitude(), mLastLocation.getLatitude()), Toast.LENGTH_SHORT).show();
-            longitude = mLastLocation.getLongitude();
-            latitude = mLastLocation.getLatitude();
-            setCoordinates();
-        }
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setNumUpdates(1);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                if (location != null) {
+                    if(getActivity() != null)
+                         Toast.makeText(getActivity(), String.format("Longitude: %f\nLatitude %f", location.getLongitude(), location.getLatitude()), Toast.LENGTH_SHORT).show();
+                    longitude = location.getLongitude();
+                    latitude = location.getLatitude();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setCoordinates();
+                        }
+                    });
+                }
+                else
+                    Toast.makeText(getActivity(), "No last known location", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
