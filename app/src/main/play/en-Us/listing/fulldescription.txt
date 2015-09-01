@@ -1,0 +1,1 @@
+CameAndWent is a tool designed to take your mind off of punching in and out of your office. Simply configure the app with the locations of your projects and the GPS will assume that you are at work when you are within a configurable distance.
