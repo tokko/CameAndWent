@@ -3,7 +3,7 @@ branches:
   only:
     - master
     - alpha
-    - dev
+    - feature
 android:
   components:
     - platform-tools
