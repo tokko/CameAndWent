@@ -29,7 +29,8 @@ before_deploy:
 before_script:
  - chmod +x gradlew
 script:
-  - ./gradlew testRelease  - if [ "$TRAVIS_BRANCH" = "alpha" ]; then ./gradlew publishRelease; fi
+  - ./gradlew testRelease
+  - if [ "$TRAVIS_BRANCH" = "alpha" ]; then ./gradlew publishRelease; fi
 after_success:
   - git config user.email $GIT_EMAIL
   - git config user.name $GIT_NAME
