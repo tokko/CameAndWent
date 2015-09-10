@@ -21,6 +21,7 @@ import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 
 import java.text.DecimalFormat;
@@ -202,7 +203,12 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
 
         @Override
         protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
-            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d", cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR))));
+            DateTime date = new DateTime(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE)));
+            DateTime dateOfMonday = TimeConverter.getMondayOfWeek(date);
+            DateTime dateOfFriday = TimeConverter.getFridayOfWeek(date);
+            String monday = new SimpleDateFormat("dd/MM").format(new Date(dateOfMonday.getMillis()));
+            String friday = new SimpleDateFormat("dd/MM").format(new Date(dateOfFriday.getMillis()));
+            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d, %s-%s", cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)), monday, friday));
         }
 
         @Override

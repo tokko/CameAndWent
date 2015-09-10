@@ -10,24 +10,21 @@ import android.net.Uri;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowPreferenceManager;
 
-//@Config(emulateSdk = 18, manifest = "app/src/main/AndroidManifest.xml")
-@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@Config(sdk = Constants.SDK_VERSION, constants = BuildConfig.class, manifest = "/app/src/main/AndroidManifest.xml")
+@RunWith(RobolectricGradleTestRunner.class)
 public class CameAndWentProviderTests {
 
     private CameAndWentProvider mProvider;
@@ -44,37 +41,6 @@ public class CameAndWentProviderTests {
         sharedPreferences.edit().clear().apply();
         mProvider.seed();
     }
-
-
-    @Test
-    @Ignore //TODO: is this test still valid?
-    public void testMonthlySummary_CorrectData(){
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_MONTHLY_SUMMARY, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
-        Assert.assertEquals(CameAndWentProvider.WEEKS_BACK, c.getCount());
-        long duration = DateTimeConstants.MILLIS_PER_HOUR*40;
-        int[] weeks = new int[52];
-        for (c.moveToFirst(); !c.isLast(); c.moveToNext()){
-            weeks[c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR))]++;
-            Assert.assertEquals(duration, c.getLong(c.getColumnIndex(CameAndWentProvider.DURATION)));
-        }
-        c.close();
-        for (int week : weeks)
-            Assert.assertFalse(weeks[week] > 1);
-    }
-    @SafeVarargs
-    private final <T> boolean contains(T[] arr, T... elems){
-        for(T t : elems)
-            if(contains(arr, t)) return true;
-        return false;
-    }
-
-    private <T> boolean contains(T[] arr, T elem){
-        for(T t : arr)
-            if(t.equals(elem))
-                return true;
-        return false;
-    }
-
 
     @Test
     public void testCame(){
@@ -296,7 +262,7 @@ public class CameAndWentProviderTests {
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, null, null, null);
         Assert.assertNotNull(c);
         Assert.assertEquals(5, c.getCount());
-        Assert.assertEquals(4, c.getColumnNames().length);
+        Assert.assertEquals(8, c.getColumnNames().length);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);
@@ -316,7 +282,7 @@ public class CameAndWentProviderTests {
         Cursor c = mContentResolver.query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.TAG), new String[]{"TAG2"}, null);
         Assert.assertNotNull(c);
         Assert.assertEquals(1, c.getCount());
-        Assert.assertEquals(4, c.getColumnNames().length);
+        Assert.assertEquals(8, c.getColumnNames().length);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.ID) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.TAG) > -1);
         Assert.assertTrue(c.getColumnIndex(CameAndWentProvider.LONGITUDE) > -1);

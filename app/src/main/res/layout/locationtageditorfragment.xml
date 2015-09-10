@@ -3,39 +3,83 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/locationtageditor_TagTitle"
-        android:hint="Tag"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/locationtageditor_SetLocation"
-        android:text="Set Location"
-        style="@android:style/Widget.ActionButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <LinearLayout
-        android:id="@+id/locationtageditor_coordinates"
-        android:layout_width="wrap_content"
-        android:visibility="gone"
-        android:orientation="vertical"
         android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/locationtageditor_TagTitle"
+                android:hint="Tag"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/locationtageditor_Longitude"
-            android:text="placeholder"
-            style="@android:style/TextAppearance.DeviceDefault.Medium"
+            <Button
+                android:id="@+id/locationtageditor_SetLocation"
+                android:text="Set Location"
+                style="@android:style/Widget.ActionButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:id="@+id/locationtageditor_coordinates"
+                android:layout_width="wrap_content"
+                android:visibility="gone"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/locationtageditor_Longitude"
+                    android:text="placeholder"
+                    style="@android:style/TextAppearance.DeviceDefault.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/locationtageditor_Latitude"
+                    android:text="placeholder"
+                    style="@android:style/TextAppearance.DeviceDefault.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+        </LinearLayout>
+        <CheckBox
             android:layout_width="wrap_content"
+            android:text="Reminder"
+            android:checked="false"
+            android:id="@+id/locationtageditor_Reminder"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/locationtageditor_Latitude"
-            android:text="placeholder"
-            style="@android:style/TextAppearance.DeviceDefault.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:id="@+id/locationtageditor_reminderSettingsContainer"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/locationtageditor_titlePreview"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:layout_width="match_parent"
+                android:id="@+id/locationtageditor_recipient"
+                android:hint="Recipient (name@example.com)"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:layout_width="match_parent"
+                android:id="@+id/locationtageditor_name"
+                android:hint="Name (your name)"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:id="@+id/locationtageditor_prefix"
+                android:hint="Prefix"
+                android:layout_height="wrap_content" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
     <LinearLayout
         style="?android:buttonBarStyle"
         android:layout_width="match_parent"

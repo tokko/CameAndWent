@@ -1,0 +1,1 @@
+Date interval on header in weekly summary.
