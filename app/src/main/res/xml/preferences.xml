@@ -8,6 +8,7 @@
 
     <PreferenceCategory
         android:dependency="enabled"
+        android:key="location"
         android:title="Location">
 
         <com.tokko.cameandwent.cameandwent.settings.LocationPreference
@@ -189,6 +190,12 @@
     <PreferenceCategory
         android:dependency="enabled"
         android:title="Misc">
+        <CheckBoxPreference
+            android:dependency="enabled"
+            android:defaultValue="false"
+            android:title="Expand last week"
+            android:summary="Expand last week instead of current week on summary open"
+            android:key="summary_last_week" />
         <CheckBoxPreference
             android:dependency="enabled"
             android:defaultValue="false"

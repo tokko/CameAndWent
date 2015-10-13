@@ -21,11 +21,11 @@ android:
     - extra-android-m2repository
     - addon-google_apis-google-22
 jdk:
-- oraclejdk8
+  - oraclejdk8
 before_deploy:
-- git config --global user.email "builds@travis-ci.com"
-- git config --global user.name "Travis CI"
-- ls -R
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
+  - ls -R
 before_script:
  - chmod +x gradlew
 script:
@@ -33,9 +33,9 @@ script:
   - ./gradlew testRelease
   - if [ "$TRAVIS_BRANCH" = "alpha" ]; then ./gradlew publishRelease; fi
 after_success:
-- git config user.email $GIT_EMAIL
-- git config user.name $GIT_NAME
-- git commit -a -m "Committed by Travis-CI for updated versioncodes"
-- if [ "$TRAVIS_BRANCH" = "alpha" ]; then git push https://$GIT_CREDS@github.com/tokko/EventTasks.git HEAD:master; fi
+  - git config user.email $GIT_EMAIL
+  - git config user.name $GIT_NAME
+  - git commit -a -m "Committed by Travis-CI for updated versioncodes"
+  - if [ "$TRAVIS_BRANCH" = "alpha" ]; then git push https://$GIT_CREDS@github.com/tokko/EventTasks.git HEAD:master; fi
 #dd:
-¤  secure: dWG36t30QfpmqO9y4gW3UV+jW1d8TdzkLNbcQlcN/A3s56Aa95SfkR7k1F1pDZUPFeNWUhmO5yHbqXlh8r7obHRh2YobDrNebPSog7P2UgyRSxywhwm0uKDzf9f1kgGK2Q/ZgGKwdVh43AGL+DN7zK2jB1if9TOJybaQWX4E4btZEoWgT+bogMvum+ou0LS0i217QYS70CxgmZHBdpaQOmQ/m/VA2v4X6wz9BJu45F28oOFznbKq87pL5f1Uqjr/IWac6MlSRQPPgpQagchYDUCr7Xt0OuJ4em2updFyRhmxE7ZGRoFtt2jlTa+7s5bVTQ4cGBH4PtZl7inVdds5JEQQPeuZr/9RgnFBWjpz6vJ+A5jL5RXKJc5/iutZlSTR1C1+skFJ6stP4YptUo8bnuf1D9X87yi+NMZFLcV56NKdtEhX3Cy3OX4dhYnyxMCVBsmnrjVsK+AG+jJbOTKKvmW4nvzWpNbtKXW9ak5Y5A+L9P6cLSwJiS5MQ/uTHzWerCU2iaVddIUUv5aI0KGEjPOnwE18sR25s05I6mP3xuiKg4TjxRaC2tSO6J3V/sDyn+sJDmByn7CPS0Q33dEOerREB4Rq+glFHW3Vd9oLcSuNDu5wRWb1lrypymHs/f20pEeEW35rsOzeiDElLbPfb8mHWCuizbliDnK5OdMefQw=
+#  secure: dWG36t30QfpmqO9y4gW3UV+jW1d8TdzkLNbcQlcN/A3s56Aa95SfkR7k1F1pDZUPFeNWUhmO5yHbqXlh8r7obHRh2YobDrNebPSog7P2UgyRSxywhwm0uKDzf9f1kgGK2Q/ZgGKwdVh43AGL+DN7zK2jB1if9TOJybaQWX4E4btZEoWgT+bogMvum+ou0LS0i217QYS70CxgmZHBdpaQOmQ/m/VA2v4X6wz9BJu45F28oOFznbKq87pL5f1Uqjr/IWac6MlSRQPPgpQagchYDUCr7Xt0OuJ4em2updFyRhmxE7ZGRoFtt2jlTa+7s5bVTQ4cGBH4PtZl7inVdds5JEQQPeuZr/9RgnFBWjpz6vJ+A5jL5RXKJc5/iutZlSTR1C1+skFJ6stP4YptUo8bnuf1D9X87yi+NMZFLcV56NKdtEhX3Cy3OX4dhYnyxMCVBsmnrjVsK+AG+jJbOTKKvmW4nvzWpNbtKXW9ak5Y5A+L9P6cLSwJiS5MQ/uTHzWerCU2iaVddIUUv5aI0KGEjPOnwE18sR25s05I6mP3xuiKg4TjxRaC2tSO6J3V/sDyn+sJDmByn7CPS0Q33dEOerREB4Rq+glFHW3Vd9oLcSuNDu5wRWb1lrypymHs/f20pEeEW35rsOzeiDElLbPfb8mHWCuizbliDnK5OdMefQw=

@@ -3,6 +3,7 @@ package com.tokko.cameandwent.cameandwent.summaries;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -152,7 +153,9 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         else if(loader.getId() == -2)
             spinnerAdapter.swapCursor(data);
         if(expandableListView.getCount() > 0)
-            expandableListView.expandGroup(expandableListView.getCount() - 1);
+            if(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("summary_last_week", false) && expandableListView.getCount() > 2)
+                expandableListView.expandGroup(expandableListView.getCount() - 2);
+            else    expandableListView.expandGroup(expandableListView.getCount() - 1);
     }
 
     @Override

@@ -21,15 +21,10 @@ android {
 
     signingConfigs {
         release {
-            try {
-                Properties props = new Properties()
-                props.load(new FileInputStream("C:\\AndroidStudioProjects\\gradle.properties"))
-                storeFile file("C:\\AndroidStudioProjects\\keystore.jks")
-                storePassword props["storePass"]
-                keyAlias props["releaseAlias"]
-                keyPassword props["releasePass"]
-            }
-            catch (FileNotFoundException ignored){}
+            storeFile rootProject.file("keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASS")
+            keyAlias System.getenv("ALIAS_NAME")
+            keyPassword System.getenv("ALIAS_PASS")
         }
     }
         defaultConfig {
@@ -113,4 +108,17 @@ dependencies {
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
     compile 'net.sourceforge.jexcelapi:jxl:2.6'
+}
+
+
+project.ext.preDexLibs = !project.hasProperty('disablePreDex')
+
+subprojects {
+    project.plugins.whenPluginAdded { plugin ->
+        if ("com.android.build.gradle.AppPlugin".equals(plugin.class.name)) {
+            project.android.dexOptions.preDexLibraries = rootProject.ext.preDexLibs
+        } else if ("com.android.build.gradle.LibraryPlugin".equals(plugin.class.name)) {
+            project.android.dexOptions.preDexLibraries = rootProject.ext.preDexLibs
+        }
+    }
 }
