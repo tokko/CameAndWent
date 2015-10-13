@@ -8,6 +8,7 @@
 
     <PreferenceCategory
         android:dependency="enabled"
+        android:key="location"
         android:title="Location">
 
         <com.tokko.cameandwent.cameandwent.settings.LocationPreference
