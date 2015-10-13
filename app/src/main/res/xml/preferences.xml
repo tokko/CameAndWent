@@ -192,6 +192,12 @@
         <CheckBoxPreference
             android:dependency="enabled"
             android:defaultValue="false"
+            android:title="Expand last week"
+            android:summary="Expand last week instead of current week on summary open"
+            android:key="summary_last_week" />
+        <CheckBoxPreference
+            android:dependency="enabled"
+            android:defaultValue="false"
             android:title="Consult rounding"
             android:summary="Round daily duration up to closest half-hour"
             android:key="use_snapup" />
