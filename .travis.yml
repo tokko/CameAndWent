@@ -29,6 +29,7 @@ before_deploy:
 before_script:
  - chmod +x gradlew
 script:
+  - ./gradlew tasks
   - ./gradlew testRelease
   - if [ "$TRAVIS_BRANCH" = "alpha" ]; then ./gradlew publishRelease; fi
 after_success:
