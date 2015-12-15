@@ -171,6 +171,8 @@ public class LogEntryEditorFragment extends RoboDialogFragment implements View.O
                 cameTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(cameTime));
                 cameTimePicker.setCurrentMinute(TimeConverter.currentTimeInMillisToCurrentMinutes(cameTime));
 
+                isBreakCheckBox.setChecked(data.getInt(data.getColumnIndex(CameAndWentProvider.ISBREAK)) == 1);
+
                 if(wentTime > 0) {
                     wentContainer.setVisibility(View.VISIBLE);
                     wentTimePicker.setCurrentHour(TimeConverter.currentTimeInMillisToCurrentHours(wentTime));
