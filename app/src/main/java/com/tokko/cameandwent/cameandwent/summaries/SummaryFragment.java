@@ -156,6 +156,12 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
             if(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("summary_last_week", false) && expandableListView.getCount() > 2)
                 expandableListView.expandGroup(expandableListView.getCount() - 2);
             else    expandableListView.expandGroup(expandableListView.getCount() - 1);
+        expandableListView.post(new Runnable() {
+            @Override
+            public void run() {
+                expandableListView.setSelection(adapter.getGroupCount()-1);
+            }
+        });
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class CameAndWentProvider extends ContentProvider {
-    public static final int WEEKS_BACK = 5;
+    public static final int WEEKS_BACK = 40;
 
     public static final String AUTHORITY = BuildConfig.APPLICATION_ID+".CameAndWentProvider";
     private static final String URI_TEMPLATE = "content://" + AUTHORITY + "/";
