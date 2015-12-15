@@ -9,16 +9,14 @@ dependencies:
     - chmod +x gradlew
     - ./gradlew assembleRelease assembleDebug -PdisablePreDex
   cache_directories:
-      - ~/.android
+      - ~/.gradle
 test:
-  pre:
-    - chmod +x gradlew
   override:
     - ./gradlew app:testRelease -PdisablePreDex
     - cp -r app/build/reports/tests/release/classes/* $CIRCLE_TEST_REPORTS
 
 deployment:
-  appengine:
+  play:
     branch: alpha
     commands:
       - ./gradlew publishRelease
@@ -26,4 +24,3 @@ deployment:
       - git config --global user.name "Circle CI"
       - git commit -am "Update version number and codes for automatic deploy."
       - git push https://$GIT_CREDS@github.com/tokko/CameAndWent.git HEAD:alpha-circleci
- #     - git request-pull master https://$GIT_CREDS@github.com/tokko/Recipesv2.git alpha-circleci
