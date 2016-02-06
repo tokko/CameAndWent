@@ -64,25 +64,7 @@ public class CameAndWentProviderTests {
         post.close();
     }
 
-    @Test
-    public void getWeeks_FetchesAllWeeks(){
-        DateTime dt = CameAndWentProvider.getSeedDateTime();
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_WEEKS, null, null, null, CameAndWentProvider.WEEK_OF_YEAR);
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext(), dt = dt.withFieldAdded(DurationFieldType.weeks(), 1))
-            Assert.assertEquals(dt.getWeekOfWeekyear(), c.getInt(c.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)));
-        c.close();
-    }
-
-    @Test
-    public void getMonths_FetchesAllMonths(){
-        DateTime dt = CameAndWentProvider.getSeedDateTime();
-        Cursor c = mContentResolver.query(CameAndWentProvider.URI_MONTHS, null, null, null, CameAndWentProvider.MONTH_OF_YEAR);
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext(), dt = dt.withFieldAdded(DurationFieldType.months(), 1))
-            Assert.assertEquals(dt.getMonthOfYear(), c.getInt(c.getColumnIndex(CameAndWentProvider.MONTH_OF_YEAR)));
-        c.close();
-    }
-
-    @Test
+   @Test
     public void testWent(){
         ContentValues cv = new ContentValues();
         cv.put(CameAndWentProvider.CAME, System.currentTimeMillis());

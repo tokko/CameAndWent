@@ -46,6 +46,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String ISBREAK = "isbreak";
     public static final String WEEK_OF_YEAR = "weekofyear";
     public static final String MONTH_OF_YEAR = "monthofyear";
+    private static final String YEAR = "year";
     public static final String TAG = "tag";
     public static final String LONGITUDE = "longitude";
     public static final String LATITUDE = "latitude";
@@ -180,7 +181,7 @@ public class CameAndWentProvider extends ContentProvider {
 
         ArrayList<ContentValues> logEntries = new ArrayList<>();
         ArrayList<ContentValues> timeTables = new ArrayList<>();
-        for(DateTime dt = getSeedDateTime(); dt.getDayOfYear() <= dtNow.getDayOfYear(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
+        for(DateTime dt = getSeedDateTime(); dt.getMillis() <= dtNow.getMillis(); dt = dt.withFieldAdded(DurationFieldType.days(), 1)){
             if(dt.getDayOfWeek() == DateTimeConstants.SATURDAY || dt.getDayOfWeek() == DateTimeConstants.SUNDAY) continue;
             ContentValues cv = new ContentValues();
             cv.put(DATE, TimeConverter.extractDate(dt.getMillis()));
@@ -254,11 +255,11 @@ public class CameAndWentProvider extends ContentProvider {
         Cursor c;
         switch (uriMatcher.match(uri)){
             case KEY_MONTHS:
-                c = sdb.query(TIME_TABLE, new String[]{ID, MONTH_OF_YEAR}, null, null, MONTH_OF_YEAR, null, sortOrder, null);
+                c = sdb.query(TIME_TABLE, new String[]{ID, MONTH_OF_YEAR}, null, null, YEAR + ", " + MONTH_OF_YEAR, null, ID, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_MONTHS);
                 return c;
             case KEY_WEEKS:
-                c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR, DATE}, null, null, WEEK_OF_YEAR, null, sortOrder, null);
+                c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR, DATE}, null, null, YEAR + ", " +WEEK_OF_YEAR, null, ID, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_WEEKS);
                 return c;
             case KEY_DURATIONS_PER_DAY:
@@ -345,6 +346,7 @@ public class CameAndWentProvider extends ContentProvider {
         values.put(DATE, date);
         values.put(WEEK_OF_YEAR, TimeConverter.extractWeek(came));
         values.put(MONTH_OF_YEAR, TimeConverter.extractMonth(came));
+        values.put(YEAR, TimeConverter.extractYear(came));
         return date;
     }
 
@@ -420,10 +422,11 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 61;
+        private static final int DATABASE_VERSION = 65;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
+                YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0);";
 
@@ -504,7 +507,7 @@ public class CameAndWentProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            if(BuildConfig.DEBUG) return;
+            //if(BuildConfig.DEBUG) return;
             db.execSQL("DROP TRIGGER IF EXISTS break_trigger");
             Cursor c = null;
             db.beginTransaction();
@@ -559,6 +562,14 @@ public class CameAndWentProvider extends ContentProvider {
                             db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + REMINDER + " INTEGER NOT NULL DEFAULT 0 ");
                             db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + TITLE_PREFIX + " TEXT NOT NULL DEFAULT 'placeholder' ");
                             break;
+                        case 64:
+                            db.execSQL("ALTER TABLE " + TIME_TABLE + " ADD COLUMN " + YEAR + " INTEGER NOT NULL DEFAULT 0");
+                            c = db.rawQuery("SELECT * FROM " + TIME_TABLE, null);
+                            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                                ContentValues cv = new ContentValues();
+                                cv.put(YEAR, TimeConverter.extractYear(c.getLong(c.getColumnIndex(DATE))));
+                                db.update(TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
+                            }
                     }
                 }
                 if (c != null) c.close();
