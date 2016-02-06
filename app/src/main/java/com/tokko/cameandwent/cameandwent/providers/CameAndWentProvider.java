@@ -255,7 +255,7 @@ public class CameAndWentProvider extends ContentProvider {
         Cursor c;
         switch (uriMatcher.match(uri)){
             case KEY_MONTHS:
-                c = sdb.query(TIME_TABLE, new String[]{ID, MONTH_OF_YEAR}, null, null, YEAR + ", " + MONTH_OF_YEAR, null, sortOrder, null);
+                c = sdb.query(TIME_TABLE, new String[]{ID, MONTH_OF_YEAR}, null, null, YEAR + ", " + MONTH_OF_YEAR, null, ID, null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_MONTHS);
                 return c;
             case KEY_WEEKS:
