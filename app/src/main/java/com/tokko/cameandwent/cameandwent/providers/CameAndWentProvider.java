@@ -422,11 +422,11 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 65;
+        private static final int DATABASE_VERSION = 67;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
-                YEAR + " INTEGER NOT NULL DEFAULT 0, " +
+           //     YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0);";
 
@@ -562,14 +562,15 @@ public class CameAndWentProvider extends ContentProvider {
                             db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + REMINDER + " INTEGER NOT NULL DEFAULT 0 ");
                             db.execSQL("ALTER TABLE " + TABLE_TAGS_NAME + " ADD COLUMN " + TITLE_PREFIX + " TEXT NOT NULL DEFAULT 'placeholder' ");
                             break;
-                        case 64:
+                        case 66:
                             db.execSQL("ALTER TABLE " + TIME_TABLE + " ADD COLUMN " + YEAR + " INTEGER NOT NULL DEFAULT 0");
                             c = db.rawQuery("SELECT * FROM " + TIME_TABLE, null);
                             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                                 ContentValues cv = new ContentValues();
                                 cv.put(YEAR, TimeConverter.extractYear(c.getLong(c.getColumnIndex(DATE))));
-                                db.update(TABLE_LOG_NAME, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
+                                db.update(TIME_TABLE, cv, String.format("%s=?", ID), new String[]{String.valueOf(c.getInt(c.getColumnIndex(ID)))});
                             }
+                            break;
                     }
                 }
                 if (c != null) c.close();
