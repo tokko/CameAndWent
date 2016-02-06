@@ -25,6 +25,7 @@ import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import roboguice.RoboGuice;
 import roboguice.activity.RoboFragmentActivity;
 
 
