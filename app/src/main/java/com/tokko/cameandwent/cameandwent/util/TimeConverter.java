@@ -118,4 +118,8 @@ public class TimeConverter {
     public static DateTime getFridayOfWeek(DateTime date){
         return date.withDayOfWeek(DateTimeConstants.FRIDAY);
     }
+
+    public static int extractYear(long aLong) {
+        return new DateTime(aLong).getYear();
+    }
 }
