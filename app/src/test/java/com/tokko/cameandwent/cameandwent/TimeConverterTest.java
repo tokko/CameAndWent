@@ -80,12 +80,6 @@ public class TimeConverterTest extends TestCase {
         assertEquals(interval, TimeConverter.timeIntervalAsLong(hour + ":" + minute));
     }
 
-    public void testExtractWeek() throws Exception {
-        Calendar c = Calendar.getInstance();
-        int week = c.get(Calendar.WEEK_OF_YEAR);
-        assertEquals(week, TimeConverter.extractWeek(c.getTimeInMillis()));
-    }
-
     public void testExtractMonth(){
         DateTime dt = new DateTime();
         int week = dt.getMonthOfYear();
