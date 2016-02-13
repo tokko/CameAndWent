@@ -7,13 +7,13 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
-import com.tokko.cameandwent.cameandwent.ClockManager;
+import com.tokko.cameandwent.cameandwent.clockmanager.ClockManager;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.automaticbreaks.AutomaticBreakManager;
 import com.tokko.cameandwent.cameandwent.notifications.CountDownManager;
 import com.tokko.cameandwent.cameandwent.notifications.ReminderScheduler;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
-import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
+import com.tokko.cameandwent.cameandwent.services.GeofenceService;
 
 public class SettingsFragment extends PreferenceFragment {
     public SettingsFragment() {
@@ -26,7 +26,7 @@ public class SettingsFragment extends PreferenceFragment {
 
     @Override
     public void onStop() {
-        getActivity().sendBroadcast(new Intent(getActivity(), GeofenceReceiver.class).setAction(GeofenceReceiver.ACTIVATE_GEOFENCE));
+        getActivity().startService(new Intent(getActivity(), GeofenceService.class).setAction(GeofenceService.ACTIVATE_GEOFENCE));
         new ReminderScheduler(getActivity()).scheduleWeeklyReminder();
         new ReminderScheduler(getActivity()).scheduleMonthlyReminder();
         if(getActivity().getSharedPreferences(ClockManager.CLOCK_PREFS, Context.MODE_PRIVATE).getBoolean(ClockManager.PREF_CLOCKED_IN, false))

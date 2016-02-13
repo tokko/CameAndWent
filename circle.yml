@@ -1,0 +1,26 @@
+machine:
+  java:
+    version: oraclejdk8
+  environment:
+    JAVA_OPTS: "-Xms256m -Xmx4096m"
+
+dependencies:
+  pre:
+    - chmod +x gradlew
+    - ./gradlew assembleRelease assembleDebug -PdisablePreDex
+  cache_directories:
+      - ~/.gradle
+test:
+  override:
+    - ./gradlew app:testRelease -PdisablePreDex
+    - cp -r app/build/reports/tests/release/classes/* $CIRCLE_TEST_REPORTS
+
+deployment:
+  play:
+    branch: alpha
+    commands:
+      - ./gradlew publishRelease
+      - git config --global user.email "builds@circleci.com"
+      - git config --global user.name "Circle CI"
+      - git commit -am "Update version number and codes for automatic deploy."
+      - git push https://$GIT_CREDS@github.com/tokko/CameAndWent.git HEAD:alpha-circleci

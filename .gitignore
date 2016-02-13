@@ -1,6 +1,8 @@
+/.idea
+/CameAndWent.iml
+/app/app-release.apk
+/app/app.iml
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
+/cameandwentpeaccounting/build
 /build

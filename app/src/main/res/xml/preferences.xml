@@ -8,6 +8,7 @@
 
     <PreferenceCategory
         android:dependency="enabled"
+        android:key="location"
         android:title="Location">
 
         <com.tokko.cameandwent.cameandwent.settings.LocationPreference
@@ -186,16 +187,39 @@
             android:dependency="countdown" />
     </PreferenceCategory>
 
-    <CheckBoxPreference
+    <PreferenceCategory
         android:dependency="enabled"
-        android:defaultValue="false"
-        android:title="Consult rounding"
-        android:summary="Round daily duration up to closest half-hour"
-        android:key="use_snapup" />
-    <CheckBoxPreference
-        android:dependency="enabled"
-        android:defaultValue="false"
-        android:title="GPS disabled safeguard"
-        android:summary="If clocked in and GPS provider is disabled a notification will ask if you want to clock out"
-        android:key="clockoutquestion" />
+        android:title="Misc">
+        <CheckBoxPreference
+            android:dependency="enabled"
+            android:defaultValue="false"
+            android:title="Expand last week"
+            android:summary="Expand last week instead of current week on summary open"
+            android:key="summary_last_week" />
+        <CheckBoxPreference
+            android:dependency="enabled"
+            android:defaultValue="false"
+            android:title="Consult rounding"
+            android:summary="Round daily duration up to closest half-hour"
+            android:key="use_snapup" />
+        <CheckBoxPreference
+            android:dependency="enabled"
+            android:defaultValue="false"
+            android:title="GPS disabled safeguard"
+            android:summary="If clocked in and GPS provider is disabled a notification will ask if you want to clock out"
+            android:key="clockoutquestion" />
+        <CheckBoxPreference
+            android:dependency="enabled"
+            android:defaultValue="true"
+            android:title="Delayed clockout"
+            android:summary="Guards for false geofence exit transistions"
+            android:key="delayed_clockout" />
+        <EditTextPreference
+            android:dependency="delayed_clockout"
+            android:defaultValue="5"
+            android:title="Minutes to delay clockout"
+            android:summary="Time between actual clockout and clockout in minutes"
+            android:key="delayed_clockout_time" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

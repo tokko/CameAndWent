@@ -3,6 +3,7 @@ package com.tokko.cameandwent.cameandwent.summaries;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -21,6 +22,7 @@ import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
 import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 
 import java.text.DecimalFormat;
@@ -151,7 +153,15 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         else if(loader.getId() == -2)
             spinnerAdapter.swapCursor(data);
         if(expandableListView.getCount() > 0)
-            expandableListView.expandGroup(expandableListView.getCount() - 1);
+            if(PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("summary_last_week", false) && expandableListView.getCount() > 2)
+                expandableListView.expandGroup(expandableListView.getCount() - 2);
+            else    expandableListView.expandGroup(expandableListView.getCount() - 1);
+        expandableListView.post(new Runnable() {
+            @Override
+            public void run() {
+                expandableListView.setSelection(adapter.getGroupCount()-1);
+            }
+        });
     }
 
     @Override
@@ -181,7 +191,7 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
     }
 
     private class SummaryCursorAdapter extends CursorTreeAdapter{
-        private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM");
+        private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM-EE");
         private Context context;
 
         public SummaryCursorAdapter(Context context) {
@@ -202,7 +212,12 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
 
         @Override
         protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
-            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d", cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR))));
+            DateTime date = new DateTime(cursor.getLong(cursor.getColumnIndex(CameAndWentProvider.DATE)));
+            DateTime dateOfMonday = TimeConverter.getMondayOfWeek(date);
+            DateTime dateOfFriday = TimeConverter.getFridayOfWeek(date);
+            String monday = new SimpleDateFormat("dd/MM").format(new Date(dateOfMonday.getMillis()));
+            String friday = new SimpleDateFormat("dd/MM").format(new Date(dateOfFriday.getMillis()));
+            ((TextView)view.findViewById(android.R.id.text1)).setText(String.format("v%d, %s-%s", cursor.getInt(cursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR)), monday, friday));
         }
 
         @Override

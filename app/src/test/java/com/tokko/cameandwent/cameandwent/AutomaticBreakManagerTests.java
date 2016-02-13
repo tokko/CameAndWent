@@ -16,13 +16,12 @@ import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 
 import junit.framework.Assert;
 
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DurationFieldType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -33,8 +32,8 @@ import org.robolectric.shadows.ShadowPreferenceManager;
 
 import java.util.List;
 
-@Config(emulateSdk = 19, constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml")
-@RunWith(RobolectricTestRunner.class)
+@Config(sdk = Constants.SDK_VERSION, constants = BuildConfig.class, manifest = Constants.MANIFEST_PATH)
+@RunWith(RobolectricGradleTestRunner.class)
 public class AutomaticBreakManagerTests {
     private Context context;
     SharedPreferences sharedPreferences;

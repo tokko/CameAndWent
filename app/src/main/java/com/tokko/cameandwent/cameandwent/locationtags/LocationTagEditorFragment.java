@@ -10,26 +10,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.tokko.cameandwent.cameandwent.R;
 import com.tokko.cameandwent.cameandwent.providers.CameAndWentProvider;
-import com.tokko.cameandwent.cameandwent.receivers.GeofenceReceiver;
+import com.tokko.cameandwent.cameandwent.services.GeofenceService;
 
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
-public class LocationTagEditorFragment extends RoboDialogFragment implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class LocationTagEditorFragment extends RoboDialogFragment implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
 
     private static final String EXTRA_ID = "EXTRA_ID";
     private static final String EXTRA_TAG_TITLE = "EXTRA_TAG_TITLE";
     private static final String EXTRA_LONGITUDE = "EXTRA_LONGITUDE";
     private static final String EXTRA_LATITUDE = "EXTRA_LATITUDE";
+    private static final String EXTRA_REMINDER = "EXTRA_REMINDER";
+    private static final String EXTRA_NAME = "EXTRA_NAME";
+    private static final String EXTRA_PREFIX = "EXTRA_PREFIX";
+    private static final String EXTRA_RECIPIENT = "EXTRA_RECIPIENT";
 
     @InjectView(R.id.locationtageditor_cancelButton) private Button cancelButton;
     @InjectView(R.id.locationtageditor_okButton) private Button okButton;
@@ -39,11 +47,21 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     @InjectView(R.id.locationtageditor_Latitude) private TextView latitudeTextView;
     @InjectView(R.id.locationtageditor_Longitude) private TextView longitudeTextView;
     @InjectView(R.id.locationtageditor_coordinates) private ViewGroup coordinates;
+    @InjectView(R.id.locationtageditor_name) private EditText nameEditText;
+    @InjectView(R.id.locationtageditor_prefix) private EditText prefixEditText;
+    @InjectView(R.id.locationtageditor_Reminder) private CheckBox reminderCheckBox;
+    @InjectView(R.id.locationtageditor_recipient) private EditText recepientEditText;
+    @InjectView(R.id.locationtageditor_titlePreview) private TextView previewTextView;
+    @InjectView(R.id.locationtageditor_reminderSettingsContainer) private ViewGroup reminderContainer;
 
     private long id;
     private double longitude = -1, latitude = -1;
     private String tag;
     private GoogleApiClient mGoogleApiClient;
+    private String name;
+    private String recipient;
+    private String prefix;
+    private boolean reminder;
 
     public static LocationTagEditorFragment newInstance(long id) {
         LocationTagEditorFragment f = new LocationTagEditorFragment();
@@ -86,6 +104,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         okButton.setOnClickListener(this);
         setLocationButton.setOnClickListener(this);
         deleteButton.setOnClickListener(this);
+        reminderCheckBox.setOnCheckedChangeListener(this);
         populateUI();
     }
 
@@ -96,6 +115,10 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         outState.putDouble(EXTRA_LONGITUDE, longitude);
         outState.putDouble(EXTRA_LATITUDE, latitude);
         outState.putString(EXTRA_TAG_TITLE, tagTitleEditText.getText().toString());
+        outState.putString(EXTRA_NAME, nameEditText.getText().toString());
+        outState.putString(EXTRA_PREFIX, prefixEditText.getText().toString());
+        outState.putString(EXTRA_RECIPIENT, recepientEditText.getText().toString());
+        outState.putBoolean(EXTRA_REMINDER, reminderCheckBox.isChecked());
     }
 
     private void loadData(Bundle b){
@@ -103,6 +126,11 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         longitude = b.getDouble(EXTRA_LONGITUDE, -1);
         tag = b.getString(EXTRA_TAG_TITLE);
         id = b.getLong(EXTRA_ID, -1);
+
+        name = b.getString(EXTRA_NAME, "");
+        recipient = b.getString(EXTRA_RECIPIENT, "");
+        prefix = b.getString(EXTRA_PREFIX, "");
+        reminder = b.getBoolean(EXTRA_REMINDER, false);
     }
 
     private void loadData(){
@@ -116,12 +144,25 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         longitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LONGITUDE));
         latitude = c.getDouble(c.getColumnIndex(CameAndWentProvider.LATITUDE));
         tag = c.getString(c.getColumnIndex(CameAndWentProvider.TAG));
+
+        recipient = c.getString(c.getColumnIndex(CameAndWentProvider.RECIPIENT));
+        name = c.getString(c.getColumnIndex(CameAndWentProvider.NAME));
+        prefix = c.getString(c.getColumnIndex(CameAndWentProvider.TITLE_PREFIX));
+
+        reminder = c.getInt(c.getColumnIndex(CameAndWentProvider.REMINDER)) == 1;
+
         c.close();
     }
 
     private void populateUI() {
         tagTitleEditText.setText(tag);
         deleteButton.setEnabled(id != -1);
+
+        recepientEditText.setText(recipient);
+        nameEditText.setText(name);
+        prefixEditText.setText(prefix);
+
+        reminderCheckBox.setChecked(reminder);
         setCoordinates();
     }
 
@@ -145,6 +186,10 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
                 cv.put(CameAndWentProvider.TAG, tagTitleEditText.getText().toString());
                 cv.put(CameAndWentProvider.LATITUDE, latitude);
                 cv.put(CameAndWentProvider.LONGITUDE, longitude);
+                cv.put(CameAndWentProvider.REMINDER, reminderCheckBox.isChecked()?1:0);
+                cv.put(CameAndWentProvider.RECIPIENT, recepientEditText.getText().toString());
+                cv.put(CameAndWentProvider.NAME, nameEditText.getText().toString());
+                cv.put(CameAndWentProvider.TITLE_PREFIX, prefixEditText.getText().toString());
                 if(id == -1)
                     getActivity().getContentResolver().insert(CameAndWentProvider.URI_TAGS, cv);
                 else
@@ -154,7 +199,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
                 break;
             case R.id.locationtageditor_DeleteButton:
                 getActivity().getContentResolver().delete(CameAndWentProvider.URI_TAGS, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)});
-                getActivity().sendBroadcast(new Intent(GeofenceReceiver.DEACTIVATE_GEOFENCE).putExtra(GeofenceReceiver.EXTRA_ID, id));
+                getActivity().sendBroadcast(new Intent(GeofenceService.DEACTIVATE_GEOFENCE).putExtra(GeofenceService.EXTRA_ID, id));
                 dismiss();
                 break;
         }
@@ -162,14 +207,28 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
 
     @Override
     public void onConnected(Bundle bundle) {
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
-            Toast.makeText(getActivity(), String.format("Longitude: %f\nLatitude %f", mLastLocation.getLongitude(), mLastLocation.getLatitude()), Toast.LENGTH_SHORT).show();
-            longitude = mLastLocation.getLongitude();
-            latitude = mLastLocation.getLatitude();
-            setCoordinates();
-        }
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setNumUpdates(1);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                if (location != null) {
+                    if(getActivity() != null)
+                         Toast.makeText(getActivity(), String.format("Longitude: %f\nLatitude %f", location.getLongitude(), location.getLatitude()), Toast.LENGTH_SHORT).show();
+                    longitude = location.getLongitude();
+                    latitude = location.getLatitude();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setCoordinates();
+                        }
+                    });
+                }
+                else
+                    Toast.makeText(getActivity(), "No last known location", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -180,5 +239,10 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        reminderContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
     }
 }

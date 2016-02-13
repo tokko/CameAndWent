@@ -25,6 +25,7 @@ import com.tokko.cameandwent.cameandwent.util.TimeConverter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import roboguice.RoboGuice;
 import roboguice.activity.RoboFragmentActivity;
 
 
@@ -100,10 +101,12 @@ public class MainActivity extends RoboFragmentActivity implements LogFragment.Lo
             SummaryFragment.newInstance().show(getSupportFragmentManager(), "summary");
             return true;
         }
+        /*
         if(id == R.id.show_monthly_summary){
             SummaryFragment.newMonthlyInstance().show(getSupportFragmentManager(), "monthly_summary");
             return true;
         }
+    */
         if(id == R.id.restore_data){
             long lastBackup = getSharedPreferences(BackupAgent.BACKUP_PREFS, Context.MODE_PRIVATE).getLong(BackupAgent.LAST_BACKUP, -1);
             AlertDialog.Builder b = new AlertDialog.Builder(this);
