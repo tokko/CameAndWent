@@ -46,7 +46,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String ISBREAK = "isbreak";
     public static final String WEEK_OF_YEAR = "weekofyear";
     public static final String MONTH_OF_YEAR = "monthofyear";
-    private static final String YEAR = "year";
+    public static final String YEAR = "year";
     public static final String TAG = "tag";
     public static final String LONGITUDE = "longitude";
     public static final String LATITUDE = "latitude";
@@ -259,7 +259,7 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_MONTHS);
                 return c;
             case KEY_WEEKS:
-                c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR, DATE}, null, null, YEAR + ", " +WEEK_OF_YEAR, null, DATE + " ASC", null);
+                c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR, DATE, YEAR}, null, null, YEAR + ", " +WEEK_OF_YEAR, null, DATE + " ASC", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_WEEKS);
                 return c;
             case KEY_DURATIONS_PER_DAY:
