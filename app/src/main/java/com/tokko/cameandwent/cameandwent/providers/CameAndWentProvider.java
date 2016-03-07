@@ -46,7 +46,7 @@ public class CameAndWentProvider extends ContentProvider {
     public static final String ISBREAK = "isbreak";
     public static final String WEEK_OF_YEAR = "weekofyear";
     public static final String MONTH_OF_YEAR = "monthofyear";
-    private static final String YEAR = "year";
+    public static final String YEAR = "year";
     public static final String TAG = "tag";
     public static final String LONGITUDE = "longitude";
     public static final String LATITUDE = "latitude";
@@ -259,7 +259,7 @@ public class CameAndWentProvider extends ContentProvider {
                 c.setNotificationUri(getContext().getContentResolver(), URI_MONTHS);
                 return c;
             case KEY_WEEKS:
-                c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR, DATE}, null, null, YEAR + ", " +WEEK_OF_YEAR, null, DATE + " ASC", null);
+                c = sdb.query(TIME_TABLE, new String[]{ID, WEEK_OF_YEAR, DATE, YEAR}, null, null, YEAR + ", " +WEEK_OF_YEAR, null, DATE + " ASC", null);
                 c.setNotificationUri(getContext().getContentResolver(), URI_WEEKS);
                 return c;
             case KEY_DURATIONS_PER_DAY:
@@ -422,11 +422,11 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 67;
+        private static final int DATABASE_VERSION = 68;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
-           //     YEAR + " INTEGER NOT NULL DEFAULT 0, " +
+                YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0);";
 

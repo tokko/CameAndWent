@@ -202,7 +202,8 @@ public class SummaryFragment extends RoboDialogFragment implements LoaderManager
         @Override
         protected Cursor getChildrenCursor(Cursor groupCursor) {
             int week = groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.WEEK_OF_YEAR));
-            return context.getContentResolver().query(CameAndWentProvider.URI_DURATIONS, null, String.format("%s=?", CameAndWentProvider.WEEK_OF_YEAR), new String[]{String.valueOf(week)}, null);
+            int year = groupCursor.getInt(groupCursor.getColumnIndex(CameAndWentProvider.YEAR));
+            return context.getContentResolver().query(CameAndWentProvider.URI_DURATIONS, null, String.format("%s=? AND %s=?", CameAndWentProvider.WEEK_OF_YEAR, CameAndWentProvider.YEAR), new String[]{String.valueOf(week), String.valueOf(year)}, null);
         }
 
         @Override
