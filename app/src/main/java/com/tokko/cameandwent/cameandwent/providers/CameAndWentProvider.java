@@ -422,11 +422,11 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 67;
+        private static final int DATABASE_VERSION = 68;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
                 DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
-           //     YEAR + " INTEGER NOT NULL DEFAULT 0, " +
+                YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0);";
 
