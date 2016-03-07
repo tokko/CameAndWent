@@ -6,8 +6,10 @@
     <item android:id="@+id/show_summary"
         android:title="Summary"
         android:showAsAction="ifRoom" />
+        <!--
     <item android:id="@+id/show_monthly_summary"
         android:title="Monthly Summary"/>
+        -->
     <item android:id="@+id/restore_data"
         android:visible="true"
         android:title="Restore data"/>
