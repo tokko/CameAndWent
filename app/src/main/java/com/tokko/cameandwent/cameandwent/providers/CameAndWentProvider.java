@@ -422,10 +422,10 @@ public class CameAndWentProvider extends ContentProvider {
 
 
     private class DatabaseOpenHelper extends SQLiteOpenHelper{
-        private static final int DATABASE_VERSION = 68;
+        private static final int DATABASE_VERSION = 70;
         private static final String CREATE_TIME_TABLE = "CREATE TABLE IF NOT EXISTS " + TIME_TABLE + "(" +
                 ID + " INTEGER PRIMARY KEY, " +
-                DATE + " INTEGER UNIQUE ON CONFLICT IGNORE, " +
+                DATE + " INTEGER UNIQUE ON CONFLICT REPLACE, " +
                 YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 WEEK_OF_YEAR + " INTEGER NOT NULL DEFAULT 0, " +
                 MONTH_OF_YEAR + " INTEGER NOT NULL DEFAULT 0);";
@@ -572,6 +572,14 @@ public class CameAndWentProvider extends ContentProvider {
                             }
                             break;
                     }
+                }
+                db.execSQL("DROP TABLE IF EXISTS " + TIME_TABLE);
+                db.execSQL(CREATE_TIME_TABLE);
+                c = db.rawQuery("SELECT * FROM " + TABLE_LOG_NAME, null);
+                for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                    ContentValues cv = new ContentValues();
+                    populateContentValuesWithTimeInfo(c.getLong(c.getColumnIndex(DATE)), cv);
+                    db.insert(TIME_TABLE, null, cv);
                 }
                 if (c != null) c.close();
             }catch (Exception e){
