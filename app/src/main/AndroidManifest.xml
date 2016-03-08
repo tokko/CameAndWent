@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="49"
-    android:versionName="1.0.0.33"
+    android:versionCode="51"
+    android:versionName="1.0.0.35"
     package="com.tokko.cameandwent.cameandwent" >
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
