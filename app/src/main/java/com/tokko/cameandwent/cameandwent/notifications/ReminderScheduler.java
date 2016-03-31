@@ -133,7 +133,7 @@ public class ReminderScheduler extends BroadcastReceiver {
         nb.setSmallIcon(android.R.drawable.ic_menu_upload);
         if(defaultPrefs.getBoolean("monthly_reminder_sound", false))
             nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_MONTHLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));
+        nb.setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(MainActivity.ACTION_WEEKLY_SUMMARY), PendingIntent.FLAG_UPDATE_CURRENT));
         return nb.build();
     }
 
