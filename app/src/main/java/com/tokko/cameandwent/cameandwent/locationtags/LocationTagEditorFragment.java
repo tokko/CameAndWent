@@ -143,7 +143,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     private void loadData(){
         if(id == -1) return;
         Cursor c = getActivity().getContentResolver().query(CameAndWentProvider.URI_TAGS, null, String.format("%s=?", CameAndWentProvider.ID), new String[]{String.valueOf(id)}, null);
-        if(!c.moveToFirst())
+        if(c == null || !c.moveToFirst())
            throw new IllegalStateException("Invalid id: " + id);
         if(c.getCount() != 1)
             throw new IllegalStateException("Duplicate primary key?");
