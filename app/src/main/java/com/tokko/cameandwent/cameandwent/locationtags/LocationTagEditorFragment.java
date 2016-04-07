@@ -1,5 +1,6 @@
 package com.tokko.cameandwent.cameandwent.locationtags;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -76,6 +77,16 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(savedInstanceState != null){
@@ -85,11 +96,6 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
             id = getArguments().getLong(EXTRA_ID, -1);
             loadData();
         }
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
     }
 
     @Override
@@ -105,6 +111,7 @@ public class LocationTagEditorFragment extends RoboDialogFragment implements Vie
         setLocationButton.setOnClickListener(this);
         deleteButton.setOnClickListener(this);
         reminderCheckBox.setOnCheckedChangeListener(this);
+        reminderCheckBox.setVisibility(View.GONE);
         populateUI();
     }
 
