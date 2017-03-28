@@ -22,5 +22,5 @@ deployment:
       - ./gradlew publishRelease
       - git config --global user.email "builds@circleci.com"
       - git config --global user.name "Circle CI"
-      - git commit -am "Update version number and codes for automatic deploy."
+      - git commit -am "Update version number and codes for automatic deploy. [ci skip]"
       - git push https://$GIT_CREDS@github.com/tokko/CameAndWent.git HEAD:alpha-circleci
