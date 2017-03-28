@@ -65,6 +65,7 @@ public class GeofenceService extends RoboIntentService implements GoogleApiClien
             int transition = event.getGeofenceTransition();
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 am.cancel(delayedClockoutIntent);
+                clockout(getApplicationContext(), cm);
                 List<Geofence> triggerList = event.getTriggeringGeofences();
                 if(triggerList == null) return;
                 for (Geofence fence : triggerList){
