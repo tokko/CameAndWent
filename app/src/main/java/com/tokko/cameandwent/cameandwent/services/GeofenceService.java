@@ -59,13 +59,13 @@ public class GeofenceService extends RoboIntentService implements GoogleApiClien
         }
         else if(intent.getAction().equals(DELAYED_DEACTIVATION))
             clockout(getApplicationContext(), cm);
+
         else{// if(intent.getAction().equals(ACTION)) {
             if(!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("enabled", true)) return;
             final GeofencingEvent event = GeofencingEvent.fromIntent(intent);
             int transition = event.getGeofenceTransition();
             if(transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 am.cancel(delayedClockoutIntent);
-                clockout(getApplicationContext(), cm);
                 List<Geofence> triggerList = event.getTriggeringGeofences();
                 if(triggerList == null) return;
                 for (Geofence fence : triggerList){
@@ -73,14 +73,18 @@ public class GeofenceService extends RoboIntentService implements GoogleApiClien
                 }
             }
             else if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                boolean delayed = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("delayed_clockout", false);
-                int delayInMinutes = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("delayed_clockout_time", "5"));
-                if(!delayed)
-                    clockout(getApplicationContext(), cm);
-                else
-                    am.setExact(AlarmManager.RTC_WAKEUP, TimeConverter.getCurrentTime().withFieldAdded(DurationFieldType.minutes(), delayInMinutes).getMillis(), delayedClockoutIntent);
+                delayClockoutIfDelayed(am, delayedClockoutIntent);
             }
         }
+    }
+
+    private void delayClockoutIfDelayed(AlarmManager am, PendingIntent delayedClockoutIntent) {
+        boolean delayed = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("delayed_clockout", false);
+        int delayInMinutes = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("delayed_clockout_time", "5"));
+        if(!delayed)
+            clockout(getApplicationContext(), cm);
+        else
+            am.setExact(AlarmManager.RTC_WAKEUP, TimeConverter.getCurrentTime().withFieldAdded(DurationFieldType.minutes(), delayInMinutes).getMillis(), delayedClockoutIntent);
     }
 
     private void clockout(Context context, ClockManager cm) {
