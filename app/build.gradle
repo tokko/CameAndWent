@@ -12,8 +12,8 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'com.github.triplet.play'
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.3'
 
     lintOptions {
         abortOnError false
@@ -30,7 +30,7 @@ android {
         defaultConfig {
             applicationId "com.tokko.cameandwent.cameandwent"
             minSdkVersion 19
-            targetSdkVersion 22
+            targetSdkVersion 25
             multiDexEnabled = true
            // versionCode 34
            // versionName "1.27"
@@ -103,7 +103,7 @@ dependencies {
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile "org.mockito:mockito-core:1.10.0"
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:22.2.0'
+   // compile 'com.android.support:appcompat-v7:25.2.3'
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'org.roboguice:roboguice:3.0-alpha-2'
    // provided 'org.roboguice:roboblender:3.+'
